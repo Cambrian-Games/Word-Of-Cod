@@ -19,6 +19,10 @@ public class CharacterWeightsEditor : Editor
 			charweights._weights = new float[26];
 		}
 
+		charweights._minVowelRate = EditorGUILayout.Slider(new GUIContent("Vowel Threshold", "The fraction of tiles that are vowels will never drop below this."), charweights._minVowelRate, 0, 1);
+
+		EditorGUILayout.Separator();
+
 		float totalWeight = charweights._weights.Sum();
 
 		EditorGUILayout.LabelField("These are floats, not integers, so you can fine-tune these.");

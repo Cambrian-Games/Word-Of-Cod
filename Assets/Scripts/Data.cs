@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // Word Data
@@ -54,6 +55,13 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 	{
 		_layout = layout;
 		_chars = new char[layout._length, layout._height];
+
+		// There is no built-in way to do this. See https://github.com/dotnet/runtime/issues/47213
+
+		foreach (Vector2Int coord in new Vector2IntIterator(_layout.BottomRight()))
+		{
+			_chars[coord.x, coord.y] = ' ';
+		}
 	}
 
 	public BoardState Clone()
@@ -110,24 +118,31 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 		delta = new BoardDelta(_layout);
 		BoardConfig config = BoardConfig.INSTANCE;
 
-		for (int col = 0; col < _layout._length; col++)
+		List<Vector2Int> newCharCoords = new List<Vector2Int>();
+
+		foreach (Vector2Int coord in new Vector2IntIterator(_layout.BottomRight()))
 		{
-			for (int row = 0; row < _layout._length; row++)
+			if (_layout[coord] == CELLK.STANDARD)
 			{
-				if (_layout[col, row] == CELLK.STANDARD)
+				if (this[coord] == ' ')
 				{
-					if (this[col, row] == ' ')
-					{
-						this[col, row] = config.Weights.RandomChar();
-						delta.AddTile(new Vector2Int(col, row), this[col, row]);
-					}
-					else
-					{
-						// no-op delta
-						delta[col, row] = new BoardDelta.TileDelta(this[col, row], new Vector2Int(col, row));
-					}
+					newCharCoords.Add(coord);
 				}
+
 			}
+			else
+			{
+				// no-op delta
+				delta[coord] = new BoardDelta.TileDelta(this[coord], coord);
+			}
+		}
+
+		char[] newChars = config.Weights.RandomChars(newCharCoords.Count, state: this);
+
+		for (int charIndex = 0; charIndex < newCharCoords.Count; charIndex++)
+		{
+			this[newCharCoords[charIndex]] = newChars[charIndex];
+			delta.AddTile(newCharCoords[charIndex], newChars[charIndex]);
 		}
 	}
 
@@ -136,6 +151,8 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 		Debug.Assert(settlek == SETTLEK.FALL || settlek == SETTLEK.RISE);
 		delta = new BoardDelta(_layout);
 		BoardConfig config = BoardConfig.INSTANCE;
+
+		List<Vector2Int> newCharCoords = new List<Vector2Int>();
 
 		foreach (int col in new IntIterator(0, _layout._length - 1))
 		{
@@ -195,7 +212,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 			IntIterator rowIterPopulate = settlek == SETTLEK.FALL ?
 				new IntIterator(0, _layout._height - 1, 1) :	// top to bottom
-				new IntIterator(_layout._height - 1, 0, -1);	// bottom to top
+				new IntIterator(_layout._height - 1, 0, -1);    // bottom to top
 
 			foreach (int row in rowIterPopulate)
 			{
@@ -211,10 +228,17 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 				if (this[col, row] == ' ')
 				{
-					this[col, row] = config.Weights.RandomChar();
-					delta.AddTile(new Vector2Int(col, row), this[col, row]);
+					newCharCoords.Add(new Vector2Int(col, row));
 				}
 			}
+		}
+
+		char[] newChars = config.Weights.RandomChars(newCharCoords.Count, state: this);
+
+		for (int charIndex = 0; charIndex < newCharCoords.Count; charIndex++)
+		{
+			this[newCharCoords[charIndex]] = newChars[charIndex];
+			delta.AddTile(newCharCoords[charIndex], newChars[charIndex]);
 		}
 	}
 
@@ -224,6 +248,8 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 		delta = new BoardDelta(_layout);
 		BoardConfig config = BoardConfig.INSTANCE;
+
+		List<Vector2Int> newCharCoords = new List<Vector2Int>();
 
 		foreach (int row in new IntIterator(0, _layout._height - 1))
 		{
@@ -278,7 +304,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 			IntIterator colIteratorPopulate = settlek == SETTLEK.FROM_LEFT ?
 				new IntIterator(0, _layout._length - 1, 1) :	// left to right
-				new IntIterator(_layout._length - 1, 0, -1);	// right to left
+				new IntIterator(_layout._length - 1, 0, -1);    // right to left
 
 			foreach (int col in colIteratorPopulate)
 			{
@@ -294,10 +320,17 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 				if (this[col, row] == ' ')
 				{
-					this[col, row] = config.Weights.RandomChar();
-					delta.AddTile(new Vector2Int(col, row), this[col, row]);
+					newCharCoords.Add(new Vector2Int(col, row));
 				}
 			}
+		}
+
+		char[] newChars = config.Weights.RandomChars(newCharCoords.Count, state: this);
+
+		for (int charIndex = 0; charIndex < newCharCoords.Count; charIndex++)
+		{
+			this[newCharCoords[charIndex]] = newChars[charIndex];
+			delta.AddTile(newCharCoords[charIndex], newChars[charIndex]);
 		}
 	}
 

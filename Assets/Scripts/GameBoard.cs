@@ -55,14 +55,10 @@ public class GameBoard : MonoBehaviour
 
 	private void GenerateBoard()
 	{
-		foreach (Vector2Int coord in new Vector2IntIterator(Vector2Int.zero, _config.Layout.BottomRight()))
-		{
-			if (_config.Layout[coord.x, coord.y] == CELLK.STANDARD)
-			{
-				_playableBoard[coord.x, coord.y] = SpawnTile(coord);
-				_currState[coord] = _playableBoard[coord.x, coord.y]._letter;
-			}
-		}
+		_nextState = _currState.CloneSettled(_config.SettleKind, out _currDelta);
+		SpawnNewTiles();
+		FallTiles(immediate: true);
+		FinishResolve();
 
 		Debug.Log("Generated Board:");
 		Debug.Log(_currState);
@@ -139,7 +135,7 @@ public class GameBoard : MonoBehaviour
 		_resolves = RESOLVES.Fall;
 	}
 
-	private void FallTiles()
+	private void FallTiles(bool immediate = false)
 	{
 		float dT = Time.deltaTime;
 
@@ -169,7 +165,7 @@ public class GameBoard : MonoBehaviour
 
 			// We are at or past our destination. It's a better check than before but still not ideal. Would be good to stress test this
 
-			if (Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0 || _config.SettleKind == SETTLEK.IN_PLACE)
+			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0 || _config.SettleKind == SETTLEK.IN_PLACE)
 			{
 				tileToMove.transform.position = dest;
 			}
@@ -191,7 +187,7 @@ public class GameBoard : MonoBehaviour
 
 			Vector3 dest = spawnOffset + coord * tileSpacing * new Vector2(1, -1);
 
-			if (Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0)
+			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0)
 			{
 				tileToMove.transform.position = dest;
 			}
@@ -259,15 +255,6 @@ public class GameBoard : MonoBehaviour
 		Debug.Log("Current State:");
 		Debug.Log(_currState);
 		Debug.Log("");
-	}
-
-	private Tile SpawnTile(Vector2Int coord, Vector2 posOffset = default)
-	{
-		Tile tile = Instantiate<Tile>(_config.DefaultTilePrefab, this.transform);
-		tile.transform.position = _config.SpawnOffset + posOffset + (coord * _config.TileSpacing * new Vector2(1, -1));
-		tile._coord = coord;
-		tile._letter = _config.Weights.RandomChar();
-		return tile;
 	}
 
 	private Vector2 FallDirection()

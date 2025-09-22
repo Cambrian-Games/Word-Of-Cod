@@ -39,3 +39,4 @@ MonoBehaviour:
   - 0.635
   - 1.3
   - 0.72
+  _minVowelRate: 0.2

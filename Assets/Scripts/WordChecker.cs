@@ -8,13 +8,11 @@ public class WordChecker : MonoBehaviour
     //the dictionary
     public SerializedDict _allWords;
 
-    private bool happened = false;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    /*
-     * Noun = 0b1000000
-     * Verb = 0b0100000
-     */
-    void Start()
+#if UNITY_EDITOR
+	private bool _hasRunTest = false;
+#endif
+
+	void Start()
     {
         _allWords = ScriptableObject.CreateInstance<SerializedDict>();
         byte[] dictbytes = File.ReadAllBytes(Application.streamingAssetsPath + "/odinDict");
@@ -56,9 +54,9 @@ public class WordChecker : MonoBehaviour
 	{
 #if UNITY_EDITOR
 		//runs once to test dict, after start, so every script inits first. No lateStart sadly
-		if (!happened)
+		if (!_hasRunTest)
 		{
-			happened = true;
+			_hasRunTest = true;
 			Debug.Log("check: test\n");
 			FPART pOS;
 
@@ -104,7 +102,7 @@ public class WordChecker : MonoBehaviour
 				Debug.Log("Not a Word");
 			}
 
-			happened = true;
+			_hasRunTest = true;
 		}
 #endif
 	}

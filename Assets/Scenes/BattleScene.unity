@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b1c1efba87a550eaa8bb5999dd7d218, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WordChecker
-  _allWords: {fileID: 11400000, guid: 837dc26e9aa51f2a5bf52235c1d899fd, type: 2}
+  _allWords: {fileID: 0}
 --- !u!4 &868568181
 Transform:
   m_ObjectHideFlags: 0
