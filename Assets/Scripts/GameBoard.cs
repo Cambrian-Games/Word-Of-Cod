@@ -3,20 +3,26 @@ using UnityEngine;
 
 public class GameBoard : MonoBehaviour
 {
-	public BoardState _currState, _nextState;
+	enum RESOLVES // RESOLVE State
+	{
+		Nil = -1,
+		DeleteSelected = 0,
+		SpawnNew = 1,
+		Fall = 2,
+		Cleanup = 3
+	}
+
+	private BoardState _currState, _nextState;
 	private BoardDelta _currDelta;
+	private Tile[,] _playableBoard, _stagingBoard; // staging board is for new tiles before they fall onto the screen
 
-	RESOLVES _resolves = RESOLVES.Nil;
+	private RESOLVES _resolves = RESOLVES.Nil;
 
-	public Tile[,] _playableBoard;
-
-	public Tile[,] _stagingBoard; // for new tiles before they fall onto the screen
-
-	BoardConfig _config;
-
-	public static GameBoard INSTANCE;
+	private BoardConfig _config;
 
 	private int _totalWords; // used for logging
+
+	public static GameBoard INSTANCE;
 
 	private void Awake()
 	{
@@ -31,37 +37,12 @@ public class GameBoard : MonoBehaviour
 		INSTANCE = this;
 	}
 
-	enum RESOLVES // RESOLVE State
-	{
-		Nil = -1,
-		DeleteSelected = 0,
-		SpawnNew = 1,
-		Fall = 2,
-		Cleanup = 3
-	}
-
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
 	{
 		_config = BoardConfig.INSTANCE;
 
-		_currState = new BoardState(_config.Layout);
-
-		_playableBoard = new Tile[_config.Layout._length, _config.Layout._height];
-		_stagingBoard = new Tile[_config.Layout._length, _config.Layout._height];
-
 		GenerateBoard();
-	}
-
-	private void GenerateBoard()
-	{
-		_nextState = _currState.CloneSettled(_config.SettleKind, out _currDelta);
-		SpawnNewTiles();
-		FallTiles(immediate: true);
-		FinishResolve();
-
-		Debug.Log("Generated Board:");
-		Debug.Log(_currState);
 	}
 
 	// Update is called once per frame
@@ -93,6 +74,41 @@ public class GameBoard : MonoBehaviour
 				FinishResolve();
 				return;
 		}
+	}
+
+	[ContextMenu("Generate Board")]
+	public void GenerateBoard()
+	{
+		if (_currState != null)
+			return;
+
+		_currState = new BoardState(_config.Layout);
+
+		_playableBoard = new Tile[_config.Layout._length, _config.Layout._height];
+		_stagingBoard = new Tile[_config.Layout._length, _config.Layout._height];
+
+		_nextState = _currState.CloneSettled(_config.SettleKind, out _currDelta);
+
+		SpawnNewTiles();
+		FallTiles(immediate: true);
+		FinishResolve();
+
+		Debug.Log("Generated Board:");
+		Debug.Log(_currState);
+	}
+
+	[ContextMenu("Delete Board")]
+	public void DeleteBoard()
+	{
+		if (_currState == null)
+			return;
+
+		_currDelta = new BoardDelta(_config.Layout);
+		DeleteSelectedTiles();
+		_resolves = RESOLVES.Nil;
+
+		_currState = _nextState = null;
+		_playableBoard = _stagingBoard = null;
 	}
 
 	private void DeleteSelectedTiles()

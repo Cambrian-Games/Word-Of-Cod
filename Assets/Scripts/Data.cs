@@ -126,6 +126,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 			{
 				if (this[coord] == ' ')
 				{
+					// new tile delta is added below, this tile gets deleted by default
 					newCharCoords.Add(coord);
 				}
 
@@ -169,7 +170,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 				if (this[col, row] != ' ')
 				{
-					// save the delta
+					// no-op delta
 					delta[col, row] = new BoardDelta.TileDelta(this[col, row], new Vector2Int(col, row));
 					continue;
 				}
@@ -264,7 +265,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 				if (this[col, row] != ' ')
 				{
-					// save the delta
+					// no-op delta
 					delta[col, row] = new BoardDelta.TileDelta(this[col, row], new Vector2Int(col, row));
 					continue;
 				}
