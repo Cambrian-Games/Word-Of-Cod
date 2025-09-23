@@ -18,6 +18,14 @@ public class GameBoard : MonoBehaviour
 
 	private RESOLVES _resolves = RESOLVES.Nil;
 
+	// These will be moved elsewhere, for a battle manager or something
+
+	public EnemyTemplate _enemyTemplate;
+	public PlayerTemplate _playerTemplate;
+
+	private EnemyInstance _enemy;
+	private PlayerInstance _player;
+
 	private BoardConfig _config;
 
 	private int _totalWords; // used for logging
@@ -41,6 +49,12 @@ public class GameBoard : MonoBehaviour
 	void Start()
 	{
 		_config = BoardConfig.INSTANCE;
+
+		if (_enemyTemplate)
+			_enemy = _enemyTemplate.CreateEntity();
+
+		if (_playerTemplate)
+			_player = _playerTemplate.CreateEntity();
 
 		GenerateBoard();
 	}
