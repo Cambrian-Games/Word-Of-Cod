@@ -15,6 +15,30 @@ public class SimpleWord
 	}
 }
 
+public class FlaggedWord
+{
+    public string word { get; set; }
+    public string pos { get; set; }
+
+    public FlaggedWord(string word, string pos)
+    {
+        this.word = word;
+        this.pos = pos;
+    }
+}
+
+public class DerivedWord
+{
+    public string word { get; set; }
+    public string source { get; set; }
+
+    public DerivedWord(string word, string source)
+    {
+        this.word = word;
+        this.source = source;
+    }
+}
+
 public class Word
 {
 	public Sense[] senses { get; set; }

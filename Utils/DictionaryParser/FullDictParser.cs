@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
 
 class ParserEntry
 {
@@ -11,7 +13,7 @@ class ParserEntry
 
 	static void Main(string[] args)
 	{
-		parserPhase4.Parse(args);
+		parserPhase1.Parse(args);
 	}
 }
 class FirstPhaseParser
@@ -21,11 +23,9 @@ class FirstPhaseParser
 	FileStream stream = null;
 	
 	Dictionary<string, SimpleWord> _wordDict = new Dictionary<string, SimpleWord>();
-	
-	HashSet<string> _partsOfSpeech = new HashSet<string>();
-	
-	HashSet<string> _otherWords = new HashSet<string>();
-	
+    Dictionary<string, List<FlaggedWord>> _flaggedWords = new Dictionary<string, List<FlaggedWord>>();
+    Dictionary<string, List<DerivedWord>> _derivedWords = new Dictionary<string, List<DerivedWord>>();
+
 	public void Parse(string[] args)
 	{
 		try
@@ -52,25 +52,27 @@ class FirstPhaseParser
 					if (jsonWord.lang != "English")
 						continue;
 
-					// store other words that weren't expected
+                    // what happens when an invalid word would fail the profanity filter? We still need its derived terms
 
-					if (jsonWord.word.Contains('-') ||
-						jsonWord.word.Contains(' ') ||
-						jsonWord.word.Contains('&') ||
-						jsonWord.word.Contains('+') ||
-						jsonWord.word.Contains('.') ||
-						jsonWord.word.Contains(',') ||
-						jsonWord.word.Contains('\'') ||
-						jsonWord.word.Contains('"') ||
-						(jsonWord.pos != null && jsonWord.pos == "name"))
-					{
-						_otherWords.Add(jsonWord.word);
-						continue;
-					}
+                    if (!IsValidWord(jsonWord))
+                        continue;
 
-					// store all found parts of speech
+                    if (IsBlacklisted(jsonWord))
+                        continue;
 
-					_partsOfSpeech.Add(jsonWord.pos);
+                    if (!IsWhitelisted(jsonWord))
+                    {
+                        if (!HasValidPartOfSpeech(jsonWord))
+                            continue;
+
+                        if (!PassesProfanityFilter(jsonWord))
+                            continue;
+
+                        if (IsVariantSpelling(jsonWord))
+                            continue;
+                    }
+
+                    // this section has to be done later. We can't afford to merge words while filtering is going on.
 
 					if (simpleWord == null)
 					{
@@ -110,7 +112,31 @@ class FirstPhaseParser
 				reader.Close();
 				stream.Close();
 
-				File.WriteAllLines(ParserEntry.PREFIX + "names.txt", _otherWords.ToList());
+                // check if words with flagged parts-of-speech exist in the dictionary already, and remove it from "incorrect part-of-speech" flag list
+
+                for (int i = _flaggedWords["Part of Speech"].Count - 1; i >= 0; i--)
+                {
+                    if (_wordDict.ContainsKey(_flaggedWords["Part of Speech"][i].word))
+                        _flaggedWords["Part of Speech"].RemoveAt(i);
+                }
+
+                List<string> wordsToRemove = _derivedWords["Part of Speech"].Where(derived => !_wordDict.ContainsKey(derived.source)).Select(derived => derived.word).ToList();
+
+                // if a word is in one sense derived from a word that was filtered out, but in another exists on its own as a non-filtered word, we want to keep it.
+
+                //foreach (string remove in wordsToRemove)
+                //{
+                //    _wordDict.Remove(remove);
+                //}
+
+                FileStream flaggedWordsStream = File.OpenWrite(ParserEntry.PREFIX + "flagged.txt");
+                StreamWriter flaggedWordsWriter = new StreamWriter(flaggedWordsStream);
+
+                string flaggedJson = JsonSerializer.Serialize(_flaggedWords);
+                flaggedWordsWriter.Write(flaggedJson);
+
+                flaggedWordsWriter.Close();
+                flaggedWordsStream.Close();
 
 				FileStream firstFilterStream = File.OpenWrite(ParserEntry.PREFIX + "firstpass.txt");
 				StreamWriter firstFilterWriter = new StreamWriter(firstFilterStream);
@@ -119,8 +145,7 @@ class FirstPhaseParser
 
 				firstFilterWriter.Write(strJson);
 				firstFilterWriter.Close();
-
-				File.WriteAllLines(ParserEntry.PREFIX + "partsofspeech.txt", _partsOfSpeech.ToList());
+                firstFilterStream.Close();
 			}
 		}
 		catch
@@ -128,6 +153,305 @@ class FirstPhaseParser
 			Console.WriteLine("File failed to load, possibly missing?");
 		}
 	}
+
+    // force word to be included if in this list
+    private bool IsWhitelisted(Word jsonWord)
+    {
+        if (jsonWord.word.ToLower() == "dictionary")
+            return true;
+
+        return false;
+    }
+
+    // exclude word if it's in this list
+    private bool IsBlacklisted(Word jsonWord)
+    {
+        return false;
+    }
+
+    public static bool IsValidWord(Word jsonWord)
+    {
+        if (jsonWord.word == null || jsonWord.word.Length == 0)
+            return false;
+
+        string word = jsonWord.word;
+        string lower = word.ToLower();
+
+        // only allow A, I, and O 
+
+        if (lower.Length == 1)
+        {
+            switch (lower[0])
+            {
+                case 'a':
+                case 'i':
+                case 'o': // still iffy on this
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // no need to output here
+
+        if (lower.IndexOfAny(new char[] { '-', ' ' }) != -1)
+        {
+            return false;
+        }
+
+        // word must contain at least one vowel
+
+        if (lower.IndexOfAny(new char[] { 'a', 'e', 'i', 'o', 'u', 'y'}) == -1)
+        {
+            //Console.WriteLine($"{word} does not contain any vowels.");
+            return false;
+        }
+        
+        if (lower.IndexOfAny(new char[] {'&', '+', '.', ',', '\'', '"', '/', '*'}) != -1)
+        {
+            //Console.WriteLine($"{word} has a non-alphanumeric symbol.");
+            return false;
+        }
+
+        if (lower.IndexOfAny(new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}) != -1)
+        {
+            //Console.WriteLine($"{word} contains a number.");
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool HasValidPartOfSpeech(Word jsonWord)
+    {
+        string pOS = jsonWord.pos;
+
+        if (pOS == null || pOS.Length == 0)
+        {
+            //Console.WriteLine($"{jsonWord.word} has no part of speech?");
+            return false;
+        }
+
+        switch (pOS)
+        {
+            // these are all tracked
+            case "noun":
+            case "verb":
+            case "adj":
+            case "adv":
+            case "prep":
+            case "pron":
+            case "conj":
+                return true;
+
+            // these should all be discarded entirely
+            case "proverb":
+            case "prep_phrase":
+            case "phrase":
+            case "name":
+                return false;
+
+            default:
+
+                // add these to flagged words. Will run a second pass to clear out any with valid parts of speech
+                if (!_flaggedWords.ContainsKey("Part of Speech"))
+                {
+                    _flaggedWords["Part of Speech"] = new List<FlaggedWord>();
+                }
+
+                _flaggedWords["Part of Speech"].Add(new FlaggedWord(jsonWord.word, pOS));
+
+                if (!_derivedWords.ContainsKey("Part of Speech"))
+                {
+                    _derivedWords["Part of Speech"] = new List<DerivedWord>();
+                }
+
+                jsonWord.forms?.ToList().ForEach(form => _derivedWords["Part of Speech"].Add(new DerivedWord(form.form, jsonWord.word)));
+                jsonWord.hyponyms?.ToList().ForEach(hyponym => _derivedWords["Part of Speech"].Add(new DerivedWord(hyponym.word, jsonWord.word)));
+                jsonWord.hyponyms?.ToList().ForEach(derived => _derivedWords["Part of Speech"].Add(new DerivedWord(derived.word, jsonWord.word)));
+                jsonWord.senses?.ToList().ForEach(sense => sense.synonyms?.ToList().ForEach(synonym => _derivedWords["Part of Speech"].Add(new DerivedWord(synonym.word, jsonWord.word))));
+
+                //Console.WriteLine($"{jsonWord.word} Flagged: Part of Speech is {pOS}");
+                return false;
+        }
+    }
+
+    public bool PassesProfanityFilter(Word jsonWord)
+    {
+        bool passes = true;
+
+        List<string> glosses = new List<string>();
+
+        jsonWord.senses?.ToList().ForEach(sense =>
+        {
+            if (sense.raw_glosses != null)
+            {
+                glosses.AddRange(sense.raw_glosses);
+            }
+        });
+
+        int glossesWithKeyword = glosses.Count(gloss =>
+        {
+            string lowerGloss = gloss.ToLower();
+
+            return
+                lowerGloss.Contains("derogatory") ||
+                lowerGloss.Contains("slur") ||
+                lowerGloss.Contains("offensive") ||
+                lowerGloss.Contains("ethnic") ||
+                lowerGloss.Contains("slang") ||
+                lowerGloss.Contains("vulgar");
+        });
+
+        if (glossesWithKeyword > 0)
+        {
+            if (!_flaggedWords.ContainsKey("Flagged Keyword in Definition"))
+            {
+                _flaggedWords["Flagged Keyword in Definition"] = new List<FlaggedWord>();
+            }
+
+            _flaggedWords["Flagged Keyword in Definition"].Add(new FlaggedWord(jsonWord.word, jsonWord.pos));
+
+            passes = false;
+        }
+
+        List<string> tags = new List<string>();
+
+        jsonWord.senses?.ToList().ForEach(sense =>
+        {
+            if (sense.tags != null)
+            {
+                tags.AddRange(sense.tags);
+            }
+        });
+
+        int tagsWithKeyword = tags.Count(tag =>
+        {
+            string lowerTag = tag.ToLower();
+
+            return
+                lowerTag.Contains("derogatory") ||
+                lowerTag.Contains("slur") ||
+                lowerTag.Contains("offensive") ||
+                lowerTag.Contains("ethnic") ||
+                lowerTag.Contains("slang") ||
+                lowerTag.Contains("vulgar");
+        });
+
+        if (tagsWithKeyword > 0)
+        {
+            if (!_flaggedWords.ContainsKey("Flagged Keyword in Tags"))
+            {
+                _flaggedWords["Flagged Keyword in Tags"] = new List<FlaggedWord>();
+            }
+
+            _flaggedWords["Flagged Keyword in Tags"].Add(new FlaggedWord(jsonWord.word, jsonWord.pos));
+
+            passes = false;
+        }
+
+        return passes;
+    }
+
+    public bool IsVariantSpelling(Word jsonWord)
+    {
+        bool hasNonVariantSpelling = true;
+
+        List<string> glosses = new List<string>();
+
+        jsonWord.senses?.ToList().ForEach(sense =>
+        {
+            if (sense.raw_glosses != null)
+            {
+                glosses.AddRange(sense.raw_glosses);
+            }
+        });
+
+        int variantGlosses = glosses.Count(gloss =>
+        {
+            string lowerGloss = gloss.ToLower();
+            return
+                gloss.Contains("spelling") ||
+                gloss.Contains("abbrev") ||
+                gloss.Contains("alternative") ||
+                gloss.Contains("alternate") ||
+                gloss.Contains("variant") ||
+                gloss.Contains("acryonm") ||
+                gloss.Contains("initial");
+        });
+
+        if (variantGlosses == glosses.Count && glosses.Count > 0)
+        {
+            hasNonVariantSpelling = false;
+
+            if (!_flaggedWords.ContainsKey("Probable Variant Spelling from Definitions"))
+            {
+                _flaggedWords["Probable Variant Spelling from Definitions"] = new List<FlaggedWord>();
+            }
+
+            _flaggedWords["Probable Variant Spelling from Definitions"].Add(new FlaggedWord(jsonWord.word, jsonWord.pos));
+        }
+        else if (variantGlosses > 0)
+        {
+            if (!_flaggedWords.ContainsKey("Possible Variant Spelling from Definitions"))
+            {
+                _flaggedWords["Possible Variant Spelling from Definitions"] = new List<FlaggedWord>();
+            }
+
+            _flaggedWords["Possible Variant Spelling from Definitions"].Add(new FlaggedWord(jsonWord.word, jsonWord.pos));
+        }
+
+        List<string> tags = new List<string>();
+
+        jsonWord.senses?.ToList().ForEach(sense =>
+        {
+            if (sense.tags != null)
+            {
+                tags.AddRange(sense.tags);
+            }
+        });
+
+        int variantTags = tags.Count(tag =>
+        {
+            string lowerTag = tag.ToLower();
+            return
+                tag.Contains("spelling") ||
+                tag.Contains("abbrev") ||
+                tag.Contains("alternative") ||
+                tag.Contains("alternate") ||
+                tag.Contains("variant") ||
+                tag.Contains("acryonm") ||
+                tag.Contains("initial");
+        });
+
+        if (variantTags == tags.Count && tags.Count > 0)
+        {
+            hasNonVariantSpelling = false;
+
+            if (!_flaggedWords.ContainsKey("Probable Variant Spelling from Tags"))
+            {
+                _flaggedWords["Probable Variant Spelling from Tags"] = new List<FlaggedWord>();
+            }
+
+            _flaggedWords["Probable Variant Spelling from Tags"].Add(new FlaggedWord(jsonWord.word, jsonWord.pos));
+        }
+        else if (variantTags > 0)
+        {
+            if (!_flaggedWords.ContainsKey("Possible Variant Spelling from Tags"))
+            {
+                _flaggedWords["Possible Variant Spelling from Tags"] = new List<FlaggedWord>();
+            }
+
+            _flaggedWords["Possible Variant Spelling from Tags"].Add(new FlaggedWord(jsonWord.word, jsonWord.pos));
+        }
+
+        if (!hasNonVariantSpelling)
+        {
+            //Console.WriteLine($"{jsonWord.word} may be a variant spelling.");
+        }
+
+        return !hasNonVariantSpelling;
+    }
 }
 
 class SecondPhaseParser
@@ -190,9 +514,9 @@ class SecondPhaseParser
 					List<string> glosses = new List<string>();
 					word.senses?.ForEach(sense =>
 					{
-						if (sense.glosses != null)
+						if (sense.raw_glosses != null)
 						{
-							glosses.AddRange(sense.glosses);
+							glosses.AddRange(sense.raw_glosses);
 						}
 					});
 
