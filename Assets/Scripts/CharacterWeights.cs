@@ -49,7 +49,7 @@ public class CharacterWeights : ScriptableObject
 
 			switch (state._layout[coord])
 			{
-				case CELLK.STANDARD:
+				case CellKind.Standard:
 					playableTileCount++;
 					break;
 			}

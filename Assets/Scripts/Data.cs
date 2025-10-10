@@ -21,29 +21,29 @@ public enum FPART : byte
 
 // Board Data
 
-public enum CELLK : byte
+public enum CellKind : byte
 {
-	STANDARD,	// Can be filled
-	LOCKED,		// Cannot be filled nor passed through
-	VOID,       // Cannot be filled, can be passed through
+	Standard,	// Can be filled
+	Locked,		// Cannot be filled nor passed through
+	Void,       // Cannot be filled, can be passed through
 				// Covered? Let tile fall through, can't be selected in this spot?
 
 	[InspectorName(null)]
-	MAX
+	Max
 }
 
-public enum SETTLEK
+public enum SettleKind
 {
 	[InspectorName(null)] // hides the NIL element in the inspector
-	NIL = -1,   // Used for overrides
-	[InspectorName("IN PLACE")]
-	IN_PLACE = 0,
-	FALL,
-	RISE,
-	[InspectorName("FROM LEFT")]
-	FROM_LEFT,
-	[InspectorName("FROM RIGHT")]
-	FROM_RIGHT,
+	Nil = -1,   // Used for overrides
+	[InspectorName("In Place")]
+	In_Place,
+	Fall,
+	Rise,
+	[InspectorName("From Left")]
+	From_Left,
+	[InspectorName("From Right")]
+	From_Right,
 }
 
 public class BoardState // the layout _can_ change mid battle due to enemy disruptions.
@@ -84,7 +84,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 	}
 
 
-	public BoardState CloneSettled(SETTLEK settlek, out BoardDelta delta)
+	public BoardState CloneSettled(SettleKind settlek, out BoardDelta delta)
 	{
 		BoardState clonedState = Clone();
 		clonedState.Settle(settlek, out delta);
@@ -94,16 +94,16 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 	// Should only call from within CloneSettled(SETTLEK)
 
-	private void Settle(SETTLEK settlek, out BoardDelta delta)
+	private void Settle(SettleKind settlek, out BoardDelta delta)
 	{
 		switch (settlek)
 		{
-			case SETTLEK.IN_PLACE:
+			case SettleKind.In_Place:
 				SettleInPlace(out delta);
 				return;
 
-			case SETTLEK.FALL:
-			case SETTLEK.RISE:
+			case SettleKind.Fall:
+			case SettleKind.Rise:
 				SettleVertical(settlek, out delta);
 				return;
 
@@ -122,7 +122,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 		foreach (Vector2Int coord in new Vector2IntIterator(_layout.BottomRight()))
 		{
-			if (_layout[coord] == CELLK.STANDARD)
+			if (_layout[coord] == CellKind.Standard)
 			{
 				if (this[coord] == ' ')
 				{
@@ -147,9 +147,9 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 		}
 	}
 
-	private void SettleVertical(SETTLEK settlek, out BoardDelta delta)
+	private void SettleVertical(SettleKind settlek, out BoardDelta delta)
 	{
-		Debug.Assert(settlek == SETTLEK.FALL || settlek == SETTLEK.RISE);
+		Debug.Assert(settlek == SettleKind.Fall || settlek == SettleKind.Rise);
 		delta = new BoardDelta(_layout);
 		BoardConfig config = BoardConfig.INSTANCE;
 
@@ -159,13 +159,13 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 		{
 			// check for empty cells
 
-			IntIterator rowIterFall = settlek == SETTLEK.FALL ?
+			IntIterator rowIterFall = settlek == SettleKind.Fall ?
 				new IntIterator(_layout._height - 1, 0, -1) :	// bottom to top
 				new IntIterator(0, _layout._height - 1, 1);		// top to bottom
 
 			foreach (int row in rowIterFall)
 			{
-				if (_layout[col, row] != CELLK.STANDARD)
+				if (_layout[col, row] != CellKind.Standard)
 					continue;
 
 				if (this[col, row] != ' ')
@@ -175,12 +175,12 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 					continue;
 				}
 
-				if (row == ((settlek == SETTLEK.FALL) ? 0 : _layout._height - 1))
+				if (row == ((settlek == SettleKind.Fall) ? 0 : _layout._height - 1))
 					continue;
 
 				// check for non-empty cells that can fill the empty cell
 
-				IntIterator rowIterScan = settlek == SETTLEK.FALL ?
+				IntIterator rowIterScan = settlek == SettleKind.Fall ?
 					new IntIterator(row - 1, 0, -1) :					// all cells above the current
 					new IntIterator(row + 1, _layout._height - 1, 1);	// all cells below the current
 
@@ -188,12 +188,12 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 				{
 					// if the cell is locked, stop searching
 
-					if (_layout[col, rowScan] == CELLK.LOCKED)
+					if (_layout[col, rowScan] == CellKind.Locked)
 						break;
 
 					// if the cell is void, skip this cell and continue searching
 
-					if (_layout[col, rowScan] == CELLK.VOID)
+					if (_layout[col, rowScan] == CellKind.Void)
 						continue;
 
 					// if the cell is standard and non-empty, move that to this cell and set that cell to empty
@@ -211,7 +211,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 				}
 			}
 
-			IntIterator rowIterPopulate = settlek == SETTLEK.FALL ?
+			IntIterator rowIterPopulate = settlek == SettleKind.Fall ?
 				new IntIterator(0, _layout._height - 1, 1) :	// top to bottom
 				new IntIterator(_layout._height - 1, 0, -1);    // bottom to top
 
@@ -219,12 +219,12 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 			{
 				// if the cell is locked, then neither this cell nor any after it can have new characters generate
 
-				if (_layout[col, row] == CELLK.LOCKED)
+				if (_layout[col, row] == CellKind.Locked)
 					break;
 
 				// if the cell is void, skip this cell and continue generating new characters
 
-				if (_layout[col, row] == CELLK.VOID)
+				if (_layout[col, row] == CellKind.Void)
 					continue;
 
 				if (this[col, row] == ' ')
@@ -243,9 +243,9 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 		}
 	}
 
-	private void SettleHorizontal(SETTLEK settlek, out BoardDelta delta)
+	private void SettleHorizontal(SettleKind settlek, out BoardDelta delta)
 	{
-		Debug.Assert(settlek == SETTLEK.FROM_LEFT || settlek == SETTLEK.FROM_RIGHT);
+		Debug.Assert(settlek == SettleKind.From_Left || settlek == SettleKind.From_Right);
 
 		delta = new BoardDelta(_layout);
 		BoardConfig config = BoardConfig.INSTANCE;
@@ -254,13 +254,13 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 		foreach (int row in new IntIterator(0, _layout._height - 1))
 		{
-			IntIterator colIteratorFall = settlek == SETTLEK.FROM_LEFT ?
+			IntIterator colIteratorFall = settlek == SettleKind.From_Left ?
 				new IntIterator(_layout._length - 1, 0, -1) :	// right to left
 				new IntIterator(0, _layout._length - 1, 1);	// left to right
 
 			foreach (int col in colIteratorFall)
 			{
-				if (_layout[col, row] != CELLK.STANDARD)
+				if (_layout[col, row] != CellKind.Standard)
 					continue;
 
 				if (this[col, row] != ' ')
@@ -270,10 +270,10 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 					continue;
 				}
 
-				if (col == ((settlek == SETTLEK.FROM_LEFT) ? 0 : _layout._length - 1))
+				if (col == ((settlek == SettleKind.From_Left) ? 0 : _layout._length - 1))
 					continue;
 
-				IntIterator colIteratorScan = settlek == SETTLEK.FROM_LEFT ?
+				IntIterator colIteratorScan = settlek == SettleKind.From_Left ?
 					new IntIterator(col - 1, 0, -1) :					// all cells left of the current
 					new IntIterator(col + 1, _layout._length - 1, 1);	// all cells right of the current
 
@@ -281,12 +281,12 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 				{
 					// if the cell is locked, stop searching
 
-					if (_layout[colScan, row] == CELLK.LOCKED)
+					if (_layout[colScan, row] == CellKind.Locked)
 						break;
 
 					// if the cell is void, skip this cell and continue searching
 
-					if (_layout[colScan, row] == CELLK.VOID)
+					if (_layout[colScan, row] == CellKind.Void)
 						continue;
 
 					// if the cell is standard and non-empty, move that to this cell and set that cell to empty
@@ -303,7 +303,7 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 				}
 			}
 
-			IntIterator colIteratorPopulate = settlek == SETTLEK.FROM_LEFT ?
+			IntIterator colIteratorPopulate = settlek == SettleKind.From_Left ?
 				new IntIterator(0, _layout._length - 1, 1) :	// left to right
 				new IntIterator(_layout._length - 1, 0, -1);    // right to left
 
@@ -311,12 +311,12 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 			{
 				// if the cell is locked, then neither this cell nor any after it can have new characters generate
 
-				if (_layout[col, row] == CELLK.LOCKED)
+				if (_layout[col, row] == CellKind.Locked)
 					break;
 
 				// if the cell is void, skip this cell and continue generating new characters
 
-				if (_layout[col, row] == CELLK.VOID)
+				if (_layout[col, row] == CellKind.Void)
 					continue;
 
 				if (this[col, row] == ' ')

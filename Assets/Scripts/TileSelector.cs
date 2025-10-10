@@ -6,22 +6,22 @@ using UnityEngine.InputSystem.LowLevel;
 
 public class TileSelector : MonoBehaviour
 {
-	public enum TILESELECTK
+	public enum TileSelectionKind
 	{
 		[InspectorName("Click and Drag")]
-		CLICK_AND_DRAG,
+		Click_And_Drag,
 		[InspectorName("Click to Start and Submit")]
-		CLICK_AND_MOVE,
+		Click_And_Move,
 		[InspectorName("Click Each Letter")]
-		CLICK_EACH_LETTER,
+		Click_Each_Letter,
 		[InspectorName("Keyboard Movement")]
-		KEYBOARD_MOVE,
+		Keyboard_Move,
 		[InspectorName("Type")]
-		TYPE
+		Type
 	}
 
 	[SerializeField]
-	private TILESELECTK _selectionKind = TILESELECTK.CLICK_AND_DRAG;
+	private TileSelectionKind _selectionKind = TileSelectionKind.Click_And_Drag;
 
 	[SerializeField]
 	private LineRenderer _lineRenderer;
@@ -38,8 +38,6 @@ public class TileSelector : MonoBehaviour
 	internal bool _isSelectingEnabled = true;
 
 	public static TileSelector INSTANCE;
-	
-	public WordChecker _wordChecker;
 
 	private void Awake()
 	{
@@ -67,26 +65,25 @@ public class TileSelector : MonoBehaviour
 		{
 			UpdateTileSelection();
 		}
-
     }
 
 	void UpdateTileSelection()
 	{
 		switch (_selectionKind)
 		{
-			case TILESELECTK.CLICK_AND_DRAG:
+			case TileSelectionKind.Click_And_Drag:
 				UpdateMouseSelect(drag: true);
 				return;
-			case TILESELECTK.CLICK_AND_MOVE:
+			case TileSelectionKind.Click_And_Move:
 				UpdateMouseSelect(drag: false);
 				return;
-			case TILESELECTK.CLICK_EACH_LETTER:
+			case TileSelectionKind.Click_Each_Letter:
 				UpdateClickLetter();
 				return;
-			case TILESELECTK.KEYBOARD_MOVE:
+			case TileSelectionKind.Keyboard_Move:
 				UpdateKeyboardMove();
 				return;
-			case TILESELECTK.TYPE:
+			case TileSelectionKind.Type:
 				UpdateType();
 				return;
 		}
@@ -123,37 +120,33 @@ public class TileSelector : MonoBehaviour
 
 				if (_word != "")
 				{
-					// this is where we would confirm that this is a real word
-					if (_wordChecker.CheckWord(_word, out _pOS))
-					{
-						Debug.Log($"Submitted {_word} ({_pOS})");
-						List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
-						Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
-						Debug.Log("");
-						GameBoard.INSTANCE.SubmitWord(_selectedTiles);
-					}
-					else
-					{
-						Debug.Log($"{_word} is not a word.");
-						List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
-						Debug.Log("- Deselecting " + string.Join(", ", coordList));
-						Debug.Log("");
-						// some sort of animation plays?
-					}
+                    List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
 
-					// would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
+                    if (BattleManager.INSTANCE.TrySubmitWord(_word, _selectedTiles))
+                    {
+                        Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
+                        Debug.Log("");
+                    }
+                    else
+                    {
+                        Debug.Log($"{_word} is not a word.");
+                        Debug.Log("- Deselecting " + string.Join(", ", coordList));
+                        Debug.Log("");
+                    }
 
-					foreach (Tile tile in _selectedTiles)
-					{
-						if (tile == _currentHighlightedTile)
-						{
-							tile.HighlightState = HIGHLIGHTS.HIGHLIGHTED;
-						}
-						else
-						{
-							tile.HighlightState = HIGHLIGHTS.NORMAL;
-						}
-					}
+                    // would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
+                    
+                    foreach (Tile tile in _selectedTiles)
+                    {
+                        if (tile == _currentHighlightedTile)
+                        {
+                            tile.HighlightState = HIGHLIGHTS.HIGHLIGHTED;
+                        }
+                        else
+                        {
+                            tile.HighlightState = HIGHLIGHTS.NORMAL;
+                        }
+                    }
 
 					// Deselect all tiles
 					_selectedTiles.Clear();
@@ -194,7 +187,7 @@ public class TileSelector : MonoBehaviour
 	{
 		_currentHighlightedTile = tile;
 
-		bool hoverSelecting = (_selectionKind == TILESELECTK.CLICK_AND_DRAG || _selectionKind == TILESELECTK.CLICK_AND_MOVE) && _isMouseSelecting;
+		bool hoverSelecting = (_selectionKind == TileSelectionKind.Click_And_Drag || _selectionKind == TileSelectionKind.Click_And_Move) && _isMouseSelecting;
 
 		if (hoverSelecting)
 		{

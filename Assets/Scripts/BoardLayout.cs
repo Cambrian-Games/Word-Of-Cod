@@ -11,11 +11,11 @@ public class BoardLayout : SerializedScriptableObject
 	public int _height = 1;
 
 	[OdinSerialize]
-	private CELLK[,] _grid;
+	private CellKind[,] _grid;
 
-	public CELLK[,] Grid => _grid;
+	public CellKind[,] Grid => _grid;
 
-	public CELLK this[int col, int row]
+	public CellKind this[int col, int row]
 	{
 		get => _grid[col, row];
 #if UNITY_EDITOR
@@ -23,7 +23,7 @@ public class BoardLayout : SerializedScriptableObject
 #endif
 	}
 
-	public CELLK this[Vector2Int coord]
+	public CellKind this[Vector2Int coord]
 	{
 		get => _grid[coord.x, coord.y];
 #if UNITY_EDITOR
@@ -34,7 +34,7 @@ public class BoardLayout : SerializedScriptableObject
 #if UNITY_EDITOR
 	// Does not compile in release builds
 
-	public void SetGrid(CELLK[,] gridNew)
+	public void SetGrid(CellKind[,] gridNew)
 	{
 		_grid = gridNew;
 		_length = _grid.GetLength(0);

@@ -12,7 +12,22 @@ public class WordChecker : MonoBehaviour
 	private bool _hasRunTest = false;
 #endif
 
-	void Start()
+    public static WordChecker INSTANCE;
+
+    private void Awake()
+    {
+        // set up singleton
+
+        if (INSTANCE != null && INSTANCE != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        INSTANCE = this;
+    }
+
+    void Start()
     {
         _allWords = ScriptableObject.CreateInstance<SerializedDict>();
         byte[] dictbytes = File.ReadAllBytes(Application.streamingAssetsPath + "/odinDict");

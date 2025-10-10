@@ -9,9 +9,9 @@ public class BoardConfig : MonoBehaviour
 	public static BoardConfig INSTANCE;
 
 	[SerializeField]
-	private SETTLEK _defaultSettleKind = SETTLEK.FALL;
-	private SETTLEK _overrideSettleKind = SETTLEK.NIL;
-	public SETTLEK SettleKind => _overrideSettleKind != SETTLEK.NIL ? _overrideSettleKind : _defaultSettleKind;
+	private SettleKind _defaultSettleKind = SettleKind.Fall;
+	private SettleKind _overrideSettleKind = SettleKind.Nil;
+	public SettleKind SettleKind => _overrideSettleKind != SettleKind.Nil ? _overrideSettleKind : _defaultSettleKind;
 
 	[SerializeField]
 	private CharacterWeights _characterWeights;
@@ -75,19 +75,19 @@ public class BoardConfig : MonoBehaviour
 	{
 		_layout = ScriptableObject.CreateInstance<BoardLayout>();
 		_layout._length = _layout._height = 7;
-		_layout.SetGrid(new CELLK[_layout._length, _layout._height]);
+		_layout.SetGrid(new CellKind[_layout._length, _layout._height]);
 
-		_layout[0, 0] = CELLK.STANDARD; _layout[1, 0] = CELLK.STANDARD; _layout[2, 0] = CELLK.VOID;		_layout[3, 0] = CELLK.VOID;		_layout[4, 0] = CELLK.VOID;		_layout[5, 0] = CELLK.STANDARD; _layout[6, 0] = CELLK.STANDARD;
-		_layout[0, 1] = CELLK.STANDARD; _layout[1, 1] = CELLK.STANDARD; _layout[2, 1] = CELLK.STANDARD; _layout[3, 1] = CELLK.VOID;		_layout[4, 1] = CELLK.STANDARD; _layout[5, 1] = CELLK.STANDARD; _layout[6, 1] = CELLK.STANDARD;
-		_layout[0, 2] = CELLK.VOID;		_layout[1, 2] = CELLK.STANDARD; _layout[2, 2] = CELLK.STANDARD; _layout[3, 2] = CELLK.STANDARD; _layout[4, 2] = CELLK.STANDARD; _layout[5, 2] = CELLK.STANDARD; _layout[6, 2] = CELLK.VOID;
-		_layout[0, 3] = CELLK.VOID;		_layout[1, 3] = CELLK.VOID;		_layout[2, 3] = CELLK.STANDARD; _layout[3, 3] = CELLK.STANDARD; _layout[4, 3] = CELLK.STANDARD; _layout[5, 3] = CELLK.VOID;		_layout[6, 3] = CELLK.VOID;
-		_layout[0, 4] = CELLK.VOID;		_layout[1, 4] = CELLK.STANDARD; _layout[2, 4] = CELLK.STANDARD; _layout[3, 4] = CELLK.STANDARD; _layout[4, 4] = CELLK.STANDARD; _layout[5, 4] = CELLK.STANDARD; _layout[6, 4] = CELLK.VOID;
-		_layout[0, 5] = CELLK.STANDARD; _layout[1, 5] = CELLK.STANDARD; _layout[2, 5] = CELLK.STANDARD; _layout[3, 5] = CELLK.VOID;		_layout[4, 5] = CELLK.STANDARD; _layout[5, 5] = CELLK.STANDARD; _layout[6, 5] = CELLK.STANDARD;
-		_layout[0, 6] = CELLK.STANDARD; _layout[1, 6] = CELLK.STANDARD; _layout[2, 6] = CELLK.VOID;		_layout[3, 6] = CELLK.VOID;		_layout[4, 6] = CELLK.VOID;		_layout[5, 6] = CELLK.STANDARD; _layout[6, 6] = CELLK.STANDARD;
+		_layout[0, 0] = CellKind.Standard; _layout[1, 0] = CellKind.Standard; _layout[2, 0] = CellKind.Void;		_layout[3, 0] = CellKind.Void;		_layout[4, 0] = CellKind.Void;		_layout[5, 0] = CellKind.Standard; _layout[6, 0] = CellKind.Standard;
+		_layout[0, 1] = CellKind.Standard; _layout[1, 1] = CellKind.Standard; _layout[2, 1] = CellKind.Standard; _layout[3, 1] = CellKind.Void;		_layout[4, 1] = CellKind.Standard; _layout[5, 1] = CellKind.Standard; _layout[6, 1] = CellKind.Standard;
+		_layout[0, 2] = CellKind.Void;		_layout[1, 2] = CellKind.Standard; _layout[2, 2] = CellKind.Standard; _layout[3, 2] = CellKind.Standard; _layout[4, 2] = CellKind.Standard; _layout[5, 2] = CellKind.Standard; _layout[6, 2] = CellKind.Void;
+		_layout[0, 3] = CellKind.Void;		_layout[1, 3] = CellKind.Void;		_layout[2, 3] = CellKind.Standard; _layout[3, 3] = CellKind.Standard; _layout[4, 3] = CellKind.Standard; _layout[5, 3] = CellKind.Void;		_layout[6, 3] = CellKind.Void;
+		_layout[0, 4] = CellKind.Void;		_layout[1, 4] = CellKind.Standard; _layout[2, 4] = CellKind.Standard; _layout[3, 4] = CellKind.Standard; _layout[4, 4] = CellKind.Standard; _layout[5, 4] = CellKind.Standard; _layout[6, 4] = CellKind.Void;
+		_layout[0, 5] = CellKind.Standard; _layout[1, 5] = CellKind.Standard; _layout[2, 5] = CellKind.Standard; _layout[3, 5] = CellKind.Void;		_layout[4, 5] = CellKind.Standard; _layout[5, 5] = CellKind.Standard; _layout[6, 5] = CellKind.Standard;
+		_layout[0, 6] = CellKind.Standard; _layout[1, 6] = CellKind.Standard; _layout[2, 6] = CellKind.Void;		_layout[3, 6] = CellKind.Void;		_layout[4, 6] = CellKind.Void;		_layout[5, 6] = CellKind.Standard; _layout[6, 6] = CellKind.Standard;
 	}
 #endif
 
-	public void SetOverrideSettlek(SETTLEK overrideSettleKind)
+	public void SetOverrideSettlek(SettleKind overrideSettleKind)
 	{
 		_overrideSettleKind = overrideSettleKind;
 	}

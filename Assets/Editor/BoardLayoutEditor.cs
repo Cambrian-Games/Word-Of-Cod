@@ -11,7 +11,7 @@ public class BoardLayoutEditorWindow : EditorWindow
 	private int _heightPending;
 	private int _lengthPending;
 
-	static Color[] COLORS = new Color[(int)CELLK.MAX]
+	static Color[] COLORS = new Color[(int)CellKind.Max]
 	{ 
 		new Color32(0xFF, 0xFF, 0xFF, 0xFF),
 		new Color32(0xFF, 0x49, 0x49, 0xFF),
@@ -45,12 +45,12 @@ public class BoardLayoutEditorWindow : EditorWindow
 			}
 			GUI.enabled = true;
 
-			foreach (CELLK cellk in Enum.GetValues(typeof(CELLK)))
+			foreach (CellKind cellk in Enum.GetValues(typeof(CellKind)))
 			{
-				if (cellk == CELLK.MAX)
+				if (cellk == CellKind.Max)
 					continue;
 
-				COLORS[(int)cellk] = EditorGUILayout.ColorField(Enum.GetName(typeof(CELLK), cellk), COLORS[(int)cellk]);
+				COLORS[(int)cellk] = EditorGUILayout.ColorField(Enum.GetName(typeof(CellKind), cellk), COLORS[(int)cellk]);
 			}
 
 			GUI.enabled = !pendingSizeChange;
@@ -75,8 +75,8 @@ public class BoardLayoutEditorWindow : EditorWindow
 				if (!EditorGUI.Toggle(rectNew, true))
 				{
 					int cellkNext = (int)_target[coord] + 1;
-					cellkNext %= (int)CELLK.MAX;
-					_target[coord] = (CELLK)cellkNext;
+					cellkNext %= (int)CellKind.Max;
+					_target[coord] = (CellKind)cellkNext;
 				}
 			}
 
@@ -91,7 +91,7 @@ public class BoardLayoutEditorWindow : EditorWindow
 	{
 		Debug.Assert(_target);
 
-		CELLK[,] gridNew = new CELLK[_lengthPending, _heightPending];
+		CellKind[,] gridNew = new CellKind[_lengthPending, _heightPending];
 
 		if (_target.Grid != null)
 		{

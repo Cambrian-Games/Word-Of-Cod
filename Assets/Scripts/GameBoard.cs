@@ -1,34 +1,25 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameBoard : MonoBehaviour
 {
-	enum RESOLVES // RESOLVE State
+	enum ResolveState
 	{
 		Nil = -1,
-		DeleteSelected = 0,
-		SpawnNew = 1,
-		Fall = 2,
-		Cleanup = 3
+		Spawn_New_Tiles,
+		Tiles_Fall,
+		Cleanup
 	}
 
 	private BoardState _currState, _nextState;
 	private BoardDelta _currDelta;
 	private Tile[,] _playableBoard, _stagingBoard; // staging board is for new tiles before they fall onto the screen
 
-	private RESOLVES _resolves = RESOLVES.Nil;
-
-	// These will be moved elsewhere, for a battle manager or something
-
-	public EnemyTemplate _enemyTemplate;
-	public PlayerTemplate _playerTemplate;
-
-	private EnemyInstance _enemy;
-	private PlayerInstance _player;
+	private ResolveState _resolveState = ResolveState.Nil;
 
 	private BoardConfig _config;
-
-	private int _totalWords; // used for logging
+    private bool _lockStateMachine;
 
 	public static GameBoard INSTANCE;
 
@@ -50,41 +41,34 @@ public class GameBoard : MonoBehaviour
 	{
 		_config = BoardConfig.INSTANCE;
 
-		if (_enemyTemplate)
-			_enemy = _enemyTemplate.CreateEntity();
-
-		if (_playerTemplate)
-			_player = _playerTemplate.CreateEntity();
-
 		GenerateBoard();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		UpdateResolveState();
+        if (!_lockStateMachine)
+        {
+            UpdateResolveState();
+        }
 	}
 
 	private void UpdateResolveState()
 	{
-		switch (_resolves)
+		switch (_resolveState)
 		{
-			case RESOLVES.Nil:
+			case ResolveState.Nil:
 				return;
 
-			case RESOLVES.DeleteSelected:
-				DeleteSelectedTiles();
-				return;
-
-			case RESOLVES.SpawnNew:
+			case ResolveState.Spawn_New_Tiles:
 				SpawnNewTiles();
 				return;
 
-			case RESOLVES.Fall:
+			case ResolveState.Tiles_Fall:
 				FallTiles();
 				return;
 
-			case RESOLVES.Cleanup:
+			case ResolveState.Cleanup:
 				FinishResolve();
 				return;
 		}
@@ -119,7 +103,7 @@ public class GameBoard : MonoBehaviour
 
 		_currDelta = new BoardDelta(_config.Layout);
 		DeleteSelectedTiles();
-		_resolves = RESOLVES.Nil;
+		_resolveState = ResolveState.Nil;
 
 		_currState = _nextState = null;
 		_playableBoard = _stagingBoard = null;
@@ -137,14 +121,16 @@ public class GameBoard : MonoBehaviour
 			}
 		}
 
-		_resolves = RESOLVES.SpawnNew;
+		_resolveState = ResolveState.Spawn_New_Tiles;
 	}
 
 	private void SpawnNewTiles()
 	{
-		// Vector2s are pass-by-value so there's no point in creating and destroying a new one every iteration of the loop
+        _nextState = _currState.CloneSettled(_config.SettleKind, out _currDelta);
 
-		Vector2 spawnDir = (_config.SettleKind == SETTLEK.IN_PLACE) ? Vector2.up : -FallDirection();
+        // Vector2s are pass-by-value so there's no point in creating and destroying a new one every iteration of the loop
+
+        Vector2 spawnDir = (_config.SettleKind == SettleKind.In_Place) ? Vector2.up : -FallDirection();
 		Vector2 layoutDims = _config.Layout.Dims();
 		Vector2 tileSpacing = _config.TileSpacing;
 		Vector2 spawnOffset = _config.SpawnOffset;
@@ -162,7 +148,7 @@ public class GameBoard : MonoBehaviour
 
 		// TODO mini settle+cleanup step
 
-		_resolves = RESOLVES.Fall;
+		_resolveState = ResolveState.Tiles_Fall;
 	}
 
 	private void FallTiles(bool immediate = false)
@@ -195,7 +181,7 @@ public class GameBoard : MonoBehaviour
 
 			// We are at or past our destination. It's a better check than before but still not ideal. Would be good to stress test this
 
-			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0 || _config.SettleKind == SETTLEK.IN_PLACE)
+			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0 || _config.SettleKind == SettleKind.In_Place)
 			{
 				tileToMove.transform.position = dest;
 			}
@@ -232,7 +218,7 @@ public class GameBoard : MonoBehaviour
 
 		if (!movedTile)
 		{
-			_resolves = RESOLVES.Cleanup;
+			_resolveState = ResolveState.Cleanup;
 		}
 	}
 
@@ -242,9 +228,9 @@ public class GameBoard : MonoBehaviour
 
 		switch (_config.SettleKind)
 		{
-			case SETTLEK.IN_PLACE:
-			case SETTLEK.FALL:
-			case SETTLEK.FROM_LEFT:
+			case SettleKind.In_Place:
+			case SettleKind.Fall:
+			case SettleKind.From_Left:
 				coordIterator = new Vector2IntIterator(_config.Layout.BottomRight(), Vector2Int.zero); // y first doesn't really matter here
 				break;
 			default:
@@ -276,10 +262,9 @@ public class GameBoard : MonoBehaviour
 		}
 
 		_currDelta = null;
-		_resolves = RESOLVES.Nil;
+		_resolveState = ResolveState.Nil;
 		_currState = _nextState;
 		_nextState = null;
-		TileSelector.INSTANCE._isSelectingEnabled = true;
 
 		Debug.Log("");
 		Debug.Log("Current State:");
@@ -291,15 +276,15 @@ public class GameBoard : MonoBehaviour
 	{
 		switch (_config.SettleKind)
 		{
-			case SETTLEK.IN_PLACE:
+			case SettleKind.In_Place:
 				return Vector2.zero;
-			case SETTLEK.FALL:
+			case SettleKind.Fall:
 				return Vector2.down;
-			case SETTLEK.RISE:
+			case SettleKind.Rise:
 				return Vector2.up;
-			case SETTLEK.FROM_LEFT:
+			case SettleKind.From_Left:
 				return Vector2.right;
-			case SETTLEK.FROM_RIGHT:
+			case SettleKind.From_Right:
 				return Vector2.left;
 			default:
 #if UNITY_EDITOR
@@ -309,17 +294,34 @@ public class GameBoard : MonoBehaviour
 		}
 	}
 
-	internal void SubmitWord(List<Tile> selectedTiles)
+    /// <summary>
+    /// Remove the specified tiles from the board and transfer them to a different transform (expected to be the battle manager)
+    /// </summary>
+    /// <param name="selectedTiles"></param>
+    /// <param name="lockStateMachine"></param>
+	internal void DisconnectTiles(List<Tile> selectedTiles, Transform newParent)
 	{
 		foreach (Tile tile in selectedTiles)
 		{
 			_currState[tile._coord] = ' ';
+
+            // the board no longer cares about this tile, but the Battle Manager does care about it
+
+            _playableBoard[tile._coord.x, tile._coord.y] = null;
+
+            tile.transform.parent = newParent;
 		}
 
-		_nextState = _currState.CloneSettled(_config.SettleKind, out _currDelta);
-		_resolves = RESOLVES.DeleteSelected;
-		TileSelector.INSTANCE._isSelectingEnabled = false;
-
-		Debug.Log(++_totalWords + " Word(s) Submitted");
+		_resolveState = ResolveState.Spawn_New_Tiles;
 	}
+
+    public void LockStateMachine(bool locked)
+    {
+        _lockStateMachine = locked;
+    }
+
+    internal bool IsSettled()
+    {
+        return _resolveState == ResolveState.Nil;
+    }
 }
