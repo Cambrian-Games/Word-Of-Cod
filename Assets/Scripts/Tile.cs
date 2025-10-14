@@ -21,7 +21,12 @@ public class Tile: MonoBehaviour
 	{
 		if (_tmpro)
 		{
-			_tmpro.text = _letter.ToString();
+            string textNew = _letter.ToString();
+
+            if (_tmpro.text != textNew)
+            {
+                _tmpro.text = textNew;
+            }
 		}
 	}
 
