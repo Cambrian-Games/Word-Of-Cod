@@ -1,9 +1,7 @@
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.LightTransport;
+using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
@@ -48,6 +46,9 @@ public class BattleManager : MonoBehaviour
 
     private Enemy _enemy;
     private Player _player;
+
+	public SceneAsset _loseScene;
+	public SceneAsset _winScene;
 
     // may need to have a prefab and spawn multiple displays if we want multiple enemies on screen.
     public EntityDisplay _enemyDisplay;
@@ -196,7 +197,15 @@ public class BattleManager : MonoBehaviour
             case BattleState.Settle_Board:
                 GameBoard.INSTANCE.LockStateMachine(false);
                 break;
-        }
+
+			case BattleState.Lose:
+				SceneManager.LoadScene(_loseScene.name);
+				break;
+
+			case BattleState.Win:
+				SceneManager.LoadScene(_winScene.name);
+				break;
+		}
     }
 
     private void UpdatePPT()
