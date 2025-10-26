@@ -3,8 +3,9 @@ import time
 import webview
 
 def wordListLogic(wordsfile, word, window):
-    time.sleep(5)
     done = False
+    keepfile = open("keep.txt", 'w')
+    rejectfile = open("reject.txt", 'w')
     while not done:
         word = word.rstrip('\n')
         print(word)
@@ -16,8 +17,15 @@ def wordListLogic(wordsfile, word, window):
             window.load_url(url)
             print(window.get_current_url())
             window.title = word
+
+            choice = input("y(es) or n(o): ")
+            if choice[0] == "y":
+                keepfile.write(word + "\n")
+            else:
+                rejectfile.write(word + "\n")
+
             word = wordsfile.readline()
-        time.sleep(2)
+        #time.sleep(2)
 
 
 
