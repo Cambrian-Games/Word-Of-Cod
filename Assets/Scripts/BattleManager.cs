@@ -145,6 +145,10 @@ public class BattleManager : MonoBehaviour
             case BattleState.Player_Turn:
                 TileSelector.INSTANCE._isSelectingEnabled = false;
                 break;
+
+			case BattleState.Enemy_Turn:
+				_enemyTurnHandler.EndTurn();
+				break;
         }
 
         _battleState = newState;

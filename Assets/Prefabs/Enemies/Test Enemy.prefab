@@ -44,7 +44,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17b33e969ad0fad4484bfb172a4425b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  _displayName: Test Enemy
+  _displayName: Bass-ic
   _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 50
-  _attackDamage: 2
+  _attackDamage: 0
+  _rules:
+  - _ruleKind: 0
+    _turnsToWait: 2
+    _damage: 0
+  - _ruleKind: 1
+    _turnsToWait: 0
+    _damage: 25
+  ints: 00000000
+  strs:
+  - 

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Entity : MonoBehaviour
@@ -19,4 +20,19 @@ public class Entity : MonoBehaviour
             _hasInit = true;
         }
     }
+
+	public virtual void UpdateTurn()
+	{
+
+	}
+
+	public virtual void StartTurn()
+	{
+
+	}
+
+	public virtual void EndTurn()
+	{
+
+	}
 }
