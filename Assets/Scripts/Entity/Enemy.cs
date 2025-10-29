@@ -73,8 +73,6 @@ public class AttackRule
 	private RuleKind _ruleKind;
 	public RuleKind Rule => _ruleKind;
 
-	// Wait Turns
-
 	// This will eventually support ranges.
 	[Min(0), SerializeField]
 	private int _turnsToWait = 0;
@@ -94,17 +92,22 @@ public class AttackRule
 		};
 	}
 
-	internal void StartTurn(RuleData currentRuleData)
+	internal void StartTurn(RuleData data)
 	{
 		switch (_ruleKind)
 		{
 			case RuleKind.Wait_Turns:
-				((WaitTurnData)currentRuleData)._turnsWaited++;
+				((WaitTurnData)data)._turnsWaited++;
 				break;
 		}
 	}
 
-	// This should return false if a multi-frame operation needs to occur and has not yet completed (i.e. animations).
+	/// <summary>
+	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done by this rule and false <br/>
+	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
+	/// </summary>
+	/// <param name="data">State data required for some rules</param>
+	/// <returns></returns>
 	internal bool UpdateTurn(RuleData data)
 	{
 		switch (_ruleKind)
@@ -124,24 +127,19 @@ public class AttackRule
 
 	internal bool IsComplete(RuleData data)
 	{
-		switch (_ruleKind)
+		return _ruleKind switch
 		{
-			case RuleKind.Wait_Turns:
-				return ((WaitTurnData)data)._turnsWaited >= TurnsToWait;
-
-			case RuleKind.Standard_Attack:
-				return ((StandardAttackData)data)._hasAttacked;
-
-			default:
-				return true;
-		}
+			RuleKind.Wait_Turns => ((WaitTurnData)data)._turnsWaited >= TurnsToWait,
+			RuleKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
+			_ => true,
+		};
 	}
 }
 
 /// <summary>
-/// Any extra metadata we need to complete an attack
+/// Any extra metadata we need to complete an AttackRule
 /// </summary>
-public class RuleData
+public abstract class RuleData
 {
 	public readonly AttackRule.RuleKind _ruleKind;
 
