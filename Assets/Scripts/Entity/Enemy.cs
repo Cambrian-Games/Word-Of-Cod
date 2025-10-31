@@ -66,7 +66,9 @@ public class AttackRule
 		[InspectorName("Wait Turns")]
 		Wait_Turns,
 		[InspectorName("Standard Attack")]
-		Standard_Attack
+		Standard_Attack,
+		[InspectorName("Pin Prick")]
+		Create_Spiny_And_Damage // will try to support sub-rules to make this more modular.
 	}
 
 	[SerializeField]
@@ -88,6 +90,7 @@ public class AttackRule
 		{
 			RuleKind.Wait_Turns => new WaitTurnData(),
 			RuleKind.Standard_Attack => new StandardAttackData(),
+			RuleKind.Create_Spiny_And_Damage => new StandardAttackData(),
 			_ => null,
 		};
 	}
@@ -120,6 +123,12 @@ public class AttackRule
 				((StandardAttackData)data)._hasAttacked = true;
 				return true;
 
+			case RuleKind.Create_Spiny_And_Damage:
+				BattleManager.INSTANCE.DamagePlayer(Damage);
+				GameBoard.INSTANCE.TransformTiles(oldKind: Tile.TileKind.Normal, newKind: Tile.TileKind.Spiny, num: 2);
+				((StandardAttackData)data)._hasAttacked = true;
+				return true;
+
 			default:
 				return true;
 		}
@@ -131,6 +140,7 @@ public class AttackRule
 		{
 			RuleKind.Wait_Turns => ((WaitTurnData)data)._turnsWaited >= TurnsToWait,
 			RuleKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
+			RuleKind.Create_Spiny_And_Damage => ((StandardAttackData)data)._hasAttacked,
 			_ => true,
 		};
 	}

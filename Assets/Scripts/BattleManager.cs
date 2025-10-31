@@ -282,6 +282,13 @@ public class BattleManager : MonoBehaviour
         {
             case PostPlayerTurnState.Display_Word:
                 _directions.Clear();
+				_tilesInWord.ForEach(tile => tile.OnSubmit());
+
+				if (_player._currentHealth <= 0)
+				{
+					// interrupt state change to lose the game. Should probably be its own step instead.
+					SetBattleState(BattleState.Lose);
+				}
                 break;
 
             case PostPlayerTurnState.Attack_Enemy:

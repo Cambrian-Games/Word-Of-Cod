@@ -324,4 +324,22 @@ public class GameBoard : MonoBehaviour
     {
         return _resolveState == ResolveState.Nil;
     }
+
+	internal void TransformTiles(Tile.TileKind oldKind, Tile.TileKind newKind, int num)
+	{
+		int converted = 0;
+		Vector2Int dims = _config.Layout.Dims();
+
+		while (converted < num)
+		{
+			int randCol = UnityEngine.Random.Range(0, dims.x);
+			int randRow = UnityEngine.Random.Range(0, dims.y);
+
+			if (_playableBoard[randCol, randRow].Kind == oldKind)
+			{
+				_playableBoard[randCol, randRow].Kind = newKind;
+				converted++;
+			}
+		}
+	}
 }

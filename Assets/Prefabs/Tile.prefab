@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7211954246531153590}
-  - component: {fileID: 4036130178732745845}
   - component: {fileID: 3947973941020287808}
+  - component: {fileID: 4036130178732745845}
   - component: {fileID: 6899414853714606206}
   m_Layer: 0
   m_Name: Tile
@@ -35,6 +35,28 @@ Transform:
   - {fileID: 4579424953373167465}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3947973941020287808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5397940430235210866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68d59c8bbd2c8c246a614d659f59de44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tile
+  _tmpro: {fileID: 1438421192466119716}
+  _letter: 0
+  _normalSprite: {fileID: 21300000, guid: 5726e906cfef8be4ba35f4d9b32caebe, type: 3}
+  _spinySprite: {fileID: 21300000, guid: 1fe6ff2e1a814c04f870ccb3be6d6376, type: 3}
+  _sandySprite: {fileID: 0}
+  _spriteRenderer: {fileID: 4036130178732745845}
+  _normalColor: {r: 1, g: 1, b: 1, a: 1}
+  _highlightedColor: {r: 1, g: 1, b: 0.759434, a: 1}
+  _selectedColor: {r: 1, g: 1, b: 0.3529412, a: 1}
+  _selectedAndHighlightedColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!212 &4036130178732745845
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -93,25 +115,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &3947973941020287808
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5397940430235210866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68d59c8bbd2c8c246a614d659f59de44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Tile
-  _tmpro: {fileID: 1438421192466119716}
-  _letter: 0
-  _sprite: {fileID: 4036130178732745845}
-  _normalColor: {r: 1, g: 1, b: 1, a: 1}
-  _highlightedColor: {r: 1, g: 1, b: 0.759434, a: 1}
-  _selectedColor: {r: 1, g: 1, b: 0.3529412, a: 1}
-  _selectedAndHighlightedColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!61 &6899414853714606206
 BoxCollider2D:
   m_ObjectHideFlags: 0

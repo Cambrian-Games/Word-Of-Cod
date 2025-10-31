@@ -102,7 +102,7 @@ public class TileSelector : MonoBehaviour
 
 				if (_currentHighlightedTile)
 				{
-					SelectTile(_currentHighlightedTile);
+					TrySelectTile(_currentHighlightedTile);
 				}
 			}
 		}
@@ -193,7 +193,7 @@ public class TileSelector : MonoBehaviour
 		{
 			if (_selectedTiles.Count == 0)
 			{
-				SelectTile(tile);
+				TrySelectTile(tile);
 			}
 			else
 			{
@@ -215,7 +215,7 @@ public class TileSelector : MonoBehaviour
 
 						if (Mathf.Abs(gridDist.x) <= 1 && Mathf.Abs(gridDist.y) <= 1 && !_selectedTiles.Contains(tile))
 						{
-							SelectTile(tile);
+							TrySelectTile(tile);
 						}
 						else
 						{
@@ -252,8 +252,11 @@ public class TileSelector : MonoBehaviour
 		// this could drive selection starting instead of UpdateMouseSelect
 	}
 
-	internal void SelectTile(Tile tile)
+	internal void TrySelectTile(Tile tile)
 	{
+		if (!tile.IsSelectable)
+			return;
+
 		_selectedTiles.Add(tile);
 		_word += tile._letter;
 		tile.HighlightState = HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED;
