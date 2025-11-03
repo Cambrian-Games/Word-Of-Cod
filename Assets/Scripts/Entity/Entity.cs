@@ -9,7 +9,7 @@ public class Entity : MonoBehaviour
 	public int _maxHealth;
 
     // state
-    internal int _currentHealth;
+    public int _currentHealth;
     private bool _hasInit;
 
     public void Init()
