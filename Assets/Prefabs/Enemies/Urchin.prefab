@@ -48,9 +48,23 @@ MonoBehaviour:
   _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 50
   _rules:
-  - _ruleKind: 0
-    _turnsToWait: 1
-    _damage: 0
-  - _ruleKind: 1
-    _turnsToWait: 0
-    _damage: 25
+  - _matchAll: 0
+    _conditions:
+    - _field: 4
+      _is: 5
+      _value: 2
+    _effects:
+    - _afterEffectDelay: 0
+      _effectKind: 2
+      _damage: 25
+      _from: 0
+      _to: 1
+      _numTiles: 2
+    - _afterEffectDelay: 0
+      _effectKind: 1
+      _damage: 20
+      _from: 0
+      _to: 0
+      _numTiles: 0
+  _attackPriority: 0
+  _canRepeatLastAction: 1

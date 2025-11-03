@@ -61,6 +61,7 @@ public class BattleManager : MonoBehaviour
     FPART _pOS; // parts-of-speech for submitted word
     string _wordToSubmit;
     string _lastWord;
+	internal string LastWord => _lastWord;
     List<Tile> _tilesInWord;
 
     public Transform _tileDestination;
@@ -388,4 +389,9 @@ public class BattleManager : MonoBehaviour
     {
         return _player._currentHealth;
     }
+
+	internal int MaxPlayerHealth()
+	{
+		return _player._maxHealth;
+	}
 }

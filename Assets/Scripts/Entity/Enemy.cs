@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +12,15 @@ public class Enemy : Entity
     // attack state
 
 	internal int _currentRule = -1;
-	private RuleData _currentRuleData = null;
+	private int _lastRule = -1;
+	internal int LastRule => _lastRule;
+	internal int _turnsSinceLastAction = 0;
+
+	[SerializeField]
+	private AttackPriority _attackPriority;
+	public AttackPriority Priority => _attackPriority;
+	[SerializeField]
+	private bool _canRepeatLastAction = true;
 
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
@@ -23,166 +30,98 @@ public class Enemy : Entity
 		base.UpdateTurn();
 
 		if (!_isTurnComplete)
-			_isTurnComplete = _rules[_currentRule].UpdateTurn(_currentRuleData);
+			_isTurnComplete = _rules[_currentRule].UpdateRule();
 	}
 
 	public override void StartTurn()
 	{
-		if (_currentRuleData == null)
+		if (_currentRule != -1)
 		{
-			_currentRule = 0;
-			_currentRuleData = _rules[_currentRule].GenerateData();
+			_lastRule = _currentRule;
 		}
 
-		_isTurnComplete = false;
-		_rules[_currentRule].StartTurn(_currentRuleData);
+		// select new rule
 
-		Debug.Log(_currentRuleData.ToString());
+		switch (_attackPriority)
+		{
+			case AttackPriority.Loop:
+				int nextRule = (_lastRule + 1) % _rules.Count;
+
+				if (_rules[nextRule].CanRun(this))
+				{
+					_currentRule = nextRule;
+					_rules[_currentRule].StartRule();
+					_turnsSinceLastAction = 0;
+				}
+				else
+				{
+					_currentRule = -1;
+				}
+				break;
+
+			case AttackPriority.First_Available:
+				bool foundViableRule = false;
+
+				for (int i = 0; i < _rules.Count; i++)
+				{
+					if (!_canRepeatLastAction && i == _lastRule)
+						continue;
+
+					if (_rules[i].CanRun(this))
+					{
+						_currentRule = i;
+						_rules[_currentRule].StartRule();
+						_turnsSinceLastAction = 0;
+						foundViableRule = true;
+						break;
+					}
+				}
+
+				if (!foundViableRule)
+				{
+					_currentRule = -1;
+				}
+				break;
+
+			case AttackPriority.Random_From_All_Available:
+				List<int> ruleCandidates = new List<int>();
+
+				for (int i = 0; i < _rules.Count; i++)
+				{
+					if (!_canRepeatLastAction && i == _lastRule)
+						continue;
+
+					if (_rules[i].CanRun(this))
+					{
+						ruleCandidates.Add(i);
+					}
+				}
+
+				if (ruleCandidates.Count > 0)
+				{
+					int index = UnityEngine.Random.Range(0, ruleCandidates.Count);
+					_currentRule = ruleCandidates[index];
+					_rules[_currentRule].StartRule();
+					_turnsSinceLastAction = 0;
+				}
+				else
+				{
+					_currentRule = -1;
+				}
+				break;
+		}
+
+		// if there is no rule, the turn is complete and this does nothing
+
+		_isTurnComplete = _currentRule == -1;
 	}
 
 	public override void EndTurn()
 	{
 		base.EndTurn();
+		if (_currentRule != -1)
+			_rules[_currentRule].EndRule();
 
-		if (_currentRule >= _rules.Count)
-		{
-			_currentRule = 0;
-			_currentRuleData = _rules[_currentRule].GenerateData();
-		}
-
-		if (_rules[_currentRule].IsComplete(_currentRuleData))
-		{
-			_currentRule = (_currentRule + 1) % _rules.Count;
-			_currentRuleData = _rules[_currentRule].GenerateData();
-		}
-	}
-}
-
-[Serializable]
-public class AttackRule
-{
-	public enum RuleKind
-	{
-		[InspectorName("Wait Turns")]
-		Wait_Turns,
-		[InspectorName("Standard Attack")]
-		Standard_Attack,
-		[InspectorName("Pin Prick")]
-		Create_Spiny_And_Damage // will try to support sub-rules to make this more modular.
-	}
-
-	[SerializeField]
-	private RuleKind _ruleKind;
-	public RuleKind Rule => _ruleKind;
-
-	// This will eventually support ranges.
-	[Min(0), SerializeField]
-	private int _turnsToWait = 0;
-	public int TurnsToWait => (_ruleKind == RuleKind.Wait_Turns) ? _turnsToWait : throw new InvalidOperationException();
-
-	[Min(0), SerializeField]
-	public int _damage = 0;
-	public int Damage => (_ruleKind == RuleKind.Standard_Attack) ? _damage : throw new InvalidOperationException();
-
-	public RuleData GenerateData()
-	{
-		return _ruleKind switch
-		{
-			RuleKind.Wait_Turns => new WaitTurnData(),
-			RuleKind.Standard_Attack => new StandardAttackData(),
-			RuleKind.Create_Spiny_And_Damage => new StandardAttackData(),
-			_ => null,
-		};
-	}
-
-	internal void StartTurn(RuleData data)
-	{
-		switch (_ruleKind)
-		{
-			case RuleKind.Wait_Turns:
-				((WaitTurnData)data)._turnsWaited++;
-				break;
-		}
-	}
-
-	/// <summary>
-	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done by this rule and false <br/>
-	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
-	/// </summary>
-	/// <param name="data">State data required for some rules</param>
-	/// <returns></returns>
-	internal bool UpdateTurn(RuleData data)
-	{
-		switch (_ruleKind)
-		{
-			case RuleKind.Wait_Turns:
-				return true;
-
-			case RuleKind.Standard_Attack:
-				BattleManager.INSTANCE.DamagePlayer(Damage);
-				((StandardAttackData)data)._hasAttacked = true;
-				return true;
-
-			case RuleKind.Create_Spiny_And_Damage:
-				BattleManager.INSTANCE.DamagePlayer(Damage);
-				GameBoard.INSTANCE.TransformTiles(oldKind: Tile.TileKind.Normal, newKind: Tile.TileKind.Spiny, num: 2);
-				((StandardAttackData)data)._hasAttacked = true;
-				return true;
-
-			default:
-				return true;
-		}
-	}
-
-	internal bool IsComplete(RuleData data)
-	{
-		return _ruleKind switch
-		{
-			RuleKind.Wait_Turns => ((WaitTurnData)data)._turnsWaited >= TurnsToWait,
-			RuleKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
-			RuleKind.Create_Spiny_And_Damage => ((StandardAttackData)data)._hasAttacked,
-			_ => true,
-		};
-	}
-}
-
-/// <summary>
-/// Any extra metadata we need to complete an AttackRule
-/// </summary>
-public abstract class RuleData
-{
-	public readonly AttackRule.RuleKind _ruleKind;
-
-	public RuleData(AttackRule.RuleKind ruleKind)
-	{
-		_ruleKind = ruleKind;
-	}
-}
-
-public class WaitTurnData : RuleData
-{
-	public int _turnsWaited = 0;
-
-	public WaitTurnData() : base(AttackRule.RuleKind.Wait_Turns)
-	{
-	}
-
-	public override string ToString()
-	{
-		return "Turns Waited: " + _turnsWaited;
-	}
-}
-
-public class StandardAttackData : RuleData
-{
-	public bool _hasAttacked = false;
-
-	public StandardAttackData() : base(AttackRule.RuleKind.Standard_Attack)
-	{
-	}
-
-	public override string ToString()
-	{
-		return "Has Attacked: " + _hasAttacked;
+		_turnsSinceLastAction++;
 	}
 }
