@@ -1,9 +1,7 @@
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.LightTransport;
+using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
@@ -49,6 +47,9 @@ public class BattleManager : MonoBehaviour
     private Enemy _enemy;
     private Player _player;
 
+	public SceneAsset _loseScene;
+	public SceneAsset _winScene;
+
     // may need to have a prefab and spawn multiple displays if we want multiple enemies on screen.
     public EntityDisplay _enemyDisplay;
     public EntityDisplay _playerDisplay;
@@ -60,6 +61,7 @@ public class BattleManager : MonoBehaviour
     FPART _pOS; // parts-of-speech for submitted word
     string _wordToSubmit;
     string _lastWord;
+	internal string LastWord => _lastWord;
     List<Tile> _tilesInWord;
 
     public Transform _tileDestination;
@@ -144,6 +146,10 @@ public class BattleManager : MonoBehaviour
             case BattleState.Player_Turn:
                 TileSelector.INSTANCE._isSelectingEnabled = false;
                 break;
+
+			case BattleState.Enemy_Turn:
+				_enemyTurnHandler.EndTurn();
+				break;
         }
 
         _battleState = newState;
@@ -196,7 +202,15 @@ public class BattleManager : MonoBehaviour
             case BattleState.Settle_Board:
                 GameBoard.INSTANCE.LockStateMachine(false);
                 break;
-        }
+
+			case BattleState.Lose:
+				SceneManager.LoadScene(_loseScene.name);
+				break;
+
+			case BattleState.Win:
+				SceneManager.LoadScene(_winScene.name);
+				break;
+		}
     }
 
     private void UpdatePPT()
@@ -269,6 +283,13 @@ public class BattleManager : MonoBehaviour
         {
             case PostPlayerTurnState.Display_Word:
                 _directions.Clear();
+				_tilesInWord.ForEach(tile => tile.OnSubmit());
+
+				if (_player._currentHealth <= 0)
+				{
+					// interrupt state change to lose the game. Should probably be its own step instead.
+					SetBattleState(BattleState.Lose);
+				}
                 break;
 
             case PostPlayerTurnState.Attack_Enemy:
@@ -368,4 +389,9 @@ public class BattleManager : MonoBehaviour
     {
         return _player._currentHealth;
     }
+
+	internal int MaxPlayerHealth()
+	{
+		return _player._maxHealth;
+	}
 }

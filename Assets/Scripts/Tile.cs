@@ -1,15 +1,41 @@
-﻿using TMPro;
+﻿using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Tile: MonoBehaviour
 {
+	public enum TileKind
+	{
+		Normal,
+		Spiny,
+		Sandy
+	}
+
+	private TileKind _tileKind = TileKind.Normal;
+	internal TileKind Kind
+	{
+		get => _tileKind;
+		set => SetTileKind(value);
+	}
+
 	public TextMeshPro _tmpro;
 	public char _letter;
 	// should not be editor-accessible, should be accessed by code
 	internal Vector2Int _coord;
 
 	[SerializeField]
-	private SpriteRenderer _sprite;
+	private Sprite _normalSprite;
+	[SerializeField]
+	private Sprite _spinySprite;
+	[SerializeField]
+	private Sprite _sandySprite;
+
+	[Min(0)]
+	public int _spinyDamage = 10;
+
+	[SerializeField]
+	private SpriteRenderer _spriteRenderer;
 
 	[SerializeField]
 	private Color _normalColor, _highlightedColor, _selectedColor, _selectedAndHighlightedColor;
@@ -21,7 +47,24 @@ public class Tile: MonoBehaviour
 	{
 		if (_tmpro)
 		{
-			_tmpro.text = _letter.ToString();
+			string strLast = _tmpro.text;
+			string strGoal = _tileKind == TileKind.Sandy ? "" : _letter.ToString();
+			
+			if (strLast != strGoal)
+			{
+				_tmpro.text = strGoal;
+			}
+		}
+	}
+
+	public bool IsSelectable => _tileKind != TileKind.Sandy;
+	public void OnSubmit()
+	{
+		switch (_tileKind)
+		{
+			case TileKind.Spiny:
+				BattleManager.INSTANCE.DamagePlayer(_spinyDamage);
+				break;
 		}
 	}
 
@@ -44,23 +87,35 @@ public class Tile: MonoBehaviour
 	{
 		_highlightState = tileSelectState;
 
-		if (_sprite)
+		if (_spriteRenderer)
 		{
-			switch (_highlightState)
+			_spriteRenderer.color = _highlightState switch
 			{
-				case HIGHLIGHTS.NORMAL:
-					_sprite.color = _normalColor;
-					return;
-				case HIGHLIGHTS.HIGHLIGHTED:
-					_sprite.color = _highlightedColor;
-					return;
-				case HIGHLIGHTS.SELECTED:
-					_sprite.color = _selectedColor;
-					return;
-				case HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED:
-					_sprite.color = _selectedAndHighlightedColor;
-					return;
-			}
+				HIGHLIGHTS.NORMAL => _normalColor,
+				HIGHLIGHTS.HIGHLIGHTED => _highlightedColor,
+				HIGHLIGHTS.SELECTED => _selectedColor,
+				HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED => _selectedAndHighlightedColor,
+				_ => throw new InvalidOperationException(),
+			};
+		}
+	}
+
+	private void SetTileKind(TileKind tileKind)
+	{
+		if (_tileKind == tileKind)
+			return;
+
+		_tileKind = tileKind;
+
+		if (_spriteRenderer)
+		{
+			_spriteRenderer.sprite = _tileKind switch
+			{
+				TileKind.Normal => _normalSprite,
+				TileKind.Spiny => _spinySprite,
+				TileKind.Sandy => _sandySprite,
+				_ => throw new InvalidOperationException(),
+			};
 		}
 	}
 }

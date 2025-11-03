@@ -1,6 +1,4 @@
-﻿
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 // This will become more complex as needed
@@ -20,13 +18,18 @@ internal class EnemyTurnHandler
 
     public bool IsTurnComplete()
     {
-        return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _enemies.All(enemy => enemy._hasAttacked);
+        return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _enemies.All(enemy => enemy.IsTurnComplete);
     }
 
     public void StartTurn()
     {
-        _enemies.ForEach(enemy => enemy._hasAttacked = false);
+        _enemies.ForEach(enemy => enemy.StartTurn());
     }
+
+	public void EndTurn()
+	{
+		_enemies.ForEach(enemy => enemy.EndTurn());
+	}
 
     public void Update()
     {
@@ -35,8 +38,7 @@ internal class EnemyTurnHandler
             if (BattleManager.INSTANCE.CurrentPlayerHealth() <= 0)
                 break;
 
-            _enemies[i]._hasAttacked = true;
-            BattleManager.INSTANCE.DamagePlayer(_enemies[i]._attackDamage);
+			_enemies[i].UpdateTurn();
         }
     }
 }

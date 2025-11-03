@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Entity : MonoBehaviour
@@ -8,7 +9,7 @@ public class Entity : MonoBehaviour
 	public int _maxHealth;
 
     // state
-    internal int _currentHealth;
+    public int _currentHealth;
     private bool _hasInit;
 
     public void Init()
@@ -19,4 +20,19 @@ public class Entity : MonoBehaviour
             _hasInit = true;
         }
     }
+
+	public virtual void UpdateTurn()
+	{
+
+	}
+
+	public virtual void StartTurn()
+	{
+
+	}
+
+	public virtual void EndTurn()
+	{
+
+	}
 }
