@@ -14,7 +14,7 @@ public class Enemy : Entity
 	internal int _currentRule = -1;
 	private int _lastRule = -1;
 	internal int LastRule => _lastRule;
-	internal int _turnsSinceLastAction = 0; // the math around this variable is funky. After the first action it's accurate, but it doesn't know how to handle the start of the fight.
+	internal int _turnsSinceLastAction = 0;
 
 	[SerializeField]
 	private AttackPriority _attackPriority;
@@ -39,6 +39,10 @@ public class Enemy : Entity
 		{
 			_lastRule = _currentRule;
 		}
+
+		// increment turn count at start of turn. Will reset to zero if action is selected
+
+		_turnsSinceLastAction++;
 
 		// select new rule
 
@@ -121,7 +125,5 @@ public class Enemy : Entity
 		base.EndTurn();
 		if (_currentRule != -1)
 			_rules[_currentRule].EndRule();
-
-		_turnsSinceLastAction++;
 	}
 }
