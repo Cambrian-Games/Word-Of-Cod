@@ -411,7 +411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6478365160b028744be6cf389e535c87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  _enemyPrefab: {fileID: 3799837967197732049, guid: 3623c6aabd9f7b24298d276bc17382f0, type: 3}
+  _enemyPrefab: {fileID: 3799837967197732049, guid: 9c2538c23ef18f744b8d4a27eef21909, type: 3}
   _playerPrefab: {fileID: 5385752238530973539, guid: 38244eab106481d4282cfe564163e2ca, type: 3}
   _loseScene: {fileID: 102900000, guid: 10aff388008011c4fbd00c7cdaf9cce8, type: 3}
   _winScene: {fileID: 102900000, guid: 5b4fa5be8a142d04698b939da9f71374, type: 3}

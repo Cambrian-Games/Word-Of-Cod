@@ -14,7 +14,7 @@ public class Enemy : Entity
 	internal int _currentRule = -1;
 	private int _lastRule = -1;
 	internal int LastRule => _lastRule;
-	internal int _turnsSinceLastAction = 0;
+	internal int _turnsSinceLastAction = 0; // the math around this variable is funky. After the first action it's accurate, but it doesn't know how to handle the start of the fight.
 
 	[SerializeField]
 	private AttackPriority _attackPriority;

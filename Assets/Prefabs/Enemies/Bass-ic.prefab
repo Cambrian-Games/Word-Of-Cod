@@ -48,11 +48,11 @@ MonoBehaviour:
   _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 50
   _rules:
-  - _matchAll: 0
-    _conditions:
-    - _field: 4
+  - _conditions:
+    - _field: 6
       _is: 5
       _value: 2
+    _matchAll: 0
     _effects:
     - _afterEffectDelay: 0
       _effectKind: 1

@@ -36,12 +36,24 @@ public class AttackRule
 
 	public void StartRule()
 	{
+		if (_effects.Count == 0)
+		{
+			Debug.LogError("No effects found!");
+			return;
+		}
+
 		_currentEffect = 0;
 		_effectData = _effects[_currentEffect].GenerateData();
 	}
 
 	public bool UpdateRule()
 	{
+		if (_effectData == null)
+		{
+			Debug.LogError("No effect data, can't update rule.");
+			return true;
+		}
+
 		if (_effectData._effectEndTime <= 0.0f)
 		{
 			if (_effects[_currentEffect].UpdateEffect(_effectData))
@@ -83,6 +95,10 @@ public class AttackCondition
 		Player_Health,
 		[InspectorName("Player Health (Percentage)")]
 		Player_Health_Percent,
+		[InspectorName("First Turn")]
+		First_Turn,
+		[InspectorName("Not First Turn")]
+		Not_First_Turn,
 		[InspectorName("Turns Since Last Action")]
 		Turns_Since_Last_Action,
 		[InspectorName("Index of Last Action")]
@@ -128,6 +144,10 @@ public class AttackCondition
 				throw new NotImplementedException();
 			case ConditionField.Enemy_Killed:
 				throw new NotImplementedException();
+			case ConditionField.First_Turn:
+				return owner._turnsSinceLastAction == 0;
+			case ConditionField.Not_First_Turn:
+				return owner._turnsSinceLastAction != 0;
 		}
 
 		int input = _field switch

@@ -335,7 +335,7 @@ public class GameBoard : MonoBehaviour
 			int randCol = UnityEngine.Random.Range(0, dims.x);
 			int randRow = UnityEngine.Random.Range(0, dims.y);
 
-			if (_playableBoard[randCol, randRow].Kind == oldKind)
+			if (_playableBoard[randCol, randRow] && _playableBoard[randCol, randRow].Kind == oldKind)
 			{
 				_playableBoard[randCol, randRow].Kind = newKind;
 				converted++;
