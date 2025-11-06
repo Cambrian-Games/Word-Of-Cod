@@ -2,7 +2,7 @@
 
 class ParserEntry
 {
-	public static string PREFIX = "..\\..\\..\\";
+	public static string PREFIX = "../../../";
 
 	static FirstPhaseParser parserPhase1 = new FirstPhaseParser();
 	static SecondPhaseParser parserPhase2 = new SecondPhaseParser();
@@ -11,6 +11,8 @@ class ParserEntry
 
 	static void Main(string[] args)
 	{
+		//parserPhase1.Parse(args);
+		//parserPhase2.Parse(args);
 		parserPhase4.Parse(args);
 	}
 }
@@ -19,6 +21,10 @@ class FirstPhaseParser
 	string _fulldictPath = "raw-wiktextract-data.jsonl";
 	
 	FileStream stream = null;
+	
+	FileStream listStream = null;
+	
+	List<string> wordList = new List<string>();
 	
 	Dictionary<string, SimpleWord> _wordDict = new Dictionary<string, SimpleWord>();
 	
@@ -30,102 +36,137 @@ class FirstPhaseParser
 	{
 		try
 		{
-			stream = File.OpenRead(ParserEntry.PREFIX + _fulldictPath);
 
-			if (stream.CanRead)
+			//string path = ParserEntry.PREFIX + "twl06.txt";
+			listStream = File.OpenRead(ParserEntry.PREFIX + "all_words.txt");
+
+			if (listStream.CanRead)
 			{
-				StreamReader reader = new StreamReader(stream);
+				StreamReader listReader = new StreamReader(listStream);
 
-				string? jsonString = null;
+				string word = null;
 
-				SimpleWord? simpleWord = null;
-
-				while ((jsonString = reader.ReadLine()) != null)
+				while ((word = listReader.ReadLine()) != null)
 				{
-					Word? jsonWord = JsonSerializer.Deserialize<Word>(jsonString);
+					wordList.Add(word);
+				}
 
-					// filter out null and non-english words
+				listReader.Close();
+			}
 
-					if (jsonWord == null)
-						continue;
-
-					if (jsonWord.lang != "English")
-						continue;
-
-					// store other words that weren't expected
-
-					if (jsonWord.word.Contains('-') ||
-						jsonWord.word.Contains(' ') ||
-						jsonWord.word.Contains('&') ||
-						jsonWord.word.Contains('+') ||
-						jsonWord.word.Contains('.') ||
-						jsonWord.word.Contains(',') ||
-						jsonWord.word.Contains('\'') ||
-						jsonWord.word.Contains('"') ||
-						(jsonWord.pos != null && jsonWord.pos == "name"))
+			listStream.Close();
+			
+			try
+			{
+				//stream = File.OpenRead(ParserEntry.PREFIX + _fulldictPath);
+				stream = File.OpenRead("/run/media/system/F/wiktionary/raw-wiktextract-data.jsonl");
+	
+				if (stream.CanRead)
+				{
+					StreamReader reader = new StreamReader(stream);
+	
+					string? jsonString = null;
+	
+					SimpleWord? simpleWord = null;
+	
+					while ((jsonString = reader.ReadLine()) != null)
 					{
-						_otherWords.Add(jsonWord.word);
-						continue;
-					}
-
-					// store all found parts of speech
-
-					_partsOfSpeech.Add(jsonWord.pos);
-
-					if (simpleWord == null)
-					{
-						simpleWord = new SimpleWord();
-						simpleWord.word = jsonWord.word;
-					}
-					else if (simpleWord.word != jsonWord.word) // we're switching to this word
-					{
-						if (_wordDict.ContainsKey(simpleWord.word))
+						Word? jsonWord = JsonSerializer.Deserialize<Word>(jsonString);
+	
+						// filter out null and non-english words
+	
+						if (jsonWord == null)
+							continue;
+	
+						if (jsonWord.lang != "English")
+							continue;
+	
+						// store other words that weren't expected
+	
+						if (jsonWord.word.Contains('-') ||
+							jsonWord.word.Contains(' ') ||
+							jsonWord.word.Contains('&') ||
+							jsonWord.word.Contains('+') ||
+							jsonWord.word.Contains('.') ||
+							jsonWord.word.Contains(',') ||
+							jsonWord.word.Contains('\'') ||
+							jsonWord.word.Contains('"') ||
+							(jsonWord.pos != null && jsonWord.pos == "name"))
 						{
-							if (simpleWord.pos != null)
-							{
-								_wordDict[simpleWord.word].pos.AddRange(simpleWord.pos);
-							}
-							if (simpleWord.senses != null)
-							{
-								_wordDict[simpleWord.word].senses.AddRange(simpleWord.senses);
-							}
-							Console.WriteLine("How did we get here?");
+							_otherWords.Add(jsonWord.word);
+							continue;
 						}
 
-						_wordDict.TryAdd(simpleWord.word, simpleWord);
-						simpleWord = new SimpleWord();
-						simpleWord.word = jsonWord.word;
-
-						if (_wordDict.Count % 10000 == 0)
-							Console.WriteLine($"{_wordDict.Count}");
+						if (!wordList.Contains(jsonWord.word))
+						{
+							continue;
+						}
+						
+						// store all found parts of speech
+	
+						_partsOfSpeech.Add(jsonWord.pos);
+	
+						if (simpleWord == null)
+						{
+							simpleWord = new SimpleWord();
+							simpleWord.word = jsonWord.word;
+						}
+						else if (simpleWord.word != jsonWord.word) // we're switching to this word
+						{
+							if (_wordDict.ContainsKey(simpleWord.word))
+							{
+								if (simpleWord.pos != null)
+								{
+									_wordDict[simpleWord.word].pos.AddRange(simpleWord.pos);
+								}
+								if (simpleWord.senses != null)
+								{
+									_wordDict[simpleWord.word].senses.AddRange(simpleWord.senses);
+								}
+								Console.WriteLine("How did we get here?");
+							}
+	
+							//check wordlist here
+							_wordDict.TryAdd(simpleWord.word, simpleWord);
+							simpleWord = new SimpleWord();
+							simpleWord.word = jsonWord.word;
+	
+							if (_wordDict.Count % 10000 == 0)
+								Console.WriteLine($"{_wordDict.Count}");
+						}
+	
+						simpleWord.pos.Add(jsonWord.pos);
+	
+						if (jsonWord.senses != null)
+						{
+							simpleWord.senses.AddRange(jsonWord.senses.ToList());
+						}
 					}
-
-					simpleWord.pos.Add(jsonWord.pos);
-
-					if (jsonWord.senses != null)
-					{
-						simpleWord.senses.AddRange(jsonWord.senses.ToList());
-					}
+					reader.Close();
+					stream.Close();
+	
+					File.WriteAllLines(ParserEntry.PREFIX + "names.txt", _otherWords.ToList());
+	
+					FileStream firstFilterStream = File.OpenWrite(ParserEntry.PREFIX + "firstpass.txt");
+					StreamWriter firstFilterWriter = new StreamWriter(firstFilterStream);
+	
+					string strJson = JsonSerializer.Serialize(_wordDict);
+	
+					firstFilterWriter.Write(strJson);
+					firstFilterWriter.Close();
+	
+					File.WriteAllLines(ParserEntry.PREFIX + "partsofspeech.txt", _partsOfSpeech.ToList());
 				}
-				reader.Close();
-				stream.Close();
-
-				File.WriteAllLines(ParserEntry.PREFIX + "names.txt", _otherWords.ToList());
-
-				FileStream firstFilterStream = File.OpenWrite(ParserEntry.PREFIX + "firstpass.txt");
-				StreamWriter firstFilterWriter = new StreamWriter(firstFilterStream);
-
-				string strJson = JsonSerializer.Serialize(_wordDict);
-
-				firstFilterWriter.Write(strJson);
-				firstFilterWriter.Close();
-
-				File.WriteAllLines(ParserEntry.PREFIX + "partsofspeech.txt", _partsOfSpeech.ToList());
+			}
+			catch
+			{
+				Console.WriteLine("File failed to load, possibly missing?");
 			}
 		}
-		catch
+		catch (Exception e)
 		{
-			Console.WriteLine("File failed to load, possibly missing?");
+			Console.WriteLine(e.ToString());
+			Console.WriteLine("Word File failed to load, possibly missing?");
 		}
 	}
 }
@@ -158,6 +199,7 @@ class SecondPhaseParser
 
 			// first step merge for case sensitivity
 
+			
 			foreach (var kvp in _inputDict)
 			{
 				string lowerKey = kvp.Key.ToLower();
@@ -181,7 +223,7 @@ class SecondPhaseParser
 			}
 
 			// second step: remove misspellings and abbreviations
-
+			/*
 			foreach (var kvp in _midDict)
 			{
 				SimpleWord word = kvp.Value;
@@ -211,17 +253,17 @@ class SecondPhaseParser
 					}
 				}
 			}
-
+			*/
 			// third step: deduplicate parts of speech
 
-			foreach (var kvp in _outputDict)
+			foreach (var kvp in _midDict)
 			{
 				if (kvp.Value != null && kvp.Value.pos != null)
 				{
 					kvp.Value.pos = kvp.Value.pos.Distinct().ToList();
 				}
 			}
-
+/*
 			foreach (var kvp in _misspelledOrAbbrevDict)
 			{
 				if (kvp.Value != null && kvp.Value.pos != null)
@@ -229,10 +271,11 @@ class SecondPhaseParser
 					kvp.Value.pos = kvp.Value.pos.Distinct().ToList();
 				}
 			}
-
+*/
 			reader.Close();
 			_stream.Close();
 
+			/*
 			FileStream misspelledStream = File.OpenWrite(ParserEntry.PREFIX + "misspelled.txt");
 			StreamWriter misspelledWriter = new StreamWriter(misspelledStream);
 			string misspelledJson = JsonSerializer.Serialize(_misspelledOrAbbrevDict);
@@ -240,9 +283,10 @@ class SecondPhaseParser
 			misspelledWriter.Close();
 			misspelledStream.Close();
 
+			*/
 			FileStream secondPassStream = File.OpenWrite(ParserEntry.PREFIX + "secondpass.txt");
 			StreamWriter secondPassWriter = new StreamWriter(secondPassStream);
-			string secondPassJson = JsonSerializer.Serialize(_outputDict);
+			string secondPassJson = JsonSerializer.Serialize(_midDict);
 			secondPassWriter.Write(secondPassJson);
 			secondPassWriter.Close();
 			secondPassStream.Close();
@@ -362,7 +406,7 @@ class FourthPhaseParser
 
 	FileStream _stream = null;
 
-	string _path = "thirdpass.txt";
+	string _path = "secondpass.txt";
 
 	public void Parse(string[] args)
 	{
@@ -401,9 +445,9 @@ class FourthPhaseParser
 
 			// last step: combine parts of speech and send to game for Odin Serialization
 		}
-		catch
+		catch (Exception e)
 		{
-
+			Console.WriteLine(e.ToString());
 		}
 	}
 }

@@ -241,7 +241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunDictCreation
   allWords: {fileID: 0}
-  jsonPath: C:\Users\Scott\Dev\BDHGames\FirstGame\Utils\DictionaryParser/fourthpass.txt
+  jsonPath: /run/media/system/F/unityProjects/FirstGame/Utils/DictionaryParser/fourthpass.txt
 --- !u!4 &1706026191
 Transform:
   m_ObjectHideFlags: 0
