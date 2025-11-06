@@ -4,7 +4,7 @@ using UnityEngine;
 [CustomPropertyDrawer(typeof(AttackEffect))]
 public class AttackEffectPropertyDrawer : PropertyDrawer
 {
-	static readonly float YOFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+	static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
 
 	public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 	{
@@ -15,39 +15,39 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 		SerializedProperty rule = property.FindPropertyRelative("_effectKind");
 
 		AttackEffect.EffectKind ruleKind = (AttackEffect.EffectKind)rule.enumValueIndex;
-		position.y += YOFFSET;
+		position.y += Y_OFFSET;
 		EditorGUI.PropertyField(position, rule);
 		position.y += EditorGUIUtility.standardVerticalSpacing; // add a bit of space between the effect kind and parameters
 
 		switch (ruleKind)
 		{
 			case AttackEffect.EffectKind.Do_Nothing:
-				position.y += YOFFSET;
+				position.y += Y_OFFSET;
 				EditorGUI.LabelField(position, "Only recommended when Attack Priority", EditorStyles.boldLabel);
-				position.y += YOFFSET;
+				position.y += Y_OFFSET;
 				EditorGUI.LabelField(position, "\tis set to Loop", EditorStyles.boldLabel);
 				break;
 			case AttackEffect.EffectKind.Standard_Attack:
-				position.y += YOFFSET;
+				position.y += Y_OFFSET;
 				EditorGUI.PropertyField(position, property.FindPropertyRelative("_damage"));
 				break;
 
 			case AttackEffect.EffectKind.Transform_Tiles:
 				float standardWidth = position.width;
 				float standardX = position.x;
-				position.y += YOFFSET;
+				position.y += Y_OFFSET;
 				EditorGUI.PropertyField(position, property.FindPropertyRelative("_numTiles"), new GUIContent("Change"));
-				position.y += YOFFSET;
+				position.y += Y_OFFSET;
 				EditorGUI.MultiPropertyField(position, new GUIContent[] { new GUIContent("From"), new GUIContent("To") }, property.FindPropertyRelative("_from"));
 				break;
 		}
 
-		position.y += YOFFSET;
+		position.y += Y_OFFSET;
 		GUI.enabled = ruleKind != AttackEffect.EffectKind.Do_Nothing;
 		EditorGUI.PropertyField(position, property.FindPropertyRelative("_afterEffectDelay"), new GUIContent("Delay After"));
-		position.y += YOFFSET;
+		position.y += Y_OFFSET;
 		EditorGUI.LabelField(position, "Delay is ignored if this is the last effect", EditorStyles.boldLabel);
-		position.y += YOFFSET;
+		position.y += Y_OFFSET;
 		EditorGUI.LabelField(position, "\tor if the effect kind is Do Nothing.", EditorStyles.boldLabel);
 		GUI.enabled = true;
 	}
@@ -67,6 +67,6 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 
 		lines += 5; // element, effect kind, Delay After, and warning (2 lines)
 
-		return lines * YOFFSET + EditorGUIUtility.standardVerticalSpacing;
+		return lines * Y_OFFSET + EditorGUIUtility.standardVerticalSpacing;
 	}
 }
