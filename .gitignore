@@ -36,6 +36,7 @@
 
 # Visual Studio cache directory
 .vs/
+.vscode/
 
 # Gradle cache directory
 .gradle/
@@ -106,3 +107,4 @@ Utils/*/obj
 Utils/*/bin
 Utils/*/raw-wiktextract-data.jsonl
 *.editorconfig
+Utils/DictionaryParser/all_words.txt

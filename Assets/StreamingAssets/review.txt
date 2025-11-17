@@ -1,18 +1,15 @@
-a
-f
-y
-dat
 google
 whatever
 seven
 zero
+one
 two
 three
 four
 five
-i
 few
 are
+dick
 six
 billion
 trillion
@@ -20,10 +17,9 @@ eight
 nine
 ten
 most
-am
 last
 mi
-chad
+it
 next
 eleven
 twelve
@@ -49,7 +45,6 @@ eighty
 ninety
 hundred
 thousand
-x
 eighteen
 some
 its
@@ -70,86 +65,36 @@ that
 mine
 both
 tan
+enough
 ai
-ma
-pb
-rs
-mb
-ns
-cs
-tb
-ga
-me
-mn
-mo
-nm
-oh
-tn
 us
 we
 he
 she
 they
+me
 them
 who
 whose
 which
-re
 do
-isp
-buku
 whether
 there
-⠁
 gone
 thy
 thine
 said
 certain
-bil
-et
 none
 many
-e
-b
-c
-d
-g
-h
-j
-k
-l
-m
-n
-p
-q
-r
-s
-t
-u
-v
-w
-z
 stop
 yon
 yonder
 yous
-ile
 quadrillion
-gb
-ah
-ë
-fm
 nil
-ff
-xxx
-aaa
-tm
-sm
-mm
 hm
-cr
-yb
+am
 das
 quintillion
 googol
@@ -157,9 +102,7 @@ googolplex
 sextillion
 septillion
 arrow
-ea
 octillion
-!
 psi
 wat
 cos
@@ -167,13 +110,9 @@ dis
 more
 fewer
 fewest
+little
 less
 least
-yi
-dem
-mph
-ob
-ky
 som
 adequate
 ago
@@ -182,1106 +121,50 @@ yin
 another
 apart
 plenty
-aac
 ever
 every
-ybp
-nanti
 infinite
-wanna
-pro
 much
 saint
 each
 either
 nonillion
-è
-doona
 pimp
-æ
-ʀ
-ə
-ʜ
-ʏ
-ʉ
-ɶ
-ɴ
+ma
 scant
-dont
 yo
-im
-℅
-—
-–
-𐑐
-𐑿
-𐑾
-𐑽
-𐑼
-𐑻
-𐑺
-𐑹
-𐑸
-𐑷
-ŭ
 bin
 gimme
 these
 those
 such
-⠷
-lt
 beaucoup
-no
-*
-ä
-rp
-hir
-ur
-lorra
-@
 canna
 dint
 ere
 fife
-torr
 aught
 couple
 sufficient
 taint
 tint
-mai
 lakh
-yer
 youse
 twain
-eh
 mon
-ide
-fower
-btu
 various
 neither
 numerous
-gillion
 decillion
 milliard
 chill
-%
-~
-◌̀
 multiple
-woulda
-gal
-dek
 methinks
 ya
-innit
-mya
 insufficient
-birra
-wo
 whichever
 notwithstanding
 umpteen
 tis
-hella
-fu
 naught
-doze
-betcha
-getcha
-gotcha
-kinda
-kindsa
-lemme
-dunno
-tether
-tib
-gy
-ts
-ð
-þ
-◌̈
-œ
-mickle
-ae
-‘
-’
-undecillion
-gta
-gis
-ips
-ebit
-yr
-int
-wotcher
-mpg
-kb
-eb
-leggo
-101
-whatsoever
-ain
-sithee
-bn
-′
-ima
-nn
-boku
-é
-dontcha
-ā
-meseems
-cham
-chave
-chell
-countless
-duodecillion
-tredecillion
-quattuordecillion
-quindecillion
-sexdecillion
-septendecillion
-novemdecillion
-vigintillion
-c12
-û
-haint
-ē
-giz
-everwhat
-sorta
-whatcha
-lotta
-c13
-c14
-c15
-c16
-c17
-c18
-gon
-hecka
-watcha
-billiard
-sike
-psig
-twentysomething
-yel
-usta
-eleventy
-zat
-wanta
-hits
-izzat
-ure
-ppmv
-fina
-eir
-dese
-wor
-gorra
-witcha
-sech
-certaine
-ă
-twas
-·
-fourscore
-oughta
-overmuch
-whaddya
-dunt
-pib
-â
-î
-wilbe
-tenne
-ĕ
-ō
-fitna
-õ
-whatth
-ß
-ſ
-yan
-fivescore
-sixscore
-ninescore
-fourty
-ô
-ü
-fortysomething
-alls
-yessum
-eleventeen
-geddit
-sposta
-mah
-zis
-ġ
-supposta
-gunna
-wone
-mks
-whosever
-issa
-waddya
-hys
-⠵
-⠃
-⠉
-⠙
-⠑
-⠋
-⠛
-⠓
-⠊
-⠚
-whaddaya
-init
-gunner
-anoda
-cannet
-onna
-manie
-helluv
-dinna
-gaso
-atta
-sorra
-◌́
-wotcha
-twelfty
-euery
-shalbe
-euerie
-twentie
-owne
-fiftie
-everie
-threety
-twoty
-fiveteen
-threeteen
-fyve
-seuen
-gro
-couldna
-wouldna
-^h
-methink
-qv
-enuff
-methinketh
-odda
-thr
-fiddy
-hunnit
-whatsamatta
-tethera
-fift
-hadda
-letcha
-wich
-tyan
-methera
-sethera
-lethera
-hovera
-dovera
-bumfit
-giggot
-mether
-mightna
-nis
-coupla
-imma
-◌̄
-◌̧
-trn
-xp
-hant
-fortyish
-seventysomething
-fiftysomething
-thatt
-‐
-foure
-bya
-dincha
-whosesoever
-inna
-thir
-doncha
-℀
-℻
-cmon
-kyr
-umol
-several
-ɢ
-whichsoever
-hunnert
-mln
-◌̆
-theres
-hes
-gonno
-enow
-wontcha
-woncha
-whatchoo
-trilliard
-throtteen
-oughter
-oughtta
-abouta
-xyr
-witcher
-ö
-gissa
-anny
-dessay
-didna
-ᴀ
-ꜱ
-ᴢ
-ã
-ȧ
-ạ
-ė
-ị
-ȯ
-ṡ
-ẽ
-℁
-ŏ
-⠀
-wossat
-⠂
-⠄
-⠈
-⠐
-⠠
-⠅
-⠆
-⠌
-⠒
-⠔
-⠘
-⠡
-⠢
-⠤
-⠨
-⠰
-⠇
-⠍
-⠎
-⠕
-⠖
-⠜
-⠦
-⠥
-⠣
-⠩
-⠪
-⠱
-⠲
-⠸
-⠴
-⠬
-⠏
-⠗
-⠝
-⠞
-⠧
-⠫
-⠭
-⠮
-⠳
-⠶
-⠹
-⠺
-⠼
-⠟
-⠯
-⠻
-⠽
-⠾
-⠿
-dintcha
-wouldnae
-didja
-wouldja
-bouta
-hdms
-hnms
-hnlms
-wassat
-gl
-meseemeth
-willya
-didya
-℞
-ũ
-yure
-whassamatter
-whassamatta
-wassamatta
-d/l
-lemmie
-onescore
-plzthx
-wassamatter
-`gt`
-suche
-⸮
-eny
-tway
-weve
-sixe
-didncha
-didntcha
-wonnot
-isnae
-eurie
-teenty
-didnae
-couldnae
-shallnae
-werenae
-shouldnae
-willnae
-mightnae
-neednae
-wasnae
-orter
-norra
-aintcha
-aint
-hevery
-doan
-severall
-fewscore
-sortsa
-ī
-ū
-sitch
-mib
-vss
-kyd
-geddid
-needna
-⠐⠡
-⠐⠣
-⠐⠕
-⠐⠗
-⠐⠝
-⠐⠟
-⠐⠞
-⠐⠥
-⠐⠮
-⠐⠱
-⠐⠳
-⠐⠹
-⠐⠺
-ppbv
-kya
-gya
-twenny
-thirdy
-fordy
-sevendy
-gerra
-typa
-methinx
-howsit
-wazzat
-mcc
-wunt
-weele
-ight
-woant
-thers
-werena
-useter
-unvigintillion
-whuss
-fitty
-whatya
-whattaya
-quadrilliard
-quintilliard
-ʹ
-allis
-ary
-quodque
-hadder
-thilk
-gna
-thre
-whath
-trynna
-thretty
-yonders
-sev
-xir
-hafter
-zir
-thik
-thretteen
-ĭ
-bothe
-binna
-it⁺⁶
-fr⁺⁶
-ger⁺⁶
-msec
-muchee
-𐑑
-𐑒
-𐑓
-𐑔
-𐑕
-𐑖
-𐑗
-𐑚
-𐑛
-𐑜
-𐑝
-𐑞
-𐑟
-𐑠
-𐑡
-𐑘
-𐑙
-𐑢
-𐑣
-𐑯
-𐑤
-𐑥
-𐑦
-𐑧
-seaven
-forda
-⠐⠓
-⠐⠑
-⠐⠋
-⠐⠍
-⠐⠅
-⠐⠇
-⠐⠙
-⠐⠎
-⠐⠏
-⠐⠽
-⠘⠮
-⠘⠹
-⠘⠥
-⠘⠺
-⠘⠱
-⠸⠉
-⠸⠍
-⠸⠓
-⠸⠮
-⠸⠎
-⠸⠺
-⠠⠄
-⠨⠙
-⠨⠞
-⠨⠑
-⠨⠎
-⠨⠝
-⠰⠝
-⠰⠽
-⠰⠎
-⠰⠑
-⠰⠞
-⠰⠇
-⠰⠛
-⠠⠽
-⠠⠝
-⠐⠂
-⠐⠜
-⠴⠄
-⠠⠦
-⠶⠄
-⠠⠶
-⠔⠔
-⠄⠄⠄
-⠔⠖
-⠁⠃
-⠁⠃⠧
-⠁⠉
-⠁⠉⠗
-⠁⠋
-⠁⠋⠝
-⠁⠋⠺
-⠁⠛
-⠁⠛⠌
-⠁⠇
-⠁⠇⠍
-⠁⠇⠗
-⠁⠇⠞
-⠁⠇⠹
-⠁⠇⠺
-⠆⠉
-⠆⠋
-⠆⠓
-⠆⠇
-⠆⠝
-⠆⠎
-⠆⠞
-⠆⠽
-⠃⠇
-⠃⠗⠇
-⠉⠙
-⠉⠧⠛
-⠉⠧
-⠒⠉⠧⠛
-⠗⠉⠧⠛
-⠙⠉⠧⠛
-⠙⠉⠧
-⠗⠉⠧
-⠒⠉⠧
-⠡⠝
-⠙⠉⠇
-⠙⠉⠇⠛
-⠑⠊
-⠋⠌
-⠋⠗
-⠛⠙
-⠛⠗⠞
-⠓⠍
-⠊⠍⠍
-⠇⠇
-⠇⠗
-⠍⠡
-⠍⠌
-⠝⠑⠉
-⠝⠑⠊
-⠕⠄⠉
-⠏⠙
-⠏⠻⠓
-⠟⠅
-⠗⠚⠉⠛
-⠗⠚⠉
-⠎⠡
-⠎⠙
-⠩⠙
-⠞⠙
-⠞⠛⠗
-⠞⠍
-⠞⠝
-⠧⠎
-⠺⠙
-⠭⠎
-⠭⠋
-⠽⠗
-⠽⠗⠧⠎
-⠽⠗⠋
-⠠⠴
-⠐⠠⠤
-⠤⠤⠤
-⠤⠤
-⠘⠦
-⠘⠴
-⠨⠣
-⠨⠜
-⠸⠣
-⠸⠜
-⠐⠤
-⠈⠣
-⠈⠜
-⠐⠖
-⠐⠶
-⠐⠦
-⠐⠌
-⠈⠢
-⠈⠔
-⠨⠴
-⠈⠒⠏
-⠨⠡
-⠸⠩
-⠈⠯
-⠈⠁
-⠈⠎
-⠈⠲
-⠎⠄
-⠈⠑
-⠈⠉
-⠨⠤
-⠸⠌
-⠸⠡
-⠏⠜
-betchya
-⠰⠆
-whyja
-howja
-waint
-thats
-eib
-o2
-whydja
-a/a
-wasna
-📠
-mehopes
-us$
-toldja
-whatchu
-threy
-oughten
-eightysomething
-hph
-sixtysomething
-ninetysomething
-anotha
-thone
-willna
-whadda
-meetcha
-wantcha
-hundredsomething
-googolplexplex
-twelfe
-aincha
-dammitall
-fixna
-howdja
-wouldya
-gizza
-insteada
-gwineter
-letchya
-gotchya
-worra
-theyre
-yall
-wasnt
-whaddo
-tasswage
-duovigintillion
-dashitall
-gonner
-didny
-trevigintillion
-quattuorvigintillion
-wossamatter
-whatsamatter
-wisnae
-wossit
-twelue
-sezee
-hunderd
-manye
-fiew
-ebery
-disna
-bofe
-enny
-dunnot
-hasna
-wheredja
-whatchya
-nossuh
-yessuh
-nunya
-whatevah
-whatevuh
-gottcha
-allat
-havta
-wichu
-ĩ
-whadya
-whadja
-millionty
-whadiya
-whadaya
-vich
-googolplexian
-twelveteen
-thother
-30
-birrova
-🐐
-hundredsome
-thousandsome
-/s
-yoleven
-whassat
-watchoo
-hexillion
-tryinna
-yaknow
-heptillion
-iwantone
-whuzzat
-whuzzamatter
-whizyer
-hassome
-shallna
-`lt`g`gt`
-μms
-dunnit
-nossah
-yessah
-🆘
-🆐
-🅌
-🆗
-🆔
-thaz
-whoze
-whaz
-alotta
-bookoo
-godda
-wimme
-nunty
-nantee
-nanty
-nuntee
-wuzzent
-whyncha
-whuzzit
-whazzat
-syxe
-eyther
-⠨⠌
-μgal
-mgal
-hundart
-trigintillion
-🆖
-thirtie
-googolplexians
-muchell
-yizzer
-yisser
-yousser
-outchea
-thet
-woss
-thassit
-whatna
-itsa
-aiight
-yoll
-quinvigintillion
-sexvigintillion
-septenvigintillion
-octovigintillion
-novemvigintillion
-untrigintillion
-duotrigintillion
-thart
-wannit
-quattuortrigintillion
-octogintillion
-quadragintillion
-useta
-wun
-sextrigintillion
-septentrigintillion
-octotrigintillion
-novemtrigintillion
-quinquagintillion
-aii
-boocoo
-youah
-yassum
-🦀
-ꜧ
-boutcha
-boutchu
-zup
-skoden
-kibps
-mibps
-gibps
-mib/s
-gb/s
-/s/
-witchoo
-witchu
-millinillion
-twey
-arencha
-thatta
-cantcha
-myllion
-slpm
-whassa
-whutcha
-dinnet
-wotjer
-twoo
-googolduplex
-mustnae
-ᵺ
-/j
-/lh
-/srs
-/gen
-/thread
-/nm
-/t
-iight
-whatsever
-mybp
-donchaknow
-outcha
-aboutcha
-withoutcha
-outchu
-aboutchu
-getcho
-betcho
-outcho
-hasnae
-tensomething
-ɡ
-ɜ
-◌͡◌
-⠈⠦
-⠈⠌
-⠈⠡
-⠸⠴
-⠸⠔
-⠸⠲
-⠰⠰
-⠨⠂
-⠈⠇
-⠈⠽
-thowsand
-anudder
-nudder
-◌̂
-uvver
-ɒ
-/hj
-wuddya
-fightcha
-shootcha
-divent
-aboutta
-whatkin
-whatlike
-witcho
-damfino
-damnfino
-/rant
-/uj
-/rj
-`lt`/s`gt`
-o͝o
-o͞o
-yknow
-🌽
-shanna
-/nsrs
-/neg
-🆊
-🅿
-🆍
-🅊
-🅋
-🅍
-🅎
-🅐
-🅕
-🅛
-🅟
-🅤
-🅹
-🅻
-🆋
-🆙
-🆑
-🄬
-🄭
-o̱
-◌͟◌
-◌᷵
-◌᷍◌
-whadyer
-whaddayer
-◌͞◌
-◌͝◌
-trilliards
-t͟h
-k͟h
-quadrilliards
-c̣
-ḵ
-ǣ
-ȳ
-t*
-ᴋ
-ᴛ
-ᴄ
-u̇
-y̆
-c͟h
-s͞i
-c͞i
-t͞i
-t͞h
-a͞e
-a᷍u
-e᷍u
-e͞w
-e᷍e
-e᷍i
-o᷍i
-a᷍i
-a͞a
-a͞o
-a᷍a
-a͟i
-kgps
-kmps
-thylke
-whoseso
-shis
-twelvety
-𐑩
-𐑨
-𐑪
-𐑫
-𐑬
-𐑭
-𐑮
-𐑰
-𐑱
-𐑲
-𐑳
-𐑴
-𐑵
-𐑶
-🔜
-🔝
-🔛🔝
-🔙
-mspf
-thold
-milly
-stoodis
-woat
-/pos
-/neu
-wadda
-eithers
-tudder
-🗑️🔥
-🔛
-centimillion
-centimillions
-centibillion
-centibillions
-⸼
-🪢
-decabillion
-decabillion
+do
