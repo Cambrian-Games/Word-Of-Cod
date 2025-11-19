@@ -12,7 +12,7 @@ public class Entity : MonoBehaviour
     public int _currentHealth;
     private bool _hasInit;
 
-    public void Init()
+    public virtual void Init()
     {
         if (!_hasInit)
         {

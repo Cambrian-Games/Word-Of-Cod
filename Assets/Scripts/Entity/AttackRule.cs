@@ -16,12 +16,21 @@ public enum AttackPriority
 public class AttackRule
 {
 	public List<AttackCondition> _conditions;
-	public bool _matchAll; // true = all
+	public bool _matchAllToRun; // true = all
+
+	public List<AttackCondition> _cancelConditions;
+	public bool _matchAllToCancel;
+
+	public bool _uninterruptible;
 
 	public List<AttackEffect> _effects;
 
 	EffectData _effectData;
-	int _currentEffect;
+
+	int _currentEffectindex;
+	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
+
+	internal int _roundsSinceLastUsed;
 
 	public bool CanRun(Enemy owner)
 	{
@@ -31,7 +40,21 @@ public class AttackRule
 		if (_conditions.Count == 0)
 			return true;
 
-		return _matchAll ? _conditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
+		if (ShouldCancel(owner))
+			return false;
+
+		return _matchAllToRun ? _conditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
+	}
+
+	public bool ShouldCancel(Enemy owner)
+	{
+		if (_uninterruptible)
+			return false;
+
+		if (_cancelConditions.Count == 0)
+			return false;
+
+		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
 	}
 
 	public void StartRule()
@@ -42,11 +65,24 @@ public class AttackRule
 			return;
 		}
 
-		_currentEffect = 0;
-		_effectData = _effects[_currentEffect].GenerateData();
+		_currentEffectindex = -1; // no current effect
 	}
 
-	public bool UpdateRule()
+	internal void StartRound()
+	{
+		// update next effect here because it's required for the forecast
+
+		_currentEffectindex++;
+		Debug.Assert(_currentEffectindex < _effects.Count);
+		_effectData = CurrentEffect.GenerateData();
+	}
+
+	internal void StartTurn()
+	{
+		// TBD, may not do anything aside from animations.
+	}
+
+	public bool UpdateTurn()
 	{
 		if (_effectData == null)
 		{
@@ -54,30 +90,70 @@ public class AttackRule
 			return true;
 		}
 
+		// current effect is incomplete
+
 		if (_effectData._effectEndTime <= 0.0f)
 		{
-			if (_effects[_currentEffect].UpdateEffect(_effectData))
+			bool isEffectComplete = CurrentEffect.UpdateEffect(_effectData);
+
+			if (isEffectComplete)
 			{
 				// the final effect is complete
-				if (_currentEffect + 1 >= _effects.Count)
+
+				if (_currentEffectindex + 1 >= _effects.Count)
+					return true;
+				
+				// the turn is over
+				if (CurrentEffect.EndsTurn)
 					return true;
 
 				_effectData._effectEndTime = Time.time;
 			}
 		}
 
+		// current effect is complete but turn is not over.
+
 		if (_effectData._effectEndTime > 0 &&
-			(_effectData._effectEndTime + _effects[_currentEffect].AfterEffectDelay) <= Time.time)
+			(_effectData._effectEndTime + CurrentEffect.AfterEffectDelay) <= Time.time)
 		{
-			_currentEffect++;
-			_effectData = _effects[_currentEffect].GenerateData();
+			_currentEffectindex++;
+			_effectData = CurrentEffect.GenerateData();
 		}
 
 		return false;
 	}
 
+	internal void EndTurn()
+	{
+		_effectData = null;
+	}
+
 	public void EndRule()
 	{
+		// TBD, might be animations
+	}
+
+	public bool Complete()
+	{
+		return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _currentEffectindex >= _effects.Count;
+	}
+
+	internal bool PastInterruptCheckpoint()
+	{
+		int checkpointIndex = _effects.FindIndex(effect => effect.IsInterruptCheckpoint);
+		if (checkpointIndex == -1)
+			return false;
+
+		// if we've completed the checkpoint effect, this rule is safe to complete
+
+		return _currentEffectindex > checkpointIndex;
+	}
+
+	internal void Cancel()
+	{
+		// mostly TBD
+
+		_currentEffectindex = -1;
 		_effectData = null;
 	}
 }
@@ -145,9 +221,9 @@ public class AttackCondition
 			case ConditionField.Enemy_Killed:
 				throw new NotImplementedException();
 			case ConditionField.First_Turn:
-				return owner._turnsSinceLastAction == 0;
+				throw new NotImplementedException();
 			case ConditionField.Not_First_Turn:
-				return owner._turnsSinceLastAction != 0;
+				throw new NotImplementedException();
 		}
 
 		int input = _field switch
@@ -156,8 +232,8 @@ public class AttackCondition
 			ConditionField.Enemy_Health_Percent => owner._currentHealth * 100 / owner._maxHealth,
 			ConditionField.Player_Health => BattleManager.INSTANCE.CurrentPlayerHealth(),
 			ConditionField.Player_Health_Percent => BattleManager.INSTANCE.CurrentPlayerHealth() * 100 / BattleManager.INSTANCE.MaxPlayerHealth(),
-			ConditionField.Turns_Since_Last_Action => owner._turnsSinceLastAction,
-			ConditionField.Last_Action_Index => owner.LastRule,
+			ConditionField.Turns_Since_Last_Action => owner._roundsSinceLastAction,
+			ConditionField.Last_Action_Index => owner.LastRuleIndex,
 			ConditionField.Last_Word_Length => BattleManager.INSTANCE.LastWord.Length,
 			ConditionField.Combo_Length => throw new NotImplementedException(),
 			_ => throw new NotImplementedException()
@@ -192,6 +268,15 @@ public class AttackEffect
 	[SerializeField]
 	private float _afterEffectDelay;
 	public float AfterEffectDelay => _afterEffectDelay;
+
+	[SerializeField]
+	private bool _endsTurn;
+	public bool EndsTurn => _endsTurn;
+
+	[SerializeField, Tooltip("If past this effect, treat rule as complete if interrupted")]
+	private bool _isInterruptCheckpoint;
+	public bool IsInterruptCheckpoint => _isInterruptCheckpoint;
+
 
 	[SerializeField]
 	private EffectKind _effectKind;

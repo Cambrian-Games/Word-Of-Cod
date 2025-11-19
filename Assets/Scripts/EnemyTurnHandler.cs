@@ -21,6 +21,11 @@ internal class EnemyTurnHandler
         return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _enemies.All(enemy => enemy.IsTurnComplete);
     }
 
+	public void StartRound()
+	{
+		_enemies.ForEach(enemy => enemy.StartRound());
+	}
+
     public void StartTurn()
     {
         _enemies.ForEach(enemy => enemy.StartTurn());
