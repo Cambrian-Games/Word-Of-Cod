@@ -135,7 +135,7 @@ public class AttackRule
 
 	public bool Complete()
 	{
-		return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _currentEffectindex >= _effects.Count;
+		return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _currentEffectindex >= _effects.Count - 1;
 	}
 
 	internal bool PastInterruptCheckpoint()

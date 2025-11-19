@@ -127,6 +127,8 @@ public class Enemy : Entity
 
 	public override void StartTurn()
 	{
+		_isTurnComplete = false;
+
 		// if we don't have an interrupt, look for one.
 
 		bool newInterrupt = false;

@@ -12,12 +12,18 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 		position.height = EditorGUIUtility.singleLineHeight;
 
 		EditorGUI.LabelField(position, label, EditorStyles.boldLabel);
-		SerializedProperty rule = property.FindPropertyRelative("_effectKind");
 
-		AttackEffect.EffectKind ruleKind = (AttackEffect.EffectKind)rule.enumValueIndex;
 		position.y += Y_OFFSET;
+		EditorGUI.PropertyField(position, property.FindPropertyRelative("_isInterruptCheckpoint"));
+		position.y += Y_OFFSET;
+		EditorGUI.PropertyField(position, property.FindPropertyRelative("_endsTurn"));
+
+		position.y += Y_OFFSET;
+		SerializedProperty rule = property.FindPropertyRelative("_effectKind");
 		EditorGUI.PropertyField(position, rule);
 		position.y += EditorGUIUtility.standardVerticalSpacing; // add a bit of space between the effect kind and parameters
+
+		AttackEffect.EffectKind ruleKind = (AttackEffect.EffectKind)rule.enumValueIndex;
 
 		switch (ruleKind)
 		{
@@ -65,7 +71,7 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 			_ => 0,
 		};
 
-		lines += 5; // element, effect kind, Delay After, and warning (2 lines)
+		lines += 7; // element, effect kind, Delay After, Interrupt Checkpoint, Ends Turn, and warning (2 lines)
 
 		return lines * Y_OFFSET + EditorGUIUtility.standardVerticalSpacing;
 	}

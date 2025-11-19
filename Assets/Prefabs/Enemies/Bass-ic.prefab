@@ -47,18 +47,30 @@ MonoBehaviour:
   _displayName: Bass-ic
   _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 50
+  _currentHealth: 0
   _rules:
-  - _conditions:
-    - _field: 6
-      _is: 5
-      _value: 2
-    _matchAll: 0
+  - _conditions: []
+    _matchAllToRun: 0
+    _cancelConditions: []
+    _matchAllToCancel: 0
+    _uninterruptible: 0
     _effects:
     - _afterEffectDelay: 0
+      _endsTurn: 1
+      _isInterruptCheckpoint: 0
+      _effectKind: 0
+      _damage: 0
+      _from: 0
+      _to: 0
+      _numTiles: 0
+    - _afterEffectDelay: 0
+      _endsTurn: 0
+      _isInterruptCheckpoint: 0
       _effectKind: 1
       _damage: 25
       _from: 0
-      _to: 1
-      _numTiles: 3
+      _to: 0
+      _numTiles: 0
+  _interruptRules: []
   _attackPriority: 0
   _canRepeatLastAction: 1
