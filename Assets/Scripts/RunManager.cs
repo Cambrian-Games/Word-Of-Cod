@@ -8,7 +8,7 @@ public class RunManager : MonoBehaviour
 	private List<EncounterPool> _pools;
 
 	[SerializeField]
-	private List<EncounterPoolKind> _runFormat;
+	private List<RunEvent> _runFormat;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -47,6 +47,13 @@ public class RunManager : MonoBehaviour
 			}
 		}
 	}
+}
+
+[Serializable]
+public class RunEvent
+{
+	[SerializeField]
+	private List<EncounterPoolKind> _eventKinds;
 }
 
 public enum EncounterPoolKind
