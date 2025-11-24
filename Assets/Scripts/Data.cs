@@ -420,7 +420,8 @@ public class BoardDelta
 // Tile Data
 
 /// <summary>
-/// These are also flags. 0b01 = highlighted, 0b10 = selected
+/// While these behave similarly to flags (0b01 = highlighted, 0b10 = selected), they are distinct states.
+/// See Tile::SetHighlightState() for an example use case.
 /// </summary>
 public enum HighlightState
 {

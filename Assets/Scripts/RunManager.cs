@@ -34,7 +34,9 @@ public class RunManager : MonoBehaviour
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
     {
-        
+		//SelectNextEvent();
+		//SelectNextEvent();
+		//SelectNextEvent();
     }
 
     // Update is called once per frame
@@ -105,7 +107,14 @@ public class RunManager : MonoBehaviour
 
 		EncounterPool pool = _pools.Find(pool => pool.PoolKind == nextEvent.EventKinds[option]);
 
-		_currentRun.Add(new Vector2Int(option, pool.GetWeightedIndex(eventIndex - 1, _currentRun[eventIndex - 1])));
+		if (eventIndex == 0)
+		{
+			_currentRun.Add(new Vector2Int(option, pool.GetWeightedIndex(-1, Vector2Int.zero)));
+		}
+		else
+		{
+			_currentRun.Add(new Vector2Int(option, pool.GetWeightedIndex(eventIndex - 1, _currentRun[eventIndex - 1])));
+		}	
 	}
 
 	public RunEvent Event(int index) => _runFormat[index];
@@ -176,11 +185,11 @@ public class EncounterPool
 		public float Weight => _weight;
 	}
 
-	internal int GetWeightedIndex(int lastRunIndex, Vector2Int lastOption)
+	internal int GetWeightedIndex(int lastEventIndex, Vector2Int lastOption)
 	{
-		if (_canRepeat == RepeatKind.No_Consecutive)
+		if (_canRepeat == RepeatKind.No_Consecutive && lastEventIndex >= 0)
 		{
-			RunEvent lastEvent = RunManager.INSTANCE.Event(lastRunIndex);
+			RunEvent lastEvent = RunManager.INSTANCE.Event(lastEventIndex);
 			EncounterPool lastPool = RunManager.INSTANCE.Pool(lastEvent.EventKinds[lastOption[0]]);
 
 			if (lastPool == this)
