@@ -40,8 +40,8 @@ public class Tile: MonoBehaviour
 	[SerializeField]
 	private Color _normalColor, _highlightedColor, _selectedColor, _selectedAndHighlightedColor;
 
-	private HIGHLIGHTS _highlightState = HIGHLIGHTS.NORMAL;
-	public HIGHLIGHTS HighlightState { get => _highlightState; set => SetHighlightState(value); }
+	private HighlightState _highlightState = HighlightState.Normal;
+	public HighlightState HighlightState { get => _highlightState; set => SetHighlightState(value); }
 
 	void Update()
 	{
@@ -83,7 +83,7 @@ public class Tile: MonoBehaviour
 		TileSelector.INSTANCE.ClickTile(this);
 	}
 
-	private void SetHighlightState(HIGHLIGHTS tileSelectState)
+	private void SetHighlightState(HighlightState tileSelectState)
 	{
 		_highlightState = tileSelectState;
 
@@ -91,10 +91,10 @@ public class Tile: MonoBehaviour
 		{
 			_spriteRenderer.color = _highlightState switch
 			{
-				HIGHLIGHTS.NORMAL => _normalColor,
-				HIGHLIGHTS.HIGHLIGHTED => _highlightedColor,
-				HIGHLIGHTS.SELECTED => _selectedColor,
-				HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED => _selectedAndHighlightedColor,
+				HighlightState.Normal => _normalColor,
+				HighlightState.Highlighted => _highlightedColor,
+				HighlightState.Selected => _selectedColor,
+				HighlightState.Selected_And_Highlighted => _selectedAndHighlightedColor,
 				_ => throw new InvalidOperationException(),
 			};
 		}

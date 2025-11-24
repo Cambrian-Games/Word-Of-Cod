@@ -140,11 +140,11 @@ public class TileSelector : MonoBehaviour
                     {
                         if (tile == _currentHighlightedTile)
                         {
-                            tile.HighlightState = HIGHLIGHTS.HIGHLIGHTED;
+                            tile.HighlightState = HighlightState.Highlighted;
                         }
                         else
                         {
-                            tile.HighlightState = HIGHLIGHTS.NORMAL;
+                            tile.HighlightState = HighlightState.Normal;
                         }
                     }
 
@@ -219,7 +219,7 @@ public class TileSelector : MonoBehaviour
 						}
 						else
 						{
-							tile.HighlightState = HIGHLIGHTS.HIGHLIGHTED;
+							tile.HighlightState = HighlightState.Highlighted;
 						}
 					}
 				}
@@ -227,16 +227,16 @@ public class TileSelector : MonoBehaviour
 		}
 		else
 		{
-			tile.HighlightState = HIGHLIGHTS.HIGHLIGHTED;
+			tile.HighlightState = HighlightState.Highlighted;
 		}
 	}
 
 	internal void MouseLeaveTile(Tile tile)
 	{
-		if (tile.HighlightState == HIGHLIGHTS.HIGHLIGHTED)
-			tile.HighlightState = HIGHLIGHTS.NORMAL;
-		else if (tile.HighlightState == HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED)
-			tile.HighlightState = HIGHLIGHTS.SELECTED;
+		if (tile.HighlightState == HighlightState.Highlighted)
+			tile.HighlightState = HighlightState.Normal;
+		else if (tile.HighlightState == HighlightState.Selected_And_Highlighted)
+			tile.HighlightState = HighlightState.Selected;
 
 		if (_currentHighlightedTile == tile)
 		{
@@ -259,7 +259,7 @@ public class TileSelector : MonoBehaviour
 
 		_selectedTiles.Add(tile);
 		_word += tile._letter;
-		tile.HighlightState = HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED;
+		tile.HighlightState = HighlightState.Selected_And_Highlighted;
 
 		_lineRenderer.positionCount++;
 		_lineRenderer.SetPosition(_lineRenderer.positionCount - 1, tile.transform.position);
@@ -269,10 +269,10 @@ public class TileSelector : MonoBehaviour
 	{
 		_selectedTiles.Remove(_selectedTiles[^1]);
 		_word = _word[..^1];
-		tile.HighlightState = HIGHLIGHTS.NORMAL;
+		tile.HighlightState = HighlightState.Normal;
 
 		_lineRenderer.positionCount--;
 
-		_selectedTiles[^1].HighlightState = HIGHLIGHTS.SELECTED_AND_HIGHLIGHTED;
+		_selectedTiles[^1].HighlightState = HighlightState.Selected_And_Highlighted;
 	}
 }

@@ -92,7 +92,7 @@ public class Enemy : Entity
 
 		if (CurrentInterrupt != null)
 		{
-			CurrentInterrupt.StartRound(); // set turns used to 0 in StartTurn. If we already have a rule we don't care when this gets updated.
+			CurrentInterrupt.StartRound(); // set turns since last use to 0 in AttackRule::StartTurn instead of here?
 			CurrentInterrupt._roundsSinceLastUsed = 0;
 			_roundsSinceLastAction = 0;
 			UpdateForecast();
@@ -110,7 +110,7 @@ public class Enemy : Entity
 
 		if (CurrentRule != null)
 		{
-			CurrentRule.StartRound(); // set turns used to 0 in StartTurn. If we already have a rule we don't care when this gets updated.
+			CurrentRule.StartRound(); // set turns since last use to 0 in AttackRule::StartTurn instead of here?
 			CurrentRule._roundsSinceLastUsed = 0;
 			_roundsSinceLastAction = 0;
 			UpdateForecast();

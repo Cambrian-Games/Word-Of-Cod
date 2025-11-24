@@ -422,10 +422,10 @@ public class BoardDelta
 /// <summary>
 /// These are also flags. 0b01 = highlighted, 0b10 = selected
 /// </summary>
-public enum HIGHLIGHTS
+public enum HighlightState
 {
-	NORMAL,
-	HIGHLIGHTED,
-	SELECTED,
-	SELECTED_AND_HIGHLIGHTED
+	Normal,
+	Highlighted,
+	Selected,
+	Selected_And_Highlighted
 }

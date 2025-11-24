@@ -23,7 +23,7 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 		EditorGUI.PropertyField(position, rule);
 		position.y += EditorGUIUtility.standardVerticalSpacing; // add a bit of space between the effect kind and parameters
 
-		AttackEffect.EffectKind ruleKind = (AttackEffect.EffectKind)rule.enumValueIndex;
+		AttackEffect.EffectKind ruleKind = (AttackEffect.EffectKind) rule.enumValueIndex;
 
 		switch (ruleKind)
 		{

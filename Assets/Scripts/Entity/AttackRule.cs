@@ -98,12 +98,13 @@ public class AttackRule
 
 			if (isEffectComplete)
 			{
-				// the final effect is complete
+				// if the final effect is complete, exit
 
 				if (_currentEffectindex + 1 >= _effects.Count)
 					return true;
 				
-				// the turn is over
+				// if the turn is over, exit
+
 				if (CurrentEffect.EndsTurn)
 					return true;
 
@@ -111,7 +112,7 @@ public class AttackRule
 			}
 		}
 
-		// current effect is complete but turn is not over.
+		// if current effect is complete but turn is not over, move to next effect
 
 		if (_effectData._effectEndTime > 0 &&
 			(_effectData._effectEndTime + CurrentEffect.AfterEffectDelay) <= Time.time)
@@ -135,6 +136,8 @@ public class AttackRule
 
 	public bool Complete()
 	{
+		// we want to end the rule if the player is dead
+
 		return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _currentEffectindex >= _effects.Count - 1;
 	}
 
@@ -144,7 +147,7 @@ public class AttackRule
 		if (checkpointIndex == -1)
 			return false;
 
-		// if we've completed the checkpoint effect, this rule is safe to complete
+		// if we've already completed the checkpoint effect, this rule is safe to mark as complete if interrupted
 
 		return _currentEffectindex > checkpointIndex;
 	}
