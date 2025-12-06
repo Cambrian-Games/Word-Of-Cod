@@ -249,7 +249,7 @@ public class GameBoard : MonoBehaviour
 			_playableBoard[tDelta._destCoord.x, tDelta._destCoord.y]._coord = tDelta._destCoord;
 		}
 
-		// move staged tiles
+		// move staged tiles into playable board
 
 		foreach (Vector2Int coord in new Vector2IntIterator(_config.Layout.BottomRight(), Vector2Int.zero))
 		{

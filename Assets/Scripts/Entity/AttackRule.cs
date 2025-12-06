@@ -138,7 +138,7 @@ public class AttackRule
 	{
 		// we want to end the rule if the player is dead
 
-		return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _currentEffectindex >= _effects.Count - 1;
+		return Player.INSTANCE.CurrentHealth <= 0 || _currentEffectindex >= _effects.Count - 1;
 	}
 
 	internal bool PastInterruptCheckpoint()
@@ -231,10 +231,10 @@ public class AttackCondition
 
 		int input = _field switch
 		{
-			ConditionField.Enemy_Health => owner._currentHealth,
-			ConditionField.Enemy_Health_Percent => owner._currentHealth * 100 / owner._maxHealth,
-			ConditionField.Player_Health => BattleManager.INSTANCE.CurrentPlayerHealth(),
-			ConditionField.Player_Health_Percent => BattleManager.INSTANCE.CurrentPlayerHealth() * 100 / BattleManager.INSTANCE.MaxPlayerHealth(),
+			ConditionField.Enemy_Health => owner.CurrentHealth,
+			ConditionField.Enemy_Health_Percent => owner.HealthPercent(),
+			ConditionField.Player_Health => Player.INSTANCE.CurrentHealth,
+			ConditionField.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
 			ConditionField.Turns_Since_Last_Action => owner._roundsSinceLastAction,
 			ConditionField.Last_Action_Index => owner.LastRuleIndex,
 			ConditionField.Last_Word_Length => BattleManager.INSTANCE.LastWord.Length,
@@ -328,7 +328,7 @@ public class AttackEffect
 		switch (_effectKind)
 		{
 			case EffectKind.Standard_Attack:
-				BattleManager.INSTANCE.DamagePlayer(_damage);
+				Player.INSTANCE.CurrentHealth -= _damage;
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
 

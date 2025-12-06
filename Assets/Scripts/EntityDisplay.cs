@@ -32,9 +32,16 @@ public class EntityDisplay : MonoBehaviour
     {
         _entity = entity;
 
-        if (_renderer && _entity != null)
+        if (_renderer)
         {
-            _renderer.sprite = _entity._sprite;
+			if (_entity != null)
+			{
+				_renderer.sprite = _entity._sprite;
+			}
+			else
+			{
+				_renderer.sprite = null;
+			}
         }
     }
 }

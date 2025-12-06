@@ -18,7 +18,7 @@ internal class EnemyTurnHandler
 
     public bool IsTurnComplete()
     {
-        return BattleManager.INSTANCE.CurrentPlayerHealth() <= 0 || _enemies.All(enemy => enemy.IsTurnComplete);
+        return Player.INSTANCE.CurrentHealth <= 0 || _enemies.All(enemy => enemy.IsTurnComplete);
     }
 
 	public void StartRound()
@@ -40,7 +40,7 @@ internal class EnemyTurnHandler
     {
         for (int i = 0; i < _enemies.Count; i++)
         {
-            if (BattleManager.INSTANCE.CurrentPlayerHealth() <= 0)
+            if (Player.INSTANCE.CurrentHealth <= 0)
                 break;
 
 			_enemies[i].UpdateTurn();

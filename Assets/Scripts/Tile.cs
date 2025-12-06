@@ -63,7 +63,8 @@ public class Tile: MonoBehaviour
 		switch (_tileKind)
 		{
 			case TileKind.Spiny:
-				BattleManager.INSTANCE.DamagePlayer(_spinyDamage);
+				// potential player death is checked immediately after OnSubmit
+				Player.INSTANCE.CurrentHealth -= _spinyDamage;
 				break;
 		}
 	}

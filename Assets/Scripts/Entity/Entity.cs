@@ -6,10 +6,18 @@ public class Entity : MonoBehaviour
     // config
 	public string _displayName;
 	public Sprite _sprite;
-	public int _maxHealth;
 
-    // state
-    public int _currentHealth;
+	[SerializeField]
+	private int _maxHealth;
+	public int MaxHealth => _maxHealth;
+
+	// state
+    private int _currentHealth;
+
+	// do we want some sort of OnDamage() function?
+	public int CurrentHealth { get => _currentHealth; set => _currentHealth = Mathf.Clamp(value, 0, _maxHealth); }
+	public int HealthPercent() => CurrentHealth * 100 / _maxHealth;
+
     private bool _hasInit;
 
     public virtual void Init()
@@ -28,7 +36,6 @@ public class Entity : MonoBehaviour
 
 	public virtual void StartTurn()
 	{
-
 	}
 
 	public virtual void EndTurn()

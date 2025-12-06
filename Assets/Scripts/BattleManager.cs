@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -45,12 +46,10 @@ public class BattleManager : MonoBehaviour
     private Player _playerPrefab;
 
     private Enemy _enemy;
-    private Player _player;
 
 	public SceneAsset _loseScene;
 	public SceneAsset _winScene;
 
-    // may need to have a prefab and spawn multiple displays if we want multiple enemies on screen.
     public EntityDisplay _enemyDisplay;
     public EntityDisplay _playerDisplay;
 
@@ -156,18 +155,23 @@ public class BattleManager : MonoBehaviour
 
         switch (_battleState)
         {
+			case BattleState.Nil:
+				_enemy = null;
+				_enemyDisplay.Entity = null;
+
+				_playerDisplay.Entity = null;
+				_enemyTurnHandler = null;
+				break;
+
             case BattleState.Load:
 
                 // Long term, _player will be moved out of the battle manager and the enemy prefab will be defined by an encounter object
 
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
-                _player = Instantiate<Player>(_playerPrefab, this.transform);
-
                 _enemy.Init();
-                _player.Init();
 
                 _enemyDisplay.Entity = _enemy;
-                _playerDisplay.Entity = _player;
+				_playerDisplay.Entity = Player.INSTANCE;
 
                 _enemyTurnHandler = new EnemyTurnHandler(_enemy);
 
@@ -190,7 +194,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Post_Enemy_Turn:
-                if (_player._currentHealth <= 0)
+                if (Player.INSTANCE.CurrentHealth <= 0)
                 {
                     SetBattleState(BattleState.Lose);
                 }
@@ -209,7 +213,8 @@ public class BattleManager : MonoBehaviour
 				break;
 
 			case BattleState.Win:
-				SceneManager.LoadScene(_winScene.name);
+				//SceneManager.LoadScene(_winScene.name);
+				RunManager.INSTANCE.WinFight();
 				break;
 		}
     }
@@ -263,8 +268,8 @@ public class BattleManager : MonoBehaviour
 
                     if (_timeElapsed > _timeToDestination)
                     {
-                        Debug.Log($"{_enemy._currentHealth} - {_damageToDeal}");
-                        _enemy._currentHealth = Mathf.Clamp(_enemy._currentHealth - _damageToDeal, 0, _enemy._maxHealth);
+                        Debug.Log($"{_enemy.CurrentHealth} - {_damageToDeal}");
+						_enemy.CurrentHealth -= _damageToDeal;
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
                     break;
@@ -286,7 +291,7 @@ public class BattleManager : MonoBehaviour
                 _directions.Clear();
 				_tilesInWord.ForEach(tile => tile.OnSubmit());
 
-				if (_player._currentHealth <= 0)
+				if (Player.INSTANCE.CurrentHealth <= 0)
 				{
 					// interrupt state change to lose the game. Should probably be its own step instead.
 					SetBattleState(BattleState.Lose);
@@ -344,7 +349,7 @@ public class BattleManager : MonoBehaviour
 
                 _tilesInWord.Clear();
 
-                if (_enemy._currentHealth <= 0)
+                if (_enemy.CurrentHealth <= 0)
                 {
                     SetBattleState(BattleState.Win);
                 }
@@ -381,18 +386,18 @@ public class BattleManager : MonoBehaviour
 
     }
 
-    internal void DamagePlayer(int baseDamage)
-    {
-        _player._currentHealth = Mathf.Clamp(_player._currentHealth - baseDamage, 0, _player._maxHealth);
-    }
-
-    internal int CurrentPlayerHealth()
-    {
-        return _player._currentHealth;
-    }
-
-	internal int MaxPlayerHealth()
+	internal void SetEnemy(Enemy prefab)
 	{
-		return _player._maxHealth;
+		_enemyPrefab = prefab;
+	}
+
+	internal void Unload()
+	{
+		SetBattleState(BattleState.Nil);
+	}
+
+	internal void Load()
+	{
+		SetBattleState(BattleState.Load);
 	}
 }

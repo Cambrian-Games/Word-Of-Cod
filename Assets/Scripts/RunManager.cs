@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
+using static BattleManager;
 
 public class RunManager : MonoBehaviour
 {
@@ -17,6 +17,22 @@ public class RunManager : MonoBehaviour
 	public List<Vector2Int> _currentRun;
 
 	public static RunManager INSTANCE;
+
+	public enum RunState
+	{
+		Nil = -1,
+		Run_Start,
+		Traveling_To_Next_Event,
+		Choice,
+		Post_Choice_Travel, // may not be needed if we can reuse Traveling_To_Next_Event
+		In_Event,
+		Post_Event, // rewards post-battle, usually
+
+		Win,
+		Lose
+	}
+
+	private RunState _state = RunState.Nil;
 
 	private void Awake()
 	{
@@ -41,9 +57,78 @@ public class RunManager : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        
-    }
+	{
+		UpdateRunState();
+	}
+
+	internal void UpdateRunState()
+	{
+		while (true)
+		{
+			RunState stateCur = _state;
+
+			switch (_state)
+			{
+				case RunState.Nil:
+					break;
+				case RunState.Run_Start:
+					break;
+				case RunState.Traveling_To_Next_Event:
+					// if travel is complete and event has a choice, switch to choice. Else, switch to event.
+					break;
+				case RunState.Choice:
+					break;
+				case RunState.Post_Choice_Travel:
+					break;
+				case RunState.In_Event:
+					break;
+				case RunState.Post_Event:
+					break;
+				case RunState.Win:
+					break;
+				case RunState.Lose:
+					break;
+			}
+
+			if (stateCur == _state)
+				break;
+		}
+	}
+	internal void SetRunState(RunState newState)
+	{
+		if (newState == _state)
+			return;
+
+		// leave old state
+
+		switch (_state)
+		{
+
+		}
+
+		_state = newState;
+
+		switch (_state)
+		{
+			case RunState.Run_Start:
+				SetRunState(RunState.Traveling_To_Next_Event);
+				break;
+			case RunState.Traveling_To_Next_Event:
+				break;
+			case RunState.Choice:
+				break;
+			case RunState.Post_Choice_Travel:
+				break;
+			case RunState.In_Event:
+				break;
+			case RunState.Post_Event:
+				break;
+			case RunState.Win:
+				break;
+			case RunState.Lose:
+				break;
+		}
+	}
 
 	private void OnValidate()
 	{
@@ -119,7 +204,35 @@ public class RunManager : MonoBehaviour
 
 	public RunEvent Event(int index) => _runFormat[index];
 	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
+
+	public void WinFight()
+	{
+		// show shop, etc
+
+		BattleManager.INSTANCE.Unload();
+
+		// animation
+
+		SelectNextEvent(0);
+
+		const int CHOICE_INDEX = 0;
+		const int ENCOUNTER_INDEX = 1;
+
+		Vector2Int stage = _currentRun[^1];
+
+		RunEvent evt = Event(_currentRun.Count - 1);
+		EncounterPoolKind encounter = evt.EventKinds[stage[CHOICE_INDEX]];
+
+		if (encounter != EncounterPoolKind.Shop)
+		{
+			Enemy enemy = Pool(encounter).EncounterPrefab(stage[ENCOUNTER_INDEX]);
+			BattleManager.INSTANCE.SetEnemy(enemy);
+			BattleManager.INSTANCE.Load();
+		}
+		throw new NotImplementedException();
+	}
 }
+
 
 [Serializable]
 public class RunEvent
@@ -179,7 +292,8 @@ public class EncounterPool
 	public class PoolEntry
 	{
 		[SerializeField]
-		private GameObject _prefab;
+		private Enemy _prefab;
+		public Enemy Prefab => _prefab;
 		[SerializeField, Min(0.1f)]
 		private float _weight = 1.0f;
 		public float Weight => _weight;
@@ -238,5 +352,10 @@ public class EncounterPool
 		}
 
 		return 0;
+	}
+
+	public Enemy EncounterPrefab(int index)
+	{
+		return _entries[index].Prefab;
 	}
 }
