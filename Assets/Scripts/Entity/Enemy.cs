@@ -82,6 +82,10 @@ public class Enemy : Entity
 			_isTurnComplete = CurrentRule.UpdateTurn();
 			return;
 		}
+
+		// safeguard, if there is no interrupt and no rule, the turn ends.
+
+		_isTurnComplete = true;
 	}
 
 	public void StartRound()
@@ -129,7 +133,7 @@ public class Enemy : Entity
 	{
 		_isTurnComplete = false;
 
-		// if we don't have an interrupt, look for one.
+		// if we don't have an interrupt, look for one. An interrupt can't override another interrupt for now.
 
 		bool newInterrupt = false;
 
@@ -165,22 +169,26 @@ public class Enemy : Entity
 
 		// if we don't have an interrupt but this rule should be cancelled for some other reason, cancel it
 
-		else if (CurrentRule != null && CurrentRule.ShouldCancel(this))
+		else if (CurrentRule != null)
 		{
-			if (CurrentRule.PastInterruptCheckpoint())
+			if (CurrentRule.ShouldCancel(this))
 			{
-				_lastRuleIndex = _currentRuleIndex;
+				if (CurrentRule.PastInterruptCheckpoint())
+				{
+					_lastRuleIndex = _currentRuleIndex;
+				}
+
+				CurrentRule.Cancel();
+				_currentRuleIndex = -1;
 			}
-
-			CurrentRule.Cancel();
-			_currentRuleIndex = -1;
+			else
+			{
+				CurrentRule.StartTurn();
+			}
 		}
-
-		// run the rule
-
-		else
+		else // no rule, immediately mark the turn as complete
 		{
-			CurrentRule.StartTurn();
+			_isTurnComplete = true;
 		}
 	}
 

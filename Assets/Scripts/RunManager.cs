@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using static BattleManager;
 
 public class RunManager : MonoBehaviour
@@ -14,9 +17,18 @@ public class RunManager : MonoBehaviour
 	public List<RunEvent> RunFormat => _runFormat;
 
 	[Header("Do not modify this! This shows what has been selected so far")]
-	public List<Vector2Int> _currentRun;
+	[SerializeField]
+	private List<Vector2Int> _currentRun;
 
 	public static RunManager INSTANCE;
+
+	public float _distanceBetweenEvents = 7.5f;
+	public float _travelTime = 3.0f;
+
+	public SceneAsset _loseScene;
+	public SceneAsset _winScene;
+
+	private Vector3 _destination;
 
 	public enum RunState
 	{
@@ -25,6 +37,7 @@ public class RunManager : MonoBehaviour
 		Traveling_To_Next_Event,
 		Choice,
 		Post_Choice_Travel, // may not be needed if we can reuse Traveling_To_Next_Event
+		Enter_Event,
 		In_Event,
 		Post_Event, // rewards post-battle, usually
 
@@ -50,6 +63,7 @@ public class RunManager : MonoBehaviour
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
     {
+		SetRunState(RunState.Run_Start);
 		//SelectNextEvent();
 		//SelectNextEvent();
 		//SelectNextEvent();
@@ -74,15 +88,69 @@ public class RunManager : MonoBehaviour
 				case RunState.Run_Start:
 					break;
 				case RunState.Traveling_To_Next_Event:
-					// if travel is complete and event has a choice, switch to choice. Else, switch to event.
+					if (Player.INSTANCE.transform.position.x > _destination.x) // not great check here
+					{
+						Player.INSTANCE.transform.position = _destination;
+
+						RunEvent evtNextTravel = Event(_currentRun.Count);
+
+						if (evtNextTravel.EventKinds.Count > 1)
+						{
+							SetRunState(RunState.Choice);
+						}
+						else
+						{
+							SetRunState(RunState.Enter_Event);
+						}
+					}
+					else
+					{
+						Player.INSTANCE.transform.position += Vector3.right * _distanceBetweenEvents / _travelTime * Time.deltaTime;
+					}
 					break;
+
 				case RunState.Choice:
+					// I don't like that we're selecting the event here, might store the number and toss it into PostChoiceTravel?
+					// and/or have a bool for choiceMade and kick us back into Traveling_To_Next_Event. idk. 
+					if (Input.GetMouseButtonDown((int) KeyCode.Mouse0))
+					{
+						SelectNextEvent(0);
+					}
+					else if (Input.GetMouseButtonDown((int) KeyCode.Mouse1))
+					{
+						SelectNextEvent(1);
+					}
 					break;
+
 				case RunState.Post_Choice_Travel:
 					break;
+				case RunState.Enter_Event:
+					// move camera from overworld view into battle view
+					SetRunState(RunState.In_Event);
+					break;
+
 				case RunState.In_Event:
+					// if the event we're in is a shop, do something here?
 					break;
 				case RunState.Post_Event:
+					// if event was shop, I don't think we do anything
+
+					// if this was a fight, we wait for items/relics to be purchased
+
+					// if this was the last event, win
+
+					if (_currentRun.Count == _runFormat.Count)
+					{
+						SetRunState(RunState.Win);
+						break;
+					}
+
+					RunEvent evtNext = Event(_currentRun.Count - 1);
+					
+					if (Pool(evtNext.EventKinds[_currentRun[^1].y]).PoolKind != EncounterPoolKind.Shop)
+					{
+						SetRunState(RunState.Traveling_To_Next_Event);
+					}
 					break;
 				case RunState.Win:
 					break;
@@ -114,18 +182,52 @@ public class RunManager : MonoBehaviour
 				SetRunState(RunState.Traveling_To_Next_Event);
 				break;
 			case RunState.Traveling_To_Next_Event:
+				_destination = Player.INSTANCE.transform.position + Vector3.right * _distanceBetweenEvents;
+				RunEvent evtNext = Event(_currentRun.Count);
+
+				if (evtNext.EventKinds.Count == 1)
+				{
+					SelectNextEvent(); // we can pick the event now since there aren't multiple options.
+				}
 				break;
+
 			case RunState.Choice:
 				break;
 			case RunState.Post_Choice_Travel:
+				// currently does nothing due to the way destinations are calculated
+				SetRunState(RunState.Enter_Event);
+				break;
+			case RunState.Enter_Event:
+				// would have animations
 				break;
 			case RunState.In_Event:
+				const int CHOICE_INDEX = 0;
+				const int ENCOUNTER_INDEX = 1;
+
+				Vector2Int stage = _currentRun[^1];
+
+				RunEvent evt = Event(_currentRun.Count - 1);
+				EncounterPoolKind encounter = evt.EventKinds[stage[CHOICE_INDEX]];
+
+				if (encounter == EncounterPoolKind.Shop)
+				{
+					// do nothing for now
+				}
+				else
+				{
+					Enemy enemy = Pool(encounter).EncounterPrefab(stage[ENCOUNTER_INDEX]);
+					BattleManager.INSTANCE.SetEnemy(enemy);
+					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position;
+					BattleManager.INSTANCE.Load();
+				}
 				break;
 			case RunState.Post_Event:
+				// if this was a fight, display items/relics screen
 				break;
 			case RunState.Win:
 				break;
 			case RunState.Lose:
+				SceneManager.LoadScene(_loseScene.name);
 				break;
 		}
 	}
@@ -204,33 +306,6 @@ public class RunManager : MonoBehaviour
 
 	public RunEvent Event(int index) => _runFormat[index];
 	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
-
-	public void WinFight()
-	{
-		// show shop, etc
-
-		BattleManager.INSTANCE.Unload();
-
-		// animation
-
-		SelectNextEvent(0);
-
-		const int CHOICE_INDEX = 0;
-		const int ENCOUNTER_INDEX = 1;
-
-		Vector2Int stage = _currentRun[^1];
-
-		RunEvent evt = Event(_currentRun.Count - 1);
-		EncounterPoolKind encounter = evt.EventKinds[stage[CHOICE_INDEX]];
-
-		if (encounter != EncounterPoolKind.Shop)
-		{
-			Enemy enemy = Pool(encounter).EncounterPrefab(stage[ENCOUNTER_INDEX]);
-			BattleManager.INSTANCE.SetEnemy(enemy);
-			BattleManager.INSTANCE.Load();
-		}
-		throw new NotImplementedException();
-	}
 }
 
 

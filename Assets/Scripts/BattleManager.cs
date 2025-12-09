@@ -47,12 +47,6 @@ public class BattleManager : MonoBehaviour
 
     private Enemy _enemy;
 
-	public SceneAsset _loseScene;
-	public SceneAsset _winScene;
-
-    public EntityDisplay _enemyDisplay;
-    public EntityDisplay _playerDisplay;
-
     internal EnemyTurnHandler _enemyTurnHandler;
 
     // Player Turn Data
@@ -90,7 +84,7 @@ public class BattleManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        SetBattleState(BattleState.Load);
+        //SetBattleState(BattleState.Load);
     }
 
     // Update is called once per frame
@@ -157,23 +151,23 @@ public class BattleManager : MonoBehaviour
         {
 			case BattleState.Nil:
 				_enemy = null;
-				_enemyDisplay.Entity = null;
 
-				_playerDisplay.Entity = null;
 				_enemyTurnHandler = null;
+
+				GameBoard.INSTANCE.DeleteBoard();
 				break;
 
             case BattleState.Load:
 
-                // Long term, _player will be moved out of the battle manager and the enemy prefab will be defined by an encounter object
-
+				// expensive, just here for testing
+				CameraTracker tracker = FindAnyObjectByType<CameraTracker>();
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
+				_enemy.transform.localPosition = (Vector2)(-tracker.targetOffset);
                 _enemy.Init();
 
-                _enemyDisplay.Entity = _enemy;
-				_playerDisplay.Entity = Player.INSTANCE;
-
                 _enemyTurnHandler = new EnemyTurnHandler(_enemy);
+
+				GameBoard.INSTANCE.GenerateBoard();
 
                 SetBattleState(BattleState.Player_Turn);
                 break;
@@ -209,12 +203,12 @@ public class BattleManager : MonoBehaviour
                 break;
 
 			case BattleState.Lose:
-				SceneManager.LoadScene(_loseScene.name);
+				RunManager.INSTANCE.SetRunState(RunManager.RunState.Lose);
 				break;
 
 			case BattleState.Win:
-				//SceneManager.LoadScene(_winScene.name);
-				RunManager.INSTANCE.WinFight();
+				// Destroy enemy in the update loop and then tell the run manager that we won
+				RunManager.INSTANCE.SetRunState(RunManager.RunState.Post_Event);
 				break;
 		}
     }
@@ -334,7 +328,7 @@ public class BattleManager : MonoBehaviour
 
                 for (int i = 0; i < _tilesInWord.Count; i++)
                 {
-                    _directions.Add(_enemyDisplay.transform.position - _tilesInWord[i].transform.position);
+                    _directions.Add(_enemy.transform.position - _tilesInWord[i].transform.position);
                 }
 
                 _timeElapsed = 0.0f;

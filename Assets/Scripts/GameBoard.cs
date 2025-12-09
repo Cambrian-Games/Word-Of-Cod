@@ -41,7 +41,7 @@ public class GameBoard : MonoBehaviour
 	{
 		_config = BoardConfig.INSTANCE;
 
-		GenerateBoard();
+		//GenerateBoard();
 	}
 
 	// Update is called once per frame
@@ -101,6 +101,8 @@ public class GameBoard : MonoBehaviour
 		if (_currState == null)
 			return;
 
+		// create a delta that marks every tile for deletion
+
 		_currDelta = new BoardDelta(_config.Layout);
 		DeleteSelectedTiles();
 		_resolveState = ResolveState.Nil;
@@ -133,7 +135,7 @@ public class GameBoard : MonoBehaviour
         Vector2 spawnDir = (_config.SettleKind == SettleKind.In_Place) ? Vector2.up : -FallDirection();
 		Vector2 layoutDims = _config.Layout.Dims();
 		Vector2 tileSpacing = _config.TileSpacing;
-		Vector2 spawnOffset = _config.SpawnOffset;
+		Vector2 spawnOffset = _config.SpawnOffset + (Vector2)Camera.main.transform.position;
 		Vector2 stagingTopLeft = spawnOffset + tileSpacing * spawnDir * layoutDims;
 
 		// I'd like this to use SpawnTile but this allows for better data caching.
@@ -160,7 +162,7 @@ public class GameBoard : MonoBehaviour
 		bool movedTile = false;
 
 		Vector3 fallDir = FallDirection();
-		Vector2 spawnOffset = _config.SpawnOffset;
+		Vector2 spawnOffset = _config.SpawnOffset + (Vector2)Camera.main.transform.position;
 		Vector2 tileSpacing = _config.TileSpacing;
 
 		foreach (Vector2Int coord in new Vector2IntIterator(_config.Layout.BottomRight()))
