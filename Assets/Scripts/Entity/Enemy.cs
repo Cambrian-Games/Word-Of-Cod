@@ -37,9 +37,9 @@ public class Enemy : Entity
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
 
-	public override void Init()
+	protected override void Awake()
 	{
-		base.Init();
+		base.Awake();
 
 		bool hasNullRules = false;
 

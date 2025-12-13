@@ -4,9 +4,11 @@ public class Player : Entity
 {
 	public static Player INSTANCE;
 
-	private void Awake()
+	protected override void Awake()
 	{
 		// set up singleton
+
+		base.Awake();
 
 		if (INSTANCE != null && INSTANCE != this)
 		{
@@ -16,7 +18,5 @@ public class Player : Entity
 		}
 
 		INSTANCE = this;
-
-		Init();
 	}
 }

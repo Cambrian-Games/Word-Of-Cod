@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class Entity : MonoBehaviour
@@ -18,15 +17,9 @@ public class Entity : MonoBehaviour
 	public int CurrentHealth { get => _currentHealth; set => _currentHealth = Mathf.Clamp(value, 0, _maxHealth); }
 	public int HealthPercent() => CurrentHealth * 100 / _maxHealth;
 
-    private bool _hasInit;
-
-    public virtual void Init()
+    protected virtual void Awake()
     {
-        if (!_hasInit)
-        {
-            _currentHealth = _maxHealth;
-            _hasInit = true;
-        }
+		_currentHealth = _maxHealth;
     }
 
 	public virtual void UpdateTurn()

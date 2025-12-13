@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
@@ -163,7 +160,6 @@ public class BattleManager : MonoBehaviour
 				CameraTracker tracker = FindAnyObjectByType<CameraTracker>();
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
 				_enemy.transform.localPosition = (Vector2)(-tracker.targetOffset);
-                _enemy.Init();
 
                 _enemyTurnHandler = new EnemyTurnHandler(_enemy);
 

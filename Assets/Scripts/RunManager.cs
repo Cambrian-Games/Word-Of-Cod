@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using static BattleManager;
 
 public class RunManager : MonoBehaviour
 {
@@ -307,7 +305,6 @@ public class RunManager : MonoBehaviour
 	public RunEvent Event(int index) => _runFormat[index];
 	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
 }
-
 
 [Serializable]
 public class RunEvent

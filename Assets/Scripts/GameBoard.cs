@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,8 +39,6 @@ public class GameBoard : MonoBehaviour
 	void Start()
 	{
 		_config = BoardConfig.INSTANCE;
-
-		//GenerateBoard();
 	}
 
 	// Update is called once per frame
@@ -135,7 +132,7 @@ public class GameBoard : MonoBehaviour
         Vector2 spawnDir = (_config.SettleKind == SettleKind.In_Place) ? Vector2.up : -FallDirection();
 		Vector2 layoutDims = _config.Layout.Dims();
 		Vector2 tileSpacing = _config.TileSpacing;
-		Vector2 spawnOffset = _config.SpawnOffset + (Vector2)Camera.main.transform.position;
+		Vector2 spawnOffset = _config.SpawnOffset;
 		Vector2 stagingTopLeft = spawnOffset + tileSpacing * spawnDir * layoutDims;
 
 		// I'd like this to use SpawnTile but this allows for better data caching.
@@ -143,7 +140,7 @@ public class GameBoard : MonoBehaviour
 		foreach (var kvp in _currDelta._newTiles)
 		{
 			Tile tile = _stagingBoard[kvp.Key.x, kvp.Key.y] = Instantiate<Tile>(_config.DefaultTilePrefab, this.transform);
-			tile.transform.position = stagingTopLeft + (kvp.Key * tileSpacing * new Vector2(1, -1));
+			tile.transform.localPosition = stagingTopLeft + (kvp.Key * tileSpacing * new Vector2(1, -1));
 			tile._letter = kvp.Value;
 			tile._coord = kvp.Key;
 		}
@@ -162,7 +159,7 @@ public class GameBoard : MonoBehaviour
 		bool movedTile = false;
 
 		Vector3 fallDir = FallDirection();
-		Vector2 spawnOffset = _config.SpawnOffset + (Vector2)Camera.main.transform.position;
+		Vector2 spawnOffset = _config.SpawnOffset;
 		Vector2 tileSpacing = _config.TileSpacing;
 
 		foreach (Vector2Int coord in new Vector2IntIterator(_config.Layout.BottomRight()))
@@ -185,11 +182,11 @@ public class GameBoard : MonoBehaviour
 
 			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0 || _config.SettleKind == SettleKind.In_Place)
 			{
-				tileToMove.transform.position = dest;
+				tileToMove.transform.localPosition = dest;
 			}
 			else
 			{
-				tileToMove.transform.position += _config.FallSpeed * dT * fallDir;
+				tileToMove.transform.localPosition += _config.FallSpeed * dT * fallDir;
 				movedTile = true;
 			}
 		}
@@ -207,11 +204,11 @@ public class GameBoard : MonoBehaviour
 
 			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0)
 			{
-				tileToMove.transform.position = dest;
+				tileToMove.transform.localPosition = dest;
 			}
 			else
 			{
-				tileToMove.transform.position += _config.FallSpeed * dT * fallDir;
+				tileToMove.transform.localPosition += _config.FallSpeed * dT * fallDir;
 				movedTile = true;
 			}
 		}
