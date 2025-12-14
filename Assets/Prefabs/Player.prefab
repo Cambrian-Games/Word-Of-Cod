@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   _displayName: Player
-  _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  _sprite: {fileID: -9090179603659708902, guid: 02dc7e9ee24d78941a677a87c285d05f, type: 3}
   _maxHealth: 150
 --- !u!212 &4745292247127067040
 SpriteRenderer:
@@ -95,7 +95,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -9090179603659708902, guid: 02dc7e9ee24d78941a677a87c285d05f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
