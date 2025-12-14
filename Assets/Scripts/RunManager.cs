@@ -16,7 +16,7 @@ public class RunManager : MonoBehaviour
 
 	[Header("Do not modify this! This shows what has been selected so far")]
 	[SerializeField]
-	private List<Vector2Int> _currentRun;
+	private List<SelectedEvent> _currentRun;
 
 	public static RunManager INSTANCE;
 
@@ -62,9 +62,6 @@ public class RunManager : MonoBehaviour
 	void Start()
     {
 		SetRunState(RunState.Run_Start);
-		//SelectNextEvent();
-		//SelectNextEvent();
-		//SelectNextEvent();
     }
 
     // Update is called once per frame
@@ -113,22 +110,26 @@ public class RunManager : MonoBehaviour
 					if (Input.GetMouseButtonDown((int) KeyCode.Mouse0))
 					{
 						SelectNextEvent(0);
+						SetRunState(RunState.Post_Choice_Travel);
 					}
 					else if (Input.GetMouseButtonDown((int) KeyCode.Mouse1))
 					{
 						SelectNextEvent(1);
+						SetRunState(RunState.Post_Choice_Travel);
 					}
 					break;
 
 				case RunState.Post_Choice_Travel:
+					// the way we calculate a destination (or reaching the destination) in Traveling_To_Next_Event falls apart here and needs a better solution.
 					break;
 				case RunState.Enter_Event:
-					// move camera from overworld view into battle view
+					// TODO move camera from overworld view into battle view
 					SetRunState(RunState.In_Event);
 					break;
 
 				case RunState.In_Event:
 					// if the event we're in is a shop, do something here?
+					// otherwise we're just waiting for the battle manager to kick us into Post_Event
 					break;
 				case RunState.Post_Event:
 					// if event was shop, I don't think we do anything
@@ -142,10 +143,8 @@ public class RunManager : MonoBehaviour
 						SetRunState(RunState.Win);
 						break;
 					}
-
-					RunEvent evtNext = Event(_currentRun.Count - 1);
 					
-					if (Pool(evtNext.EventKinds[_currentRun[^1].y]).PoolKind != EncounterPoolKind.Shop)
+					if (_currentRun[^1]._encounterKind != EncounterPoolKind.Shop)
 					{
 						SetRunState(RunState.Traveling_To_Next_Event);
 					}
@@ -199,13 +198,8 @@ public class RunManager : MonoBehaviour
 				// would have animations
 				break;
 			case RunState.In_Event:
-				const int CHOICE_INDEX = 0;
-				const int ENCOUNTER_INDEX = 1;
 
-				Vector2Int stage = _currentRun[^1];
-
-				RunEvent evt = Event(_currentRun.Count - 1);
-				EncounterPoolKind encounter = evt.EventKinds[stage[CHOICE_INDEX]];
+				EncounterPoolKind encounter = _currentRun[^1]._encounterKind;
 
 				if (encounter == EncounterPoolKind.Shop)
 				{
@@ -213,7 +207,7 @@ public class RunManager : MonoBehaviour
 				}
 				else
 				{
-					Enemy enemy = Pool(encounter).EncounterPrefab(stage[ENCOUNTER_INDEX]);
+					Enemy enemy = Pool(encounter).EncounterPrefab(_currentRun[^1]._poolIndex);
 					BattleManager.INSTANCE.SetEnemy(enemy);
 					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position;
 					BattleManager.INSTANCE.Load();
@@ -275,31 +269,36 @@ public class RunManager : MonoBehaviour
 			option = 0;
 		}
 
-		EncounterPoolKind poolKind = nextEvent.EventKinds[option];
+		SelectedEvent selectedEvent = new SelectedEvent();
+		selectedEvent._eventIndex = eventIndex;
+		selectedEvent._encounterKind = nextEvent.EventKinds[option];
 
-		if (poolKind == EncounterPoolKind.Shop)
+		switch (selectedEvent._encounterKind)
 		{
-			_currentRun.Add(new Vector2Int(option, -1));
-			return;
+			case EncounterPoolKind.Shop:
+				selectedEvent._poolIndex = -1;
+				break;
+
+			case EncounterPoolKind.All:
+				Debug.LogError("We don't support EncounterPoolKind.All yet");
+				selectedEvent._poolIndex = -1;
+				break;
+
+			default:
+				EncounterPool pool = Pool(selectedEvent._encounterKind);
+
+				if (eventIndex == 0)
+				{
+					selectedEvent._poolIndex = pool.GetWeightedIndex(-1, null);
+				}
+				else
+				{
+					selectedEvent._poolIndex = pool.GetWeightedIndex(-1, _currentRun[^1]);
+				}
+				break;
 		}
 
-		if (poolKind == EncounterPoolKind.All)
-		{
-			Debug.LogError("We don't support EncounterPoolKind.All yet");
-			_currentRun.Add(new Vector2Int(option, -1));
-			return;
-		}
-
-		EncounterPool pool = _pools.Find(pool => pool.PoolKind == nextEvent.EventKinds[option]);
-
-		if (eventIndex == 0)
-		{
-			_currentRun.Add(new Vector2Int(option, pool.GetWeightedIndex(-1, Vector2Int.zero)));
-		}
-		else
-		{
-			_currentRun.Add(new Vector2Int(option, pool.GetWeightedIndex(eventIndex - 1, _currentRun[eventIndex - 1])));
-		}	
+		_currentRun.Add(selectedEvent);
 	}
 
 	public RunEvent Event(int index) => _runFormat[index];
@@ -313,6 +312,14 @@ public class RunEvent
 	private List<EncounterPoolKind> _eventKinds;
 
 	public List<EncounterPoolKind> EventKinds => _eventKinds;
+}
+
+[Serializable]
+public class SelectedEvent
+{
+	public int _eventIndex; // what RunEvent this points to
+	public EncounterPoolKind _encounterKind;
+	public int _poolIndex = -1; // which encounter was picked from the pool
 }
 
 public enum EncounterPoolKind
@@ -371,12 +378,11 @@ public class EncounterPool
 		public float Weight => _weight;
 	}
 
-	internal int GetWeightedIndex(int lastEventIndex, Vector2Int lastOption)
+	internal int GetWeightedIndex(int lastEventIndex, SelectedEvent lastSelection)
 	{
 		if (_canRepeat == RepeatKind.No_Consecutive && lastEventIndex >= 0)
 		{
-			RunEvent lastEvent = RunManager.INSTANCE.Event(lastEventIndex);
-			EncounterPool lastPool = RunManager.INSTANCE.Pool(lastEvent.EventKinds[lastOption[0]]);
+			EncounterPool lastPool = RunManager.INSTANCE.Pool(lastSelection._encounterKind);
 
 			if (lastPool == this)
 			{
@@ -384,7 +390,7 @@ public class EncounterPool
 
 				for (int i = 0; i < _entries.Length; i++)
 				{
-					if (i == lastOption[1])
+					if (i == lastSelection._poolIndex)
 						continue;
 
 					sumNoRepeat += _entries[i].Weight;
@@ -394,7 +400,7 @@ public class EncounterPool
 
 				for (int i = 0; i < _entries.Length; i++)
 				{
-					if (i == lastOption[1])
+					if (i == lastSelection._poolIndex)
 						continue;
 
 					if (randNoRepeat < _entries[i].Weight)
