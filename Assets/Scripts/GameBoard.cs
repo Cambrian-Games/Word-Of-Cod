@@ -180,7 +180,7 @@ public class GameBoard : MonoBehaviour
 
 			// We are at or past our destination. It's a better check than before but still not ideal. Would be good to stress test this
 
-			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0 || _config.SettleKind == SettleKind.In_Place)
+			if (immediate || Vector3.Dot(dest - tileToMove.transform.localPosition, fallDir) <= 0 || _config.SettleKind == SettleKind.In_Place)
 			{
 				tileToMove.transform.localPosition = dest;
 			}
@@ -202,7 +202,7 @@ public class GameBoard : MonoBehaviour
 
 			Vector3 dest = spawnOffset + coord * tileSpacing * new Vector2(1, -1);
 
-			if (immediate || Vector3.Dot(dest - tileToMove.transform.position, fallDir) <= 0)
+			if (immediate || Vector3.Dot(dest - tileToMove.transform.localPosition, fallDir) <= 0)
 			{
 				tileToMove.transform.localPosition = dest;
 			}

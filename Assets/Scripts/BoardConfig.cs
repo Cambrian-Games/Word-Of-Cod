@@ -11,6 +11,7 @@ public class BoardConfig : MonoBehaviour
 	private SettleKind _defaultSettleKind = SettleKind.Fall;
 	private SettleKind _overrideSettleKind = SettleKind.Nil;
 	public SettleKind SettleKind => _overrideSettleKind != SettleKind.Nil ? _overrideSettleKind : _defaultSettleKind;
+	
 
 	[SerializeField]
 	private CharacterWeights _characterWeights;
@@ -89,5 +90,22 @@ public class BoardConfig : MonoBehaviour
 	public void SetOverrideSettlek(SettleKind overrideSettleKind)
 	{
 		_overrideSettleKind = overrideSettleKind;
+	}
+
+	public void SetOverrideSettlekUp()
+	{
+		SetOverrideSettlek(SettleKind.Rise);
+	}
+	public void SetOverrideSettlekDown()
+	{
+		SetOverrideSettlek(SettleKind.Fall);
+	}
+	public void SetOverrideSettlekLeft()
+	{
+		SetOverrideSettlek(SettleKind.From_Left);
+	}
+	public void SetOverrideSettlekRight()
+	{
+		SetOverrideSettlek(SettleKind.From_Right);
 	}
 }
