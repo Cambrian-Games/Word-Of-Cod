@@ -167,10 +167,10 @@ public class RunManager : MonoBehaviour
 
 		// leave old state
 
-		switch (_state)
-		{
-
-		}
+		//switch (_state)
+		//{
+		//
+		//}
 
 		_state = newState;
 
