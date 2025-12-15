@@ -159,7 +159,7 @@ public class BattleManager : MonoBehaviour
 				// expensive, just here for testing
 				CameraTracker tracker = FindAnyObjectByType<CameraTracker>();
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
-				_enemy.transform.localPosition = (Vector2)(-tracker.targetOffset);
+				_enemy.transform.localPosition = (Vector2)(-tracker._targetOffset);
 
                 _enemyTurnHandler = new EnemyTurnHandler(_enemy);
 
@@ -203,7 +203,6 @@ public class BattleManager : MonoBehaviour
 				break;
 
 			case BattleState.Win:
-				// Destroy enemy in the update loop and then tell the run manager that we won
 				RunManager.INSTANCE.SetRunState(RunManager.RunState.Post_Event);
 				break;
 		}
@@ -341,7 +340,8 @@ public class BattleManager : MonoBehaviour
 
                 if (_enemy.CurrentHealth <= 0)
                 {
-                    SetBattleState(BattleState.Win);
+					Destroy(_enemy.gameObject); // long term there will probably be an animation here so we may wait before going to Win State
+					SetBattleState(BattleState.Win);
                 }
                 else
                 {

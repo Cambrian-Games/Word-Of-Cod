@@ -57,6 +57,7 @@ public class Tile: MonoBehaviour
 	}
 
 	public bool IsSelectable => _tileKind != TileKind.Sandy;
+
 	public void OnSubmit()
 	{
 		switch (_tileKind)

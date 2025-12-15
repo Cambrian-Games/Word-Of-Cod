@@ -29,6 +29,7 @@ public class Entity : MonoBehaviour
 
 	public virtual void StartTurn()
 	{
+
 	}
 
 	public virtual void EndTurn()

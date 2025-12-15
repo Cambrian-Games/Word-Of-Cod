@@ -159,6 +159,7 @@ public class RunManager : MonoBehaviour
 				break;
 		}
 	}
+	
 	internal void SetRunState(RunState newState)
 	{
 		if (newState == _state)
@@ -209,7 +210,7 @@ public class RunManager : MonoBehaviour
 				{
 					Enemy enemy = Pool(encounter).EncounterPrefab(_currentRun[^1]._poolIndex);
 					BattleManager.INSTANCE.SetEnemy(enemy);
-					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position;
+					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position; // the cast sets the z coord to zero
 					BattleManager.INSTANCE.Load();
 				}
 				break;
