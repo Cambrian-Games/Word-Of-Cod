@@ -33,16 +33,12 @@ public class BattleManager : MonoBehaviour
     // sub-states
 
     private PostPlayerTurnState _pptState = PostPlayerTurnState.Nil;
-
-    // player template might get moved yet again into something that persists across battles
-    //  and enemy template will get wrapped into an encounter object eventually
-
+    
     [SerializeField]
     private Enemy _enemyPrefab;
-    [SerializeField]
-    private Player _playerPrefab;
 
     private Enemy _enemy;
+    public Enemy CurrentEnemy => _enemy;
 
     internal EnemyTurnHandler _enemyTurnHandler;
 
