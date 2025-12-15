@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 
 public class RunManager : MonoBehaviour
@@ -27,6 +28,8 @@ public class RunManager : MonoBehaviour
 	public SceneAsset _winScene;
 
 	private Vector3 _destination;
+
+	private bool _hasSelectedNextEvent = false;
 
 	public enum RunState
 	{
@@ -87,15 +90,13 @@ public class RunManager : MonoBehaviour
 					{
 						Player.INSTANCE.transform.position = _destination;
 
-						RunEvent evtNextTravel = Event(_currentRun.Count);
-
-						if (evtNextTravel.EventKinds.Count > 1)
-						{
-							SetRunState(RunState.Choice);
-						}
-						else
+						if (_hasSelectedNextEvent)
 						{
 							SetRunState(RunState.Enter_Event);
+						}
+						else // if we haven't already chosen the event, we have a choice to make
+						{
+							SetRunState(RunState.Choice);
 						}
 					}
 					else
@@ -107,12 +108,12 @@ public class RunManager : MonoBehaviour
 				case RunState.Choice:
 					// I don't like that we're selecting the event here, might store the number and toss it into PostChoiceTravel?
 					// and/or have a bool for choiceMade and kick us back into Traveling_To_Next_Event. idk. 
-					if (Input.GetMouseButtonDown((int) KeyCode.Mouse0))
+					if (Input.GetMouseButtonDown((int)MouseButton.Left))
 					{
 						SelectNextEvent(0);
 						SetRunState(RunState.Post_Choice_Travel);
 					}
-					else if (Input.GetMouseButtonDown((int) KeyCode.Mouse1))
+					else if (Input.GetMouseButtonDown((int)MouseButton.Right))
 					{
 						SelectNextEvent(1);
 						SetRunState(RunState.Post_Choice_Travel);
@@ -197,6 +198,7 @@ public class RunManager : MonoBehaviour
 				break;
 			case RunState.Enter_Event:
 				// would have animations
+				_hasSelectedNextEvent = false;
 				break;
 			case RunState.In_Event:
 
@@ -216,6 +218,7 @@ public class RunManager : MonoBehaviour
 				break;
 			case RunState.Post_Event:
 				// if this was a fight, display items/relics screen
+				BattleManager.INSTANCE.Unload();
 				break;
 			case RunState.Win:
 				break;
@@ -300,6 +303,8 @@ public class RunManager : MonoBehaviour
 		}
 
 		_currentRun.Add(selectedEvent);
+
+		_hasSelectedNextEvent = true;
 	}
 
 	public RunEvent Event(int index) => _runFormat[index];
