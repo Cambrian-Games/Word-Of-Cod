@@ -268,9 +268,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2552ae448c5955b44a1da31ff91ed791, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  target: {fileID: 1342681907}
-  targetOffset: {x: -6, y: 0.25, z: 0}
-  cameraOffset: -10
+  _target: {fileID: 1342681907}
+  _targetOffset: {x: -6, y: 0.25, z: 0}
+  _cameraOffset: -10
 --- !u!1 &628337402
 GameObject:
   m_ObjectHideFlags: 0
