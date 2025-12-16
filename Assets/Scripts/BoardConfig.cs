@@ -11,7 +11,6 @@ public class BoardConfig : MonoBehaviour
 	private SettleKind _defaultSettleKind = SettleKind.Fall;
 	private SettleKind _overrideSettleKind = SettleKind.Nil;
 	public SettleKind SettleKind => _overrideSettleKind != SettleKind.Nil ? _overrideSettleKind : _defaultSettleKind;
-	
 
 	[SerializeField]
 	private CharacterWeights _characterWeights;

@@ -1052,10 +1052,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 590818602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85c657b532a117424829e463eaabccfa, type: 3}
+  m_Script: {fileID: 11500000, guid: 3a00712608699bdd7b11850673b8d1ef, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthScript
-  Text: {fileID: 1561777538}
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthScript
+  _text: {fileID: 1561777538}
+  _type: 0
 --- !u!1 &628337402
 GameObject:
   m_ObjectHideFlags: 0
@@ -1307,7 +1308,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a00712608699bdd7b11850673b8d1ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthScript
-  Text: {fileID: 235681635}
+  _text: {fileID: 235681635}
+  _type: 1
 --- !u!1 &868568179
 GameObject:
   m_ObjectHideFlags: 0

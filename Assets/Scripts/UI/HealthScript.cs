@@ -1,0 +1,46 @@
+using System;
+using TMPro;
+using UnityEngine;
+
+public enum EntityType
+{
+    Player,
+    Enemy,
+}
+
+public class EnemyHealthScript : MonoBehaviour
+{
+    
+    public TMP_Text _text;
+    public EntityType _type;
+    private Enemy currEnemy;
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+
+    }
+
+    private void OnEnable()
+    {
+        //long term this is right
+        //currEnemy = BattleManager.INSTANCE.CurrentEnemy;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (_type == EntityType.Enemy)
+        {
+            //short term this is right
+            currEnemy = BattleManager.INSTANCE.CurrentEnemy;
+            if (currEnemy != null)
+            {
+                _text.text = $"{currEnemy.CurrentHealth} / {currEnemy.MaxHealth}";
+            } 
+        }
+        else
+        {
+            _text.text = $"{Player.INSTANCE.CurrentHealth} / {Player.INSTANCE.MaxHealth}";
+        }
+    }
+}
