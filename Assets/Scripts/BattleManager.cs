@@ -47,6 +47,7 @@ public class BattleManager : MonoBehaviour
     FPART _pOS; // parts-of-speech for submitted word
     string _wordToSubmit;
     string _lastWord;
+    FPART _lastWordPOS;
 	internal string LastWord => _lastWord;
     List<Tile> _tilesInWord;
 
@@ -315,7 +316,9 @@ public class BattleManager : MonoBehaviour
 
             case PostPlayerTurnState.Attack_Enemy:
                 _damageToDeal = _tilesInWord.Count * (1 + (_tilesInWord.Count - 3) / 10); // first term here is a placeholder, will be changed to actual scoring calculation
-                Debug.Log(_damageToDeal);
+                Debug.Log($"Damage Pre Relics: {_damageToDeal}");
+                _damageToDeal = Player.INSTANCE._inventory.RunPlayerDamageModRelics(_damageToDeal, _wordToSubmit, _pOS);
+                Debug.Log($"Damage Post Relics: {_damageToDeal}");
 
                 for (int i = 0; i < _tilesInWord.Count; i++)
                 {
@@ -351,14 +354,16 @@ public class BattleManager : MonoBehaviour
     public bool TrySubmitWord(string word, List<Tile> tilesUsed)
     {
         Debug.Assert(_battleState == BattleState.Player_Turn);
-
-        if (WordChecker.INSTANCE.CheckWord(word, out _pOS))
+        FPART newPOS;
+        if (WordChecker.INSTANCE.CheckWord(word, out newPOS))
         {
             Debug.Log($"Submitted {word} ({_pOS})");
             Debug.Log(++_totalWords + " Word(s) Submitted");
 
+            _lastWordPOS = _pOS;
             _lastWord = _wordToSubmit;
             _wordToSubmit = word;
+            _pOS = newPOS;
             _tilesInWord = new List<Tile>(tilesUsed);
 
             SetBattleState(BattleState.Post_Player_Turn);

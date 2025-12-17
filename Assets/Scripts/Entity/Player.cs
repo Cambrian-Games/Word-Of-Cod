@@ -4,6 +4,7 @@ public class Player : Entity
 {
 	public static Player INSTANCE;
 
+	public InventoryManager _inventory;
 	protected override void Awake()
 	{
 		// set up singleton

@@ -8,12 +8,12 @@ public enum EntityType
     Enemy,
 }
 
-public class HealthDisplay : MonoBehaviour
+public class HealthScript : MonoBehaviour
 {
     
     public TMP_Text _text;
     public EntityType _type;
-    private Enemy _currEnemy;
+    private Enemy currEnemy;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,10 +32,10 @@ public class HealthDisplay : MonoBehaviour
         if (_type == EntityType.Enemy)
         {
             //short term this is right
-            _currEnemy = BattleManager.INSTANCE.CurrentEnemy;
-            if (_currEnemy != null)
+            currEnemy = BattleManager.INSTANCE.CurrentEnemy;
+            if (currEnemy != null)
             {
-                _text.text = $"{_currEnemy.CurrentHealth} / {_currEnemy.MaxHealth}";
+                _text.text = $"{currEnemy.CurrentHealth} / {currEnemy.MaxHealth}";
             } 
         }
         else

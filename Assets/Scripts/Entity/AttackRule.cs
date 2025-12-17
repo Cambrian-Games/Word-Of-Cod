@@ -328,7 +328,8 @@ public class AttackEffect
 		switch (_effectKind)
 		{
 			case EffectKind.Standard_Attack:
-				Player.INSTANCE.CurrentHealth -= _damage;
+				int moddedDamage = Player.INSTANCE._inventory.RunEnemyDamageModRelics(_damage);
+				Player.INSTANCE.CurrentHealth -= moddedDamage;
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
 
