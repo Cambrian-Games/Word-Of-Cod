@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // Word Data
@@ -16,6 +17,35 @@ public enum FPART : byte
 	PRONOUN			= 0b00100000,
 	CONJUNCTION		= 0b01000000,
 	OTHER			= 0b10000000, // Not used in-game, only used when parsing to flag words for potential omission
+}
+
+public class Word
+{
+    private string _text;
+    public string Text => _text;
+    private FPART _pOS;
+    public FPART PartsOfSpeech => _pOS;
+
+    private int _baseDamage;
+    public int BaseDamage => _baseDamage;
+    private List<Tile> _tilesUsed;
+    private float _modifiedDamage = 0;
+    public int EffectiveDamage => _modifiedDamage != 0 ? (int) _modifiedDamage : _baseDamage;
+
+    public Word(string text, FPART pOS, List<Tile> tilesUsed)
+    {
+        _text = text;
+        _pOS = pOS;
+        _tilesUsed = new List<Tile>(tilesUsed);
+
+        _baseDamage = _text.Length * (1 + (_text.Length - 3) / 10);
+    }
+
+    internal void ModifyDamage(RelicEffect.Result result)
+    {
+        _modifiedDamage = _baseDamage * (1 + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Damage_Percent_Increase));
+        _modifiedDamage += result._values.GetValueOrDefault(RelicEffect.ValueToModify.Damage_Bonus);
+    }
 }
 
 // Board Data

@@ -32,7 +32,6 @@ public class TileSelector : MonoBehaviour
 	private List<Tile> _selectedTiles = new List<Tile>();
 	private Tile _currentHighlightedTile;
 	private string _word = "";
-	private FPART _pOS;
 
 	private bool _isMouseSelecting = false;
 	internal bool _isSelectingEnabled = true;

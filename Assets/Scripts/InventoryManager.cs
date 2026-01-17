@@ -1,9 +1,15 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class InventoryManager : MonoBehaviour
 {
+    public List<Relic> _passiveRelics;
+
+    private Dictionary<RelicEffect.EventTiming, HashSet<Relic>> _sortedPassiveRelics;
+
     public FRELICID _relicInventory;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -23,6 +29,30 @@ public class InventoryManager : MonoBehaviour
         }
         
         Debug.Log(_relicInventory);
+
+        if (_sortedPassiveRelics != null)
+        {
+            _sortedPassiveRelics.Clear();
+        }
+
+        _sortedPassiveRelics = new Dictionary<RelicEffect.EventTiming, HashSet<Relic>>();
+
+        for (int i = 0; i < _passiveRelics.Count; i++)
+        {
+            _passiveRelics[i].SetID(i);
+
+            List<RelicEffect> effects = _passiveRelics[i].Effects;
+
+            foreach (RelicEffect eff in effects)
+            {
+                if (!_sortedPassiveRelics.ContainsKey(eff.Event))
+                {
+                    _sortedPassiveRelics.Add(eff.Event, new HashSet<Relic>());
+                }
+
+                _sortedPassiveRelics[eff.Event].Add(_passiveRelics[i]);
+            }
+        }
     }
 
     // Update is called once per frame
@@ -31,36 +61,75 @@ public class InventoryManager : MonoBehaviour
         
     }
 
-    public int RunPlayerDamageModRelics(int baseDamage, string word, FPART pOS)
+    public void OnWordSubmit(Word word)
     {
-        int outDamage = baseDamage;
-        if (_relicInventory.HasFlag(FRELICID.NOUNUP))
+        RelicEffect.Result result = new RelicEffect.Result();
+
+        foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Word_Submit])
         {
-            if (pOS.HasFlag(FPART.NOUN))
-            {
-                outDamage *= 2;
-            }
+            // TODO check if we have the relic, by ID
+
+            result += relic.OnWordSubmit(word);
         }
 
-        if (_relicInventory.HasFlag(FRELICID.YUP))
-        {
-            if (word.Contains('Y'))
-            {
-                outDamage *= 2;
-            }
-        }
+        if (result._values.Count == 0)
+            return;
 
-        return outDamage;
+        word.ModifyDamage(result);
+
+        foreach (var item in result._values)
+        {
+            if (item.Key == RelicEffect.ValueToModify.Damage_Percent_Increase)
+                continue;
+
+            if (item.Key == RelicEffect.ValueToModify.Damage_Bonus)
+                continue;
+
+            Debug.LogError($"Unsupported modification of {item.Key} during OnWordSubmit");
+        }
     }
 
-    public int RunEnemyDamageModRelics(int baseDamage)
+    internal void OnEnemyAttack(int baseDamage, out int modifiedDamage)
     {
-        int outDamage = baseDamage;
-        if (_relicInventory.HasFlag(FRELICID.RESISTUP))
+        RelicEffect.Result result = new RelicEffect.Result();
+
+        foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
         {
-            outDamage = Mathf.CeilToInt(0.9f * baseDamage);
+            // TODO check if we have the relic, by ID
+
+            result += relic.OnEnemyAttack(baseDamage);
         }
 
-        return outDamage;
+        if (result._values.Count == 0)
+        {
+            modifiedDamage = baseDamage;
+            return;
+        }
+
+        float totalResistPercent = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Percent_Increase)
+            + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Percent_Increase);
+
+        float totalResistBonus = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Bonus)
+            + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus);
+
+        float totalDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
+        modifiedDamage = (int) totalDamage;
+
+        foreach (var item in result._values)
+        {
+            if (item.Key == RelicEffect.ValueToModify.Resist_Percent_Increase)
+                continue;
+
+            if (item.Key == RelicEffect.ValueToModify.Enemy_Damage_Resist_Percent_Increase)
+                continue;
+
+            if (item.Key == RelicEffect.ValueToModify.Resist_Bonus)
+                continue;
+
+            if (item.Key == RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus)
+                continue;
+
+            Debug.LogError($"Unsupported modification of {item.Key} during OnEnemyAttack");
+        }
     }
 }

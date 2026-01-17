@@ -44,19 +44,16 @@ public class BattleManager : MonoBehaviour
 
     // Player Turn Data
 
-    FPART _pOS; // parts-of-speech for submitted word
-    string _wordToSubmit;
-    string _lastWord;
-    FPART _lastWordPOS;
-	internal string LastWord => _lastWord;
+    Word _wordToSubmit;
+    Word _lastWord;
+
+	internal Word LastWord => _lastWord;
     List<Tile> _tilesInWord;
 
     public Transform _tileDestination;
     List<Vector3> _directions = new List<Vector3>();
     private float _timeToDestination = 0.5f;
     private float _timeElapsed = 0;
-
-    private int _damageToDeal = 0;
 
     private int _totalWords; // used for logging
 
@@ -254,8 +251,8 @@ public class BattleManager : MonoBehaviour
 
                     if (_timeElapsed > _timeToDestination)
                     {
-                        Debug.Log($"{_enemy.CurrentHealth} - {_damageToDeal}");
-						_enemy.CurrentHealth -= _damageToDeal;
+                        Debug.Log($"{_enemy.CurrentHealth} - {_wordToSubmit.EffectiveDamage}");
+						_enemy.CurrentHealth -= _wordToSubmit.EffectiveDamage;
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
                     break;
@@ -315,10 +312,6 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case PostPlayerTurnState.Attack_Enemy:
-                _damageToDeal = _tilesInWord.Count * (1 + (_tilesInWord.Count - 3) / 10); // first term here is a placeholder, will be changed to actual scoring calculation
-                Debug.Log($"Damage Pre Relics: {_damageToDeal}");
-                _damageToDeal = Player.INSTANCE._inventory.RunPlayerDamageModRelics(_damageToDeal, _wordToSubmit, _pOS);
-                Debug.Log($"Damage Post Relics: {_damageToDeal}");
 
                 for (int i = 0; i < _tilesInWord.Count; i++)
                 {
@@ -351,30 +344,24 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public bool TrySubmitWord(string word, List<Tile> tilesUsed)
+    public bool TrySubmitWord(string text, List<Tile> tilesUsed)
     {
         Debug.Assert(_battleState == BattleState.Player_Turn);
-        FPART newPOS;
-        if (WordChecker.INSTANCE.CheckWord(word, out newPOS))
-        {
-            Debug.Log($"Submitted {word} ({_pOS})");
-            Debug.Log(++_totalWords + " Word(s) Submitted");
 
-            _lastWordPOS = _pOS;
+        Word word;
+
+        if (WordChecker.INSTANCE.TryGetWord(text, tilesUsed, out word))
+        {
             _lastWord = _wordToSubmit;
             _wordToSubmit = word;
-            _pOS = newPOS;
-            _tilesInWord = new List<Tile>(tilesUsed);
 
             SetBattleState(BattleState.Post_Player_Turn);
             return true;
         }
         else
         {
-            _pOS = FPART.NONE;
             return false;
         }
-
     }
 
 	internal void SetEnemy(Enemy prefab)

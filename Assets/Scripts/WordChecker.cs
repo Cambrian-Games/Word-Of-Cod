@@ -1,4 +1,5 @@
 using odin.serialize.OdinSerializer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -64,8 +65,44 @@ public class WordChecker : MonoBehaviour
         return _allWords._dict.TryGetValue(word.ToLower(), out pOS);
 	}
 
-	// Update is called once per frame
-	void Update()
+    internal bool TryGetWord(string text, List<Tile> tilesUsed, out Word word)
+    {
+        Debug.Log("Checking: " + text);
+        Debug.Log("");
+
+        word = null;
+
+        if (!_allWords || _allWords._dict == null)
+        {
+            word = new Word(text, FPART.NONE, tilesUsed);
+            return true;
+        }
+
+        if (text.Length == 1)
+        {
+            char letter = text.ToLower()[0];
+            bool isWord = letter == 'a' || letter == 'i' || letter == 'o';
+
+            if (isWord)
+            {
+                word = new Word(text, FPART.NONE, tilesUsed);
+                return true;
+            }
+
+            return false;
+        }
+
+        if (_allWords._dict.TryGetValue(text.ToLower(), out FPART partsOfSpeech))
+        {
+            word = new Word(text, partsOfSpeech, tilesUsed);
+            return true;
+        }
+
+        return false;
+    }
+
+    // Update is called once per frame
+    void Update()
 	{
 #if UNITY_EDITOR
 		//runs once to test dict, after start, so every script inits first. No lateStart sadly

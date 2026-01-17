@@ -180,7 +180,7 @@ public class AttackCondition
 		Not_First_Turn,
 		[InspectorName("Turns Since Last Action")]
 		Turns_Since_Last_Action,
-		[InspectorName("Index of Last Action")]
+		[InspectorName(null), Obsolete]
 		Last_Action_Index,
 		[InspectorName("Length of Last Word")]
 		Last_Word_Length,
@@ -188,7 +188,7 @@ public class AttackCondition
 		Combo_Length,
 		[InspectorName("Combo Broken")]
 		Combo_Break,
-		[InspectorName("Enemy Killed Last Turn")]
+		[InspectorName(null), Obsolete]
 		Enemy_Killed,
 	}
 
@@ -237,7 +237,8 @@ public class AttackCondition
 			ConditionField.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
 			ConditionField.Turns_Since_Last_Action => owner._roundsSinceLastAction,
 			ConditionField.Last_Action_Index => owner.LastRuleIndex,
-			ConditionField.Last_Word_Length => BattleManager.INSTANCE.LastWord.Length,
+            // TODO fix, this is grabbing the previous turn's word
+			ConditionField.Last_Word_Length => BattleManager.INSTANCE.LastWord.Text.Length,
 			ConditionField.Combo_Length => throw new NotImplementedException(),
 			_ => throw new NotImplementedException()
 		};
@@ -328,8 +329,10 @@ public class AttackEffect
 		switch (_effectKind)
 		{
 			case EffectKind.Standard_Attack:
-				int moddedDamage = Player.INSTANCE._inventory.RunEnemyDamageModRelics(_damage);
-				Player.INSTANCE.CurrentHealth -= moddedDamage;
+                
+                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out int modifiedDamage);
+                Player.INSTANCE.CurrentHealth -= modifiedDamage;
+
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
 
