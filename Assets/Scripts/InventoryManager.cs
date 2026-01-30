@@ -10,25 +10,12 @@ public class InventoryManager : MonoBehaviour
 
     private Dictionary<RelicEffect.EventTiming, HashSet<Relic>> _sortedPassiveRelics;
 
-    public FRELICID _relicInventory;
+    public List<int> _passiveRelicInventory = new List<int>();
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        int startingRelic = Random.Range(0, 3);
-        switch (startingRelic)
-        {
-            case 0:
-                _relicInventory = FRELICID.NOUNUP;
-                break;
-            case 1:
-                _relicInventory = FRELICID.YUP;
-                break;
-            case 2:
-                _relicInventory = FRELICID.RESISTUP;
-                break;
-        }
-        
-        Debug.Log(_relicInventory);
+        Debug.Log(_passiveRelicInventory);
 
         if (_sortedPassiveRelics != null)
         {
@@ -53,6 +40,8 @@ public class InventoryManager : MonoBehaviour
                 _sortedPassiveRelics[eff.Event].Add(_passiveRelics[i]);
             }
         }
+
+        _passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
     }
 
     // Update is called once per frame
@@ -67,7 +56,8 @@ public class InventoryManager : MonoBehaviour
 
         foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Word_Submit])
         {
-            // TODO check if we have the relic, by ID
+            if (!_passiveRelicInventory.Contains(relic.ID))
+                continue;
 
             result += relic.OnWordSubmit(word);
         }
@@ -95,7 +85,8 @@ public class InventoryManager : MonoBehaviour
 
         foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
         {
-            // TODO check if we have the relic, by ID
+            if (!_passiveRelicInventory.Contains(relic.ID))
+                continue;
 
             result += relic.OnEnemyAttack(baseDamage);
         }

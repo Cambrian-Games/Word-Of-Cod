@@ -26,11 +26,11 @@ public class Word
     private FPART _pOS;
     public FPART PartsOfSpeech => _pOS;
 
-    private int _baseDamage;
-    public int BaseDamage => _baseDamage;
+    private float _baseDamage;
+    public float BaseDamage => _baseDamage;
     private List<Tile> _tilesUsed;
     private float _modifiedDamage = 0;
-    public int EffectiveDamage => _modifiedDamage != 0 ? (int) _modifiedDamage : _baseDamage;
+    public int EffectiveDamage => _modifiedDamage != 0 ? (int) _modifiedDamage : (int) _baseDamage;
 
     public Word(string text, FPART pOS, List<Tile> tilesUsed)
     {
@@ -38,7 +38,7 @@ public class Word
         _pOS = pOS;
         _tilesUsed = new List<Tile>(tilesUsed);
 
-        _baseDamage = _text.Length * (1 + (_text.Length - 3) / 10);
+        _baseDamage = _text.Length * (1 + (_text.Length - 3) / 10.0f);
     }
 
     internal void ModifyDamage(RelicEffect.Result result)
@@ -458,76 +458,4 @@ public enum HighlightState
 	Highlighted,
 	Selected,
 	Selected_And_Highlighted
-}
-
-//we have up to 64 different relics (does not include charging relics)
-//meant to be binary flags
-//[Flags]
-public enum FRELICID : long
-{
-	INVALID		= 0x0000000000000000,
-	NOUNUP		= 0x0000000000000001, //increase damage of noun-tagged words
-	YUP			= 0x0000000000000002, //increase damage of words with Y
-	RESISTUP	= 0x0000000000000004, //reduce incoming damage
-	NI1			= 0x0000000000000008, //not implemented
-	NI2			= 0x0000000000000010, //not implemented
-	NI3			= 0x0000000000000020, //not implemented
-	NI4			= 0x0000000000000040, //not implemented
-	NI5			= 0x0000000000000080, //not implemented
-	NI6			= 0x0000000000000100, //not implemented
-	NI7			= 0x0000000000000200, //not implemented
-	NI8			= 0x0000000000000400, //not implemented
-	NI9			= 0x0000000000000800, //not implemented
-	NI10		= 0x0000000000001000, //not implemented
-	NI11		= 0x0000000000002000, //not implemented
-	NI12		= 0x0000000000004000, //not implemented
-	NI13		= 0x0000000000008000, //not implemented
-	NI14		= 0x0000000000010000, //not implemented
-	NI15		= 0x0000000000020000, //not implemented
-	NI16		= 0x0000000000040000, //not implemented
-	NI17		= 0x0000000000080000, //not implemented
-	NI18		= 0x0000000000100000, //not implemented
-	NI19		= 0x0000000000200008, //not implemented
-	NI20		= 0x0000000000400008, //not implemented
-	NI21		= 0x0000000000800000, //not implemented
-	NI22		= 0x0000000001000000, //not implemented
-	NI23		= 0x0000000002000000, //not implemented
-	NI24		= 0x0000000004000000, //not implemented
-	NI25		= 0x0000000008000000, //not implemented
-	NI26		= 0x0000000010000000, //not implemented
-	NI27		= 0x0000000020000000, //not implemented
-	NI28		= 0x0000000040000000, //not implemented
-	NI29		= 0x0000000080000000, //not implemented
-	NI30		= 0x0000000100000000, //not implemented
-	NI31		= 0x0000000200000000, //not implemented
-	NI32		= 0x0000000400000000, //not implemented
-	NI33		= 0x0000000800000000, //not implemented
-	NI34		= 0x0000001000000000, //not implemented
-	NI35		= 0x0000002000000000, //not implemented
-	NI36		= 0x0000004000000000, //not implemented
-	NI37		= 0x0000008000000000, //not implemented
-	NI38		= 0x0000010000000000, //not implemented
-	NI39		= 0x0000020000000000, //not implemented
-	NI40		= 0x0000040000000000, //not implemented
-	NI41		= 0x0000080000000000, //not implemented
-	NI42		= 0x0000100000000000, //not implemented
-	NI43		= 0x0000200000000000, //not implemented
-	NI44		= 0x0000400000000000, //not implemented
-	NI45		= 0x0000800000000000, //not implemented
-	NI46		= 0x0001000000000000, //not implemented
-	NI47		= 0x0002000000000000, //not implemented
-	NI48		= 0x0004000000000000, //not implemented
-	NI49		= 0x0008000000000000, //not implemented
-	NI50		= 0x0010000000000000, //not implemented
-	NI51		= 0x0020000000000000, //not implemented
-	NI52		= 0x0040000000000000, //not implemented
-	NI53		= 0x0080000000000000, //not implemented
-	NI54		= 0x0100000000000000, //not implemented
-	NI55		= 0x0200000000000000, //not implemented
-	NI56		= 0x0400000000000000, //not implemented
-	NI57		= 0x0800000000000000, //not implemented
-	NI58		= 0x1000000000000000, //not implemented
-	NI59		= 0x2000000000000000, //not implemented
-	NI60		= 0x4000000000000000, //not implemented
-	//OTHER		= 0xFFFFFFFFFFFFFFFF, //placeholder for end rn
 }

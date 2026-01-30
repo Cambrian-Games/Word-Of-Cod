@@ -9,6 +9,8 @@ public class Relic : MonoBehaviour
 {
     private int _id = -1; // will be assigned by the inventory manager
 
+    public int ID => _id;
+
     [SerializeField]
     private string _displayName;
 
