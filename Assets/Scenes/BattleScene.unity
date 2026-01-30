@@ -1825,7 +1825,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40f98b9e74336a09d98d8392c622b5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
-  _passiveRelics: []
+  _passiveRelics:
+  - {fileID: 7595469887087623229, guid: ae5e66dc0aa224d46b9fe9ac02a7fea2, type: 3}
+  - {fileID: 7595469887087623229, guid: f2cbbd203b45c8d489656d6f62fa2165, type: 3}
+  - {fileID: 7595469887087623229, guid: 3955e81aa2864de43a829743b753012b, type: 3}
+  _passiveRelicInventory: 
 --- !u!1 &1358918173
 GameObject:
   m_ObjectHideFlags: 0

@@ -54,6 +54,9 @@ public class InventoryManager : MonoBehaviour
     {
         RelicEffect.Result result = new RelicEffect.Result();
 
+        if (!_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Word_Submit))
+            return;
+
         foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Word_Submit])
         {
             if (!_passiveRelicInventory.Contains(relic.ID))
@@ -82,6 +85,12 @@ public class InventoryManager : MonoBehaviour
     internal void OnEnemyAttack(int baseDamage, out int modifiedDamage)
     {
         RelicEffect.Result result = new RelicEffect.Result();
+
+        if (!_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Enemy_Attack))
+        {
+            modifiedDamage = baseDamage;
+            return;
+        }
 
         foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
         {

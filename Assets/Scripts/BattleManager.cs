@@ -48,7 +48,9 @@ public class BattleManager : MonoBehaviour
     Word _lastWord;
 
 	internal Word LastWord => _lastWord;
-    List<Tile> _tilesInWord;
+
+    // probably should replace all instances long-term
+    List<Tile> TilesInWord => _wordToSubmit.Tiles;
 
     public Transform _tileDestination;
     List<Vector3> _directions = new List<Vector3>();
@@ -168,7 +170,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Post_Player_Turn:
-                GameBoard.INSTANCE.DisconnectTiles(_tilesInWord, newParent: this.transform);
+                GameBoard.INSTANCE.DisconnectTiles(TilesInWord, newParent: this.transform);
                 GameBoard.INSTANCE.LockStateMachine(true);
                 SetPostPlayerTurnState(PostPlayerTurnState.Display_Word);
                 break;
@@ -213,9 +215,9 @@ public class BattleManager : MonoBehaviour
                 case PostPlayerTurnState.Display_Word:
 
                     float dTWord = Time.deltaTime;
-                    for (int i = 0; i < _tilesInWord.Count; i++)
+                    for (int i = 0; i < TilesInWord.Count; i++)
                     {
-                        _tilesInWord[i].transform.position += _directions[i] * dTWord / _timeToDestination;
+                        TilesInWord[i].transform.position += _directions[i] * dTWord / _timeToDestination;
                     }
 
                     _timeElapsed += dTWord;
@@ -242,9 +244,9 @@ public class BattleManager : MonoBehaviour
                 case PostPlayerTurnState.Attack_Enemy:
 
                     float dTAttack = Time.deltaTime;
-                    for (int i = 0; i < _tilesInWord.Count; i++)
+                    for (int i = 0; i < TilesInWord.Count; i++)
                     {
-                        _tilesInWord[i].transform.position += _directions[i] * dTAttack / _timeToDestination;
+                        TilesInWord[i].transform.position += _directions[i] * dTAttack / _timeToDestination;
                     }
 
                     _timeElapsed += dTAttack;
@@ -272,7 +274,7 @@ public class BattleManager : MonoBehaviour
         {
             case PostPlayerTurnState.Display_Word:
                 _directions.Clear();
-				_tilesInWord.ForEach(tile => tile.OnSubmit());
+				TilesInWord.ForEach(tile => tile.OnSubmit());
 
 				if (Player.INSTANCE.CurrentHealth <= 0)
 				{
@@ -294,14 +296,14 @@ public class BattleManager : MonoBehaviour
                 // TODO this hard-codes the width of the tile in the first Vector3.left
 
                 Vector2 farLeft = _tileDestination.transform.position +
-                    (_tilesInWord.Count / 2.0f) * Vector3.left +
-                    ((_tilesInWord.Count - 1) / 2.0f) * (BoardConfig.INSTANCE.TileSpacing.x) * Vector3.left;
+                    (TilesInWord.Count / 2.0f) * Vector3.left +
+                    ((TilesInWord.Count - 1) / 2.0f) * (BoardConfig.INSTANCE.TileSpacing.x) * Vector3.left;
 
-                for (int i = 0; i < _tilesInWord.Count; i++)
+                for (int i = 0; i < TilesInWord.Count; i++)
                 {
                     // TODO this hardcodes the width of the tile with the 1 and 0.5f
                     Vector3 destPosition = farLeft + ((1 + BoardConfig.INSTANCE.TileSpacing.x) * i + 0.5f) * Vector2.right;
-                    _directions.Add(destPosition - _tilesInWord[i].transform.position);
+                    _directions.Add(destPosition - TilesInWord[i].transform.position);
                 }
 
                 _timeElapsed = 0.0f;
@@ -313,9 +315,9 @@ public class BattleManager : MonoBehaviour
 
             case PostPlayerTurnState.Attack_Enemy:
 
-                for (int i = 0; i < _tilesInWord.Count; i++)
+                for (int i = 0; i < TilesInWord.Count; i++)
                 {
-                    _directions.Add(_enemy.transform.position - _tilesInWord[i].transform.position);
+                    _directions.Add(_enemy.transform.position - TilesInWord[i].transform.position);
                 }
 
                 _timeElapsed = 0.0f;
@@ -323,12 +325,12 @@ public class BattleManager : MonoBehaviour
 
             case PostPlayerTurnState.Cleanup:
                 
-                for (int i = 0; i < _tilesInWord.Count; i++)
+                for (int i = 0; i < TilesInWord.Count; i++)
                 {
-                    Destroy(_tilesInWord[i].gameObject);
+                    Destroy(TilesInWord[i].gameObject);
                 }
 
-                _tilesInWord.Clear();
+                TilesInWord.Clear();
 
                 if (_enemy.CurrentHealth <= 0)
                 {
@@ -354,6 +356,10 @@ public class BattleManager : MonoBehaviour
         {
             _lastWord = _wordToSubmit;
             _wordToSubmit = word;
+
+            // This may need to move elsewhere if we have visual feedback
+
+            Player.INSTANCE._inventory.OnWordSubmit(_wordToSubmit);
 
             SetBattleState(BattleState.Post_Player_Turn);
             return true;

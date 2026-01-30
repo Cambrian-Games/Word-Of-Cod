@@ -49,9 +49,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tile
   _tmpro: {fileID: 1438421192466119716}
   _letter: 0
-  _normalSprite: {fileID: 21300000, guid: 5726e906cfef8be4ba35f4d9b32caebe, type: 3}
-  _spinySprite: {fileID: 21300000, guid: 1fe6ff2e1a814c04f870ccb3be6d6376, type: 3}
+  _normalSprite: {fileID: 21300000, guid: d5dd23e17fabc404886416bfc86f438c, type: 3}
+  _spinySprite: {fileID: 21300000, guid: 44e7f864256e38744a2acb20a2a7e9c3, type: 3}
   _sandySprite: {fileID: 0}
+  _spinyDamage: 10
   _spriteRenderer: {fileID: 4036130178732745845}
   _normalColor: {r: 1, g: 1, b: 1, a: 1}
   _highlightedColor: {r: 1, g: 1, b: 0.759434, a: 1}

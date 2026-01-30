@@ -24,14 +24,12 @@ public class Relic : MonoBehaviour
 
     public void SetID(int i)
     {
-        if (_id == -1)
+        if (_id != -1 && _id != i)
         {
-            _id = i;
+            Debug.LogWarning($"Overwriting ID {_id} with {i}");
         }
-        else
-        {
-            Debug.LogError("Cannot set ID more than once");
-        }
+
+        _id = i;
     }
 
     internal RelicEffect.Result OnWordSubmit(Word word)
@@ -200,7 +198,17 @@ public class RelicEffect
                 continue;
             }
 
-            res._values[_valueToModify] += _value;
+            float newValue = res._values.GetValueOrDefault(_valueToModify) + _value;
+
+            if (newValue != 0)
+            {
+                res._values[_valueToModify] = newValue;
+            }
+            else
+            {
+                res._values.Remove(_valueToModify);
+            }
+            
         }
 
         return res;
@@ -227,7 +235,16 @@ public class RelicEffect
                 continue;
             }
 
-            res._values[_valueToModify] += _value;
+            float newValue = res._values.GetValueOrDefault(_valueToModify) + _value;
+
+            if (newValue != 0)
+            {
+                res._values[_valueToModify] = _value;
+            }
+            else
+            {
+                res._values.Remove(_valueToModify);
+            }
         }
 
         return res;
@@ -236,6 +253,8 @@ public class RelicEffect
     private int CountWordSubmitConditionPasses(Word word, RelicCondition condition)
     {
         int numPasses = 0;
+
+        string text = word.Text;
 
         switch (condition)
         {
@@ -253,7 +272,7 @@ public class RelicEffect
                     foreach (char filterChar in _filterString)
                     {
                         // check how many times each character is contained in the word, and take the lowest value
-                        numPasses = Mathf.Min(numPasses, word.Text.Count(letter => letter == filterChar));
+                        numPasses = Mathf.Min(numPasses, text.Count(letter => letter == filterChar));
                     }
                 }
                 break;
@@ -267,7 +286,7 @@ public class RelicEffect
                     foreach (char filterChar in _filterString)
                     {
                         // check how many times each character is contained in the word
-                        numPasses += word.Text.Count(letter => letter == filterChar);
+                        numPasses += text.Count(letter => letter == filterChar);
                     }
                 }
                 break;
@@ -276,13 +295,13 @@ public class RelicEffect
                 {
                     for (char c = 'A'; c <= 'Z'; c++)
                     {
-                        numPasses += word.Text.Contains(c) ? 1 : 0;
+                        numPasses += text.Contains(c) ? 1 : 0;
                     }
                 }
                 else
                 {
                     // check if each character is contained in the word
-                    numPasses = _filterString.Count(filterChar => word.Text.Contains(filterChar));
+                    numPasses = _filterString.Count(filterChar => text.Contains(filterChar));
                 }
                 break;
             case RelicCondition.Contains_Sequence:
@@ -290,21 +309,19 @@ public class RelicEffect
                 {
                     numPasses = 1;
                 }
-                else if (word.Text.Length < _filterString.Length)
+                else if (text.Length < _filterString.Length)
                 {
                     numPasses = 0;
                 }
                 else
                 {
-                    string wordTmp = word.Text;
-
-                    int matchIndex = wordTmp.IndexOf(_filterString);
+                    int matchIndex = text.IndexOf(_filterString);
 
                     while (matchIndex != -1)
                     {
                         numPasses++;
-                        wordTmp = wordTmp.Substring(matchIndex + _filterString.Length);
-                        matchIndex = wordTmp.IndexOf(_filterString);
+                        text = text.Substring(matchIndex + _filterString.Length);
+                        matchIndex = text.IndexOf(_filterString);
                     }
                 }
                 break;
@@ -315,7 +332,7 @@ public class RelicEffect
                 }
                 else
                 {
-                    numPasses = !_filterString.Any(filterChar => word.Text.Contains(filterChar)) ? 1 : 0;
+                    numPasses = !_filterString.Any(filterChar => text.Contains(filterChar)) ? 1 : 0;
                 }
                 break;
             case RelicCondition.Contains_All_POS:
@@ -354,15 +371,15 @@ public class RelicEffect
                 }
                 break;
             case RelicCondition.Double_Letter:
-                if (word.Text.Length < 2)
+                if (text.Length < 2)
                 {
                     numPasses = 0;
                 }
                 else
                 {
-                    for (int i = 0; i < word.Text.Length - 1; i++)
+                    for (int i = 0; i < text.Length - 1; i++)
                     {
-                        if (word.Text[i] == word.Text[i + 1])
+                        if (text[i] == text[i + 1])
                         {
                             numPasses++;
                             i++; //triple letters, if they exist, don't double count.
@@ -371,21 +388,21 @@ public class RelicEffect
                 }
                 break;
             case RelicCondition.Middle_Letter:
-                if (word.Text.Length % 2 == 0)
+                if (text.Length % 2 == 0)
                 {
                     numPasses = 0;
                 }
                 else
                 {
-                    numPasses = _filterString.Contains(word.Text[word.Text.Length / 2]) ? 1 : 0;
+                    numPasses = _filterString.Contains(text[text.Length / 2]) ? 1 : 0;
                 }
                 break;
             case RelicCondition.Palindrome:
                 numPasses = 1;
 
-                for (int i = 0; i < word.Text.Length / 2; i++) // we can ignore the middle character if this is odd
+                for (int i = 0; i < text.Length / 2; i++) // we can ignore the middle character if this is odd
                 {
-                    if (word.Text[i] != word.Text[^(i + 1)])
+                    if (text[i] != text[^(i + 1)])
                     {
                         numPasses = 0;
                         break;
@@ -394,7 +411,7 @@ public class RelicEffect
                 break;
             case RelicCondition.Alphabetical_Chain:
 
-                if (word.Text.Length <= 2)
+                if (text.Length <= 2)
                 {
                     numPasses = 0;
                     break;
@@ -403,7 +420,7 @@ public class RelicEffect
                 int currentChain = 0;
                 char lastChar = '\0';
 
-                for (int i = 0; i < word.Text.Length; i++)
+                for (int i = 0; i < text.Length; i++)
                 {
                     if (currentChain == 0)
                     {
@@ -411,7 +428,7 @@ public class RelicEffect
                     }
                     else
                     {
-                        if (word.Text[i] >= lastChar)
+                        if (text[i] >= lastChar)
                         {
                             currentChain++;
 
@@ -426,7 +443,7 @@ public class RelicEffect
                         }
                     }
 
-                    lastChar = word.Text[i];
+                    lastChar = text[i];
                 }
 
                 // don't allow chains less than 3
@@ -439,10 +456,10 @@ public class RelicEffect
                 break;
             case RelicCondition.Fully_Alphabetized_Word:
                 int longestChain = CountWordSubmitConditionPasses(word, RelicCondition.Alphabetical_Chain);
-                numPasses = longestChain == word.Text.Length ? longestChain : 0;
+                numPasses = longestChain == text.Length ? longestChain : 0;
                 break;
             case RelicCondition.Rev_Alphabetical_Chain:
-                if (word.Text.Length <= 2)
+                if (text.Length <= 2)
                 {
                     numPasses = 0;
                     break;
@@ -451,7 +468,7 @@ public class RelicEffect
                 int currentChainRev = 0;
                 char lastCharRev = '\0';
 
-                for (int i = 0; i < word.Text.Length; i++)
+                for (int i = 0; i < text.Length; i++)
                 {
                     if (currentChainRev == 0)
                     {
@@ -459,7 +476,7 @@ public class RelicEffect
                     }
                     else
                     {
-                        if (word.Text[i] <= lastCharRev)
+                        if (text[i] <= lastCharRev)
                         {
                             currentChainRev++;
 
@@ -474,7 +491,7 @@ public class RelicEffect
                         }
                     }
 
-                    lastChar = word.Text[i];
+                    lastChar = text[i];
                 }
 
                 // don't allow chains less than 3
@@ -486,7 +503,7 @@ public class RelicEffect
                 break;
             case RelicCondition.Fully_Rev_Alphabetized_Word:
                 int longestChainRev = CountWordSubmitConditionPasses(word, RelicCondition.Rev_Alphabetical_Chain);
-                numPasses = longestChainRev == word.Text.Length ? longestChainRev : 0;
+                numPasses = longestChainRev == text.Length ? longestChainRev : 0;
                 break;
 
             default:

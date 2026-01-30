@@ -29,6 +29,7 @@ public class Word
     private float _baseDamage;
     public float BaseDamage => _baseDamage;
     private List<Tile> _tilesUsed;
+    public List<Tile> Tiles => _tilesUsed;
     private float _modifiedDamage = 0;
     public int EffectiveDamage => _modifiedDamage != 0 ? (int) _modifiedDamage : (int) _baseDamage;
 

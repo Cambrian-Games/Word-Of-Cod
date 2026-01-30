@@ -42,7 +42,21 @@ public class Tile: MonoBehaviour
 	private HighlightState _highlightState = HighlightState.Normal;
 	public HighlightState HighlightState { get => _highlightState; set => SetHighlightState(value); }
 
-	void Update()
+    private void Start()
+    {
+        if (_spriteRenderer)
+        {
+            _spriteRenderer.sprite = _tileKind switch
+            {
+                TileKind.Normal => _normalSprite,
+                TileKind.Spiny => _spinySprite,
+                TileKind.Sandy => _sandySprite,
+                _ => throw new InvalidOperationException(),
+            };
+        }
+    }
+
+    void Update()
 	{
 		if (_tmpro)
 		{
