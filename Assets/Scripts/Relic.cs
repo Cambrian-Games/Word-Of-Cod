@@ -140,10 +140,12 @@ public class RelicEffect
     [SerializeField]
     private FPART _filterPOS;
 
-    [SerializeField, Header("How many times this relic's effect should be applied, \nif the condition is met more than once. 0 = No Limit")]
+    // cap on how many times the effect can trigger at once
+    [SerializeField]
     private int _numTimesToApply = 0;
 
-    [SerializeField, Header("If conditions are met, chance to trigger this effect")]
+    // if condition is met, chance to trigger
+    [SerializeField]
     private float _chanceToTrigger = 1;
 
     [SerializeField]

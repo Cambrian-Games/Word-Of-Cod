@@ -31,7 +31,7 @@ public class Word
     private List<Tile> _tilesUsed;
     public List<Tile> Tiles => _tilesUsed;
     private float _modifiedDamage = 0;
-    public int EffectiveDamage => _modifiedDamage != 0 ? (int) _modifiedDamage : (int) _baseDamage;
+    public int EffectiveDamage => _modifiedDamage != 0 ? Mathf.RoundToInt(_modifiedDamage) : Mathf.RoundToInt(_baseDamage);
 
     public Word(string text, FPART pOS, List<Tile> tilesUsed)
     {
