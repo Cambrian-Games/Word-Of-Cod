@@ -45,9 +45,10 @@ public class BattleManager : MonoBehaviour
     // Player Turn Data
 
     Word _wordToSubmit;
-    Word _lastWord;
+    Word _previousWord;
 
-	internal Word LastWord => _lastWord;
+	internal Word PreviousWord => _previousWord;
+    internal Word MostRecentWord => _wordToSubmit;
 
     // probably should replace all instances long-term
     List<Tile> TilesInWord => _wordToSubmit.Tiles;
@@ -224,7 +225,7 @@ public class BattleManager : MonoBehaviour
 
                     if (_timeElapsed > _timeToDestination)
                     {
-                        if (_lastWord != null)
+                        if (_previousWord != null)
                         {
                             SetPostPlayerTurnState(PostPlayerTurnState.Display_Combo);
                         }
@@ -354,7 +355,7 @@ public class BattleManager : MonoBehaviour
 
         if (WordChecker.INSTANCE.TryGetWord(text, tilesUsed, out word))
         {
-            _lastWord = _wordToSubmit;
+            _previousWord = _wordToSubmit;
             _wordToSubmit = word;
 
             // This may need to move elsewhere if we have visual feedback

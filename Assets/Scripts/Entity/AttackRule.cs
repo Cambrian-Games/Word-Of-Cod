@@ -237,8 +237,7 @@ public class AttackCondition
 			ConditionField.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
 			ConditionField.Turns_Since_Last_Action => owner._roundsSinceLastAction,
 			ConditionField.Last_Action_Index => owner.LastRuleIndex,
-            // TODO fix, this is grabbing the previous turn's word
-			ConditionField.Last_Word_Length => BattleManager.INSTANCE.LastWord.Text.Length,
+			ConditionField.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord.Text.Length,
 			ConditionField.Combo_Length => throw new NotImplementedException(),
 			_ => throw new NotImplementedException()
 		};

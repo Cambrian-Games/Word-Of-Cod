@@ -19,7 +19,9 @@ public class RelicEffectPropertyDrawer : PropertyDrawer
 		position.y += Y_OFFSET;
 		SerializedProperty condition = property.FindPropertyRelative("_condition");
 		EditorGUI.PropertyField(position, condition);
-		position.y += EditorGUIUtility.standardVerticalSpacing; // add a bit of space between the effect kind and parameters
+
+        // The valid conditions change depending on the event. Right now the only conditions we have are for On_Word_Submit,
+        //  this will probably change later.
 
         RelicEffect.RelicCondition conditionKind = (RelicEffect.RelicCondition) condition.enumValueIndex;
 
@@ -106,16 +108,12 @@ public class RelicEffectPropertyDrawer : PropertyDrawer
             case RelicEffect.RelicCondition.Alphabetical_Chain:
             case RelicEffect.RelicCondition.Fully_Alphabetized_Word:
             case RelicEffect.RelicCondition.Rev_Alphabetical_Chain:
-                lines = 1;
-                break;
-
             case RelicEffect.RelicCondition.Fully_Rev_Alphabetized_Word:
-
                 lines = 1;
                 break;
         }
 
-		lines += 9; // boilerplate
+		lines += 9; // 6 fields, 3 lines of labels
 
 		return lines * Y_OFFSET + EditorGUIUtility.standardVerticalSpacing;
 	}

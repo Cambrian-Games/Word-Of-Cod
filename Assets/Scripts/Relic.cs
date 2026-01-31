@@ -1,8 +1,6 @@
-using odin.serialize.OdinSerializer.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using UnityEngine;
 
 public class Relic : MonoBehaviour
@@ -53,7 +51,7 @@ public class Relic : MonoBehaviour
 
         foreach (RelicEffect effect in _effects)
         {
-            if (effect.Event != RelicEffect.EventTiming.On_Word_Submit)
+            if (effect.Event != RelicEffect.EventTiming.On_Enemy_Attack)
                 continue;
 
             res += effect.OnEnemyAttack(baseDamage);
