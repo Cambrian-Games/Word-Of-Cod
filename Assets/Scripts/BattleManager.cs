@@ -351,9 +351,7 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Assert(_battleState == BattleState.Player_Turn);
 
-        Word word;
-
-        if (WordChecker.INSTANCE.TryGetWord(text, tilesUsed, out word))
+        if (WordChecker.INSTANCE.TryGetWord(text, tilesUsed, out Word word))
         {
             _previousWord = _wordToSubmit;
             _wordToSubmit = word;

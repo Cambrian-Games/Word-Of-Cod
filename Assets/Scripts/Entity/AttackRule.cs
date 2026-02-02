@@ -329,8 +329,8 @@ public class AttackEffect
 		{
 			case EffectKind.Standard_Attack:
                 
-                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out int modifiedDamage);
-                Player.INSTANCE.CurrentHealth -= modifiedDamage;
+                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedDamage);
+                Player.INSTANCE.CurrentHealth -= (int) modifiedDamage;
 
 				((StandardAttackData)data)._hasAttacked = true;
 				break;

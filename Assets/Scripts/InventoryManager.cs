@@ -79,7 +79,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    internal void OnEnemyAttack(int baseDamage, out int modifiedDamage)
+    internal void OnEnemyAttack(float baseDamage, out float modifiedDamage)
     {
         RelicEffect.Result result = new RelicEffect.Result();
 
@@ -109,8 +109,7 @@ public class InventoryManager : MonoBehaviour
         float totalResistBonus = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Bonus)
             + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus);
 
-        float totalDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
-        modifiedDamage = (int) totalDamage;
+        modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
 
         foreach (var item in result._values)
         {

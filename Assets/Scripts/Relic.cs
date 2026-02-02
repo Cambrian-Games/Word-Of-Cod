@@ -14,6 +14,7 @@ public class Relic : MonoBehaviour
 
     [SerializeField]
     private Sprite _icon;
+    public Sprite Icon => _icon;
 
     [SerializeField]
     private List<RelicEffect> _effects;
@@ -45,7 +46,7 @@ public class Relic : MonoBehaviour
         return res;
     }
 
-    internal RelicEffect.Result OnEnemyAttack(int baseDamage)
+    internal RelicEffect.Result OnEnemyAttack(float baseDamage)
     {
         RelicEffect.Result res = new RelicEffect.Result();
 
@@ -214,7 +215,7 @@ public class RelicEffect
         return res;
     }
 
-    internal Result OnEnemyAttack(int baseDamage)
+    internal Result OnEnemyAttack(float baseDamage)
     {
         int numPasses = CountEnemyAttackConditionPasses(baseDamage, _condition);
 
@@ -293,10 +294,16 @@ public class RelicEffect
             case RelicCondition.Contains_Unique_Letters:
                 if (_filterString.Length == 0)
                 {
-                    for (char c = 'A'; c <= 'Z'; c++)
+                    // Switch this to hashset and iterate over text
+
+                    HashSet<char> letters = new HashSet<char>();
+
+                    foreach (char c in text)
                     {
-                        numPasses += text.Contains(c) ? 1 : 0;
+                        letters.Add(c);
                     }
+
+                    numPasses = letters.Count;
                 }
                 else
                 {
@@ -420,6 +427,9 @@ public class RelicEffect
                 int currentChain = 0;
                 char lastChar = '\0';
 
+                // does stack overflow have a cleaner implementation of this?
+                // It's O(n) so we won't have a faster one but cleaner might be possible
+
                 for (int i = 0; i < text.Length; i++)
                 {
                     if (currentChain == 0)
@@ -514,7 +524,7 @@ public class RelicEffect
         return numPasses;
     }
 
-    private int CountEnemyAttackConditionPasses(int baseDamage, RelicCondition condition)
+    private int CountEnemyAttackConditionPasses(float baseDamage, RelicCondition condition)
     {
         int numPasses = 0;
 
