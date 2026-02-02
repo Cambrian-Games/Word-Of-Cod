@@ -37,6 +37,11 @@ public class Enemy : Entity
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
 
+    internal string _currentForecast = "";
+
+    [SerializeField]
+    private string _defaultForecast = "$NAME is waiting.";
+
 	protected override void Awake()
 	{
 		base.Awake();
@@ -126,8 +131,17 @@ public class Enemy : Entity
 
 	private void UpdateForecast()
 	{
-		//No-Op for now, will talk to the BattleManager later
-	}
+        _currentForecast = null;
+
+        if (CurrentInterrupt != null)
+            _currentForecast = CurrentInterrupt.GetForecast();
+
+        else if (CurrentRule != null)
+            _currentForecast = CurrentRule.GetForecast();
+
+        if (_currentForecast == null || _currentForecast.Length == 0)
+            _currentForecast = _defaultForecast;
+    }
 
 	public override void StartTurn()
 	{
@@ -290,4 +304,9 @@ public class Enemy : Entity
 			CurrentRule.StartRule();
 		}
 	}
+
+    internal object FormattedForecast()
+    {
+        return _currentForecast.Replace("$NAME", this._displayName);
+    }
 }

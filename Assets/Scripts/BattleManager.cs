@@ -168,6 +168,7 @@ public class BattleManager : MonoBehaviour
             case BattleState.Player_Turn:
                 TileSelector.INSTANCE._isSelectingEnabled = true;
 				_enemyTurnHandler.StartRound();
+                Debug.Log("Forecast: " + _enemy.FormattedForecast()); 
                 break;
 
             case BattleState.Post_Player_Turn:
