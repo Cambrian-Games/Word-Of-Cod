@@ -431,7 +431,7 @@ public class RelicEffect
                 // It's O(n) so we won't have a faster one but cleaner might be possible
 
                 for (int i = 0; i < text.Length; i++)
-                {
+                {// see if SO knows a faster way?
                     if (currentChain == 0)
                     {
                         currentChain = 1;
