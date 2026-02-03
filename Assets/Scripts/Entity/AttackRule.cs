@@ -330,6 +330,9 @@ public class AttackEffect
 			case EffectKind.Standard_Attack:
                 
                 Player.INSTANCE._inventory.OnEnemyAttack(_damage, out int modifiedDamage);
+                //kinda bad but good for now
+                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup(modifiedDamage);
+
                 Player.INSTANCE.CurrentHealth -= modifiedDamage;
 
 				((StandardAttackData)data)._hasAttacked = true;

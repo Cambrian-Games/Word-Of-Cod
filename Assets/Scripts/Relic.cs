@@ -421,7 +421,7 @@ public class RelicEffect
                 char lastChar = '\0';
 
                 for (int i = 0; i < text.Length; i++)
-                {
+                {// see if SO knows a faster way?
                     if (currentChain == 0)
                     {
                         currentChain = 1;

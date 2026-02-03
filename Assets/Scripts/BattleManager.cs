@@ -36,6 +36,9 @@ public class BattleManager : MonoBehaviour
     
     [SerializeField]
     private Enemy _enemyPrefab;
+    
+    [SerializeField]
+    private GameObject _enemyDamagePopup;
 
     private Enemy _enemy;
     public Enemy CurrentEnemy => _enemy;
@@ -255,6 +258,7 @@ public class BattleManager : MonoBehaviour
                     if (_timeElapsed > _timeToDestination)
                     {
                         Debug.Log($"{_enemy.CurrentHealth} - {_wordToSubmit.EffectiveDamage}");
+                        _enemyDamagePopup.GetComponent<DamagePopupScript>().Popup(_wordToSubmit.EffectiveDamage);
 						_enemy.CurrentHealth -= _wordToSubmit.EffectiveDamage;
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
