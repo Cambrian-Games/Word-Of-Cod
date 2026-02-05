@@ -14,6 +14,13 @@ public class CharacterWeights : ScriptableObject
 	/// </summary>
 	public float _minVowelRate = 0.2f;
 
+    /// <summary>
+    /// DO NOT MODIFY THIS AT RUNTIME. It has to be public for the custom editor to work, but modifying it via code during gameplay will save those changes.
+    /// </summary>
+    public int[] _baseScores;
+
+    public int Score(char c) => _baseScores[c - 'A'];
+
 	private static readonly char[] VOWELS = { 'A', 'E', 'I', 'O', 'U' };
 
 	public char[] RandomChars(int count, BoardState state = null)

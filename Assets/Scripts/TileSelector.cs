@@ -168,7 +168,41 @@ public class TileSelector : MonoBehaviour
 
 	private void UpdateClickLetter()
 	{
-		throw new NotImplementedException();
+		if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+        {
+            List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
+
+            if (BattleManager.INSTANCE.TrySubmitWord(_word, _selectedTiles))
+            {
+                Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
+                Debug.Log("");
+            }
+            else
+            {
+                Debug.Log($"{_word} is not a word.");
+                Debug.Log("- Deselecting " + string.Join(", ", coordList));
+                Debug.Log("");
+            }
+
+            // would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
+
+            foreach (Tile tile in _selectedTiles)
+            {
+                if (tile == _currentHighlightedTile)
+                {
+                    tile.HighlightState = HighlightState.Highlighted;
+                }
+                else
+                {
+                    tile.HighlightState = HighlightState.Normal;
+                }
+            }
+
+            // Deselect all tiles
+            _selectedTiles.Clear();
+            _word = "";
+            _lineRenderer.positionCount = 0;
+        }
 	}
 
 	/// <summary>
@@ -226,7 +260,14 @@ public class TileSelector : MonoBehaviour
 		}
 		else
 		{
-			tile.HighlightState = HighlightState.Highlighted;
+            if (_selectedTiles.Contains(tile))
+            {
+                tile.HighlightState = HighlightState.Selected_And_Highlighted;
+            }
+            else
+            {
+                tile.HighlightState = HighlightState.Highlighted;
+            }
 		}
 	}
 
@@ -248,6 +289,34 @@ public class TileSelector : MonoBehaviour
 
 	internal void ClickTile(Tile tile)
 	{
+        if (_selectionKind == TileSelectionKind.Click_Each_Letter)
+        {
+            int tileIndex = _selectedTiles.IndexOf(tile);
+
+            if (tileIndex == -1)
+            {
+                if (_selectedTiles.Count > 0)
+                {
+                    Tile lastTile = _selectedTiles[^1];
+
+                    if (Math.Abs(lastTile._coord.x - tile._coord.x) <= 1 && Math.Abs(lastTile._coord.y - tile._coord.y) <= 1)
+                    {
+                        TrySelectTile(tile);
+                    }
+                }
+                else
+                {
+                    TrySelectTile(tile);
+                }
+                
+            }
+            else if (tileIndex == _selectedTiles.Count - 1)
+            {
+                DeselectTile(tile);
+            }
+
+            // otherwise do nothing
+        }
 		// this could drive selection starting instead of UpdateMouseSelect
 	}
 
@@ -266,12 +335,16 @@ public class TileSelector : MonoBehaviour
 
 	internal void DeselectTile(Tile tile)
 	{
+        Debug.Assert(_selectedTiles[^1] == tile);
 		_selectedTiles.Remove(_selectedTiles[^1]);
 		_word = _word[..^1];
 		tile.HighlightState = HighlightState.Normal;
 
 		_lineRenderer.positionCount--;
 
-		_selectedTiles[^1].HighlightState = HighlightState.Selected_And_Highlighted;
+        if (_selectedTiles.Count > 0 && (_selectionKind == TileSelectionKind.Click_And_Drag || _selectionKind == TileSelectionKind.Click_And_Move))
+        {
+            _selectedTiles[^1].HighlightState = HighlightState.Selected_And_Highlighted;
+        }
 	}
 }

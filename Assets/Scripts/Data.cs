@@ -38,7 +38,14 @@ public class Word
         _pOS = pOS;
         _tilesUsed = new List<Tile>(tilesUsed);
 
-        _baseDamage = _text.Length * (1 + (_text.Length - 3) / 10.0f);
+        foreach (char c in text)
+        {
+            _baseDamage += BoardConfig.INSTANCE.Weights.Score(c);
+        }
+
+        _baseDamage -= (text.Length - tilesUsed.Count) * BoardConfig.INSTANCE.Weights.Score('U');
+
+        _baseDamage *= (1 + (_text.Length - 3) / 10.0f);
     }
 
     internal void ModifyDamage(RelicEffect.Result result)

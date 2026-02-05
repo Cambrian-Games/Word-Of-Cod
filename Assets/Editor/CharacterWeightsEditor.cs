@@ -7,6 +7,8 @@ public class CharacterWeightsEditor : Editor
 {
 	private static bool FORMAT_AS_PERCENT;
 
+    private static bool SHOW_SCORES;
+
 	public override void OnInspectorGUI()
 	{
 		CharacterWeights charweights = target as CharacterWeights;
@@ -64,8 +66,42 @@ public class CharacterWeightsEditor : Editor
 		EditorGUILayout.FloatField("Total Weight", totalWeight);
 		GUI.enabled = true;
 
-		// Required for the editor to save.
+        EditorGUILayout.Separator();
 
-		EditorUtility.SetDirty(target);
+        if (charweights._baseScores.Length != 26)
+        {
+            charweights._baseScores = new int[26];
+        }
+
+        SHOW_SCORES = EditorGUILayout.Foldout(SHOW_SCORES, "Letter Scores");
+
+        if (SHOW_SCORES)
+        {
+            EditorGUI.indentLevel++;
+
+            for (int charIter = 0; charIter < 26; charIter++)
+            {
+                string label = $"{(char)('A' + charIter)}";
+
+                charweights._baseScores[charIter] = Mathf.Max(1, EditorGUILayout.IntField(label, charweights._baseScores[charIter]));
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        float averageScore = 0.0f;
+
+        for (int charIter = 0; charIter < 26; charIter++)
+        {
+            averageScore += charweights._baseScores[charIter] * charweights._weights[charIter];
+        }
+
+        GUI.enabled = false;
+        EditorGUILayout.FloatField("Weighted Average Score", averageScore / totalWeight);
+        GUI.enabled = true;
+
+        // Required for the editor to save.
+
+        EditorUtility.SetDirty(target);
 	}
 }
