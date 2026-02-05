@@ -2404,7 +2404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeaac1e12cf7c684f9b5af6d529ef3cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelector
-  _selectionKind: 0
+  _selectionKind: 2
   _lineRenderer: {fileID: 1896358450}
   _debugWordConfirmer: {fileID: 0}
 --- !u!4 &1896358449

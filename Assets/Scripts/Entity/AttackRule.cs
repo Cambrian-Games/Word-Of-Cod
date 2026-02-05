@@ -159,6 +159,14 @@ public class AttackRule
 		_currentEffectindex = -1;
 		_effectData = null;
 	}
+
+    internal string GetForecast()
+    {
+        if (CurrentEffect != null)
+            return CurrentEffect.ForecastDescription;
+
+        return "";
+    }
 }
 
 [Serializable]
@@ -276,7 +284,11 @@ public class AttackEffect
 	private bool _endsTurn;
 	public bool EndsTurn => _endsTurn;
 
-	[SerializeField, Tooltip("If past this effect, treat rule as complete if interrupted")]
+    [SerializeField]
+    private string _forecastDescription;
+    public string ForecastDescription => _forecastDescription;
+
+    [SerializeField, Tooltip("If past this effect, treat rule as complete if interrupted")]
 	private bool _isInterruptCheckpoint;
 	public bool IsInterruptCheckpoint => _isInterruptCheckpoint;
 
@@ -289,7 +301,7 @@ public class AttackEffect
 	public int _damage = 0;
 	public int Damage => (_effectKind == EffectKind.Standard_Attack) ? _damage : throw new InvalidOperationException();
 
-	[SerializeField]
+    [SerializeField]
 	private Tile.TileKind _from;
 	[SerializeField]
 	private Tile.TileKind _to;

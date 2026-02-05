@@ -19,6 +19,11 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 		EditorGUI.PropertyField(position, property.FindPropertyRelative("_endsTurn"));
 
 		position.y += Y_OFFSET;
+        EditorGUI.LabelField(position, "Text to display in forecast (only checks first effect in turn)");
+		position.y += Y_OFFSET;
+        EditorGUI.PropertyField(position, property.FindPropertyRelative("_forecastDescription"), new GUIContent("Forecast"));
+
+		position.y += Y_OFFSET;
 		SerializedProperty rule = property.FindPropertyRelative("_effectKind");
 		EditorGUI.PropertyField(position, rule);
 		position.y += EditorGUIUtility.standardVerticalSpacing; // add a bit of space between the effect kind and parameters
@@ -71,7 +76,7 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 			_ => 0,
 		};
 
-		lines += 7; // element, effect kind, Delay After, Interrupt Checkpoint, Ends Turn, and warning (2 lines)
+		lines += 9; // element, effect kind, Delay After, Interrupt Checkpoint, Ends Turn, and warning (2 lines)
 
 		return lines * Y_OFFSET + EditorGUIUtility.standardVerticalSpacing;
 	}
