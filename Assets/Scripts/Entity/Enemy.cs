@@ -139,6 +139,8 @@ public class Enemy : Entity
         else if (CurrentRule != null)
             _currentForecast = CurrentRule.GetForecast();
 
+        // if the above attempts fail, fall back to _defaultForecast
+
         if (_currentForecast == null || _currentForecast.Length == 0)
             _currentForecast = _defaultForecast;
     }
@@ -305,7 +307,7 @@ public class Enemy : Entity
 		}
 	}
 
-    internal object FormattedForecast()
+    internal string FormattedForecast()
     {
         return _currentForecast.Replace("$NAME", this._displayName);
     }

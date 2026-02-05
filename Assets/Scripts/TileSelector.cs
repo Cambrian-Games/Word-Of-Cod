@@ -119,38 +119,7 @@ public class TileSelector : MonoBehaviour
 
 				if (_word != "")
 				{
-                    List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
-
-                    if (BattleManager.INSTANCE.TrySubmitWord(_word, _selectedTiles))
-                    {
-                        Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
-                        Debug.Log("");
-                    }
-                    else
-                    {
-                        Debug.Log($"{_word} is not a word.");
-                        Debug.Log("- Deselecting " + string.Join(", ", coordList));
-                        Debug.Log("");
-                    }
-
-                    // would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
-                    
-                    foreach (Tile tile in _selectedTiles)
-                    {
-                        if (tile == _currentHighlightedTile)
-                        {
-                            tile.HighlightState = HighlightState.Highlighted;
-                        }
-                        else
-                        {
-                            tile.HighlightState = HighlightState.Normal;
-                        }
-                    }
-
-					// Deselect all tiles
-					_selectedTiles.Clear();
-					_word = "";
-					_lineRenderer.positionCount = 0;
+                    SendSelectedWord();
 				}
 			}
 		}
@@ -170,38 +139,7 @@ public class TileSelector : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
         {
-            List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
-
-            if (BattleManager.INSTANCE.TrySubmitWord(_word, _selectedTiles))
-            {
-                Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
-                Debug.Log("");
-            }
-            else
-            {
-                Debug.Log($"{_word} is not a word.");
-                Debug.Log("- Deselecting " + string.Join(", ", coordList));
-                Debug.Log("");
-            }
-
-            // would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
-
-            foreach (Tile tile in _selectedTiles)
-            {
-                if (tile == _currentHighlightedTile)
-                {
-                    tile.HighlightState = HighlightState.Highlighted;
-                }
-                else
-                {
-                    tile.HighlightState = HighlightState.Normal;
-                }
-            }
-
-            // Deselect all tiles
-            _selectedTiles.Clear();
-            _word = "";
-            _lineRenderer.positionCount = 0;
+            SendSelectedWord();
         }
 	}
 
@@ -286,7 +224,6 @@ public class TileSelector : MonoBehaviour
 		// how should we handle if you have only one selected tile, you're in click + move, and you move the mouse out of the play grid?
 	}
 
-
 	internal void ClickTile(Tile tile)
 	{
         if (_selectionKind == TileSelectionKind.Click_Each_Letter)
@@ -347,4 +284,40 @@ public class TileSelector : MonoBehaviour
             _selectedTiles[^1].HighlightState = HighlightState.Selected_And_Highlighted;
         }
 	}
+
+    public void SendSelectedWord()
+    {
+        List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
+
+        if (BattleManager.INSTANCE.TrySubmitWord(_word, _selectedTiles))
+        {
+            Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
+            Debug.Log("");
+        }
+        else
+        {
+            Debug.Log($"{_word} is not a word.");
+            Debug.Log("- Deselecting " + string.Join(", ", coordList));
+            Debug.Log("");
+        }
+
+        // would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
+
+        foreach (Tile tile in _selectedTiles)
+        {
+            if (tile == _currentHighlightedTile)
+            {
+                tile.HighlightState = HighlightState.Highlighted;
+            }
+            else
+            {
+                tile.HighlightState = HighlightState.Normal;
+            }
+        }
+
+        // Deselect all tiles
+        _selectedTiles.Clear();
+        _word = "";
+        _lineRenderer.positionCount = 0;
+    }
 }
