@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 
@@ -33,6 +34,7 @@ public class TileSelector : MonoBehaviour
 	private Tile _currentHighlightedTile;
 	private string _word = "";
 
+	public TMP_Text _wordDisplay;
 	private bool _isMouseSelecting = false;
 	internal bool _isSelectingEnabled = true;
 
@@ -64,6 +66,8 @@ public class TileSelector : MonoBehaviour
 		{
 			UpdateTileSelection();
 		}
+
+		_wordDisplay.text = _word;
     }
 
 	void UpdateTileSelection()
