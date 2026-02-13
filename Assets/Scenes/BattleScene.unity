@@ -201,7 +201,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 99733470}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1786051288}
+        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
+        m_MethodName: LeaveShop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
 --- !u!114 &99733470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1705,6 +1717,7 @@ MonoBehaviour:
   _travelTime: 4
   _loseScene: {fileID: 102900000, guid: 10aff388008011c4fbd00c7cdaf9cce8, type: 3}
   _winScene: {fileID: 102900000, guid: 5b4fa5be8a142d04698b939da9f71374, type: 3}
+  _storeObject: {fileID: 1786051286}
 --- !u!4 &628337404
 Transform:
   m_ObjectHideFlags: 0
@@ -4244,7 +4257,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1772057000}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1786051288}
+        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
+        m_MethodName: AddRelic
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
 --- !u!114 &1772057000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4299,7 +4324,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1786051287
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4337,6 +4362,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopManager
   _relicChoiceButton: {fileID: 1772056999}
   _inventoryManger: {fileID: 1342681908}
+  _runManager: {fileID: 628337403}
 --- !u!1 &1879326040
 GameObject:
   m_ObjectHideFlags: 0

@@ -27,6 +27,7 @@ public class RunManager : MonoBehaviour
 	public SceneAsset _loseScene;
 	public SceneAsset _winScene;
 
+	public GameObject _storeObject;
 	private Vector3 _destination;
 
 	private bool _hasSelectedNextEvent = false;
@@ -207,6 +208,7 @@ public class RunManager : MonoBehaviour
 				if (encounter == EncounterPoolKind.Shop)
 				{
 					// do nothing for now
+					_storeObject.SetActive(true);
 				}
 				else
 				{

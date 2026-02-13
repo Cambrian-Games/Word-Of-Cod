@@ -11,6 +11,8 @@ public class ShopManager : MonoBehaviour
 
     public InventoryManager _inventoryManger;
 
+    public RunManager _runManager;
+
     private int _relicChoice = -1;
     void Start()
     {
@@ -55,5 +57,6 @@ public class ShopManager : MonoBehaviour
     public void LeaveShop()
     {
         gameObject.SetActive(false);
+        _runManager.SetRunState(RunManager.RunState.Traveling_To_Next_Event);
     }
 }
