@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class BattleManager : MonoBehaviour
@@ -43,6 +44,7 @@ public class BattleManager : MonoBehaviour
     private Enemy _enemy;
     public Enemy CurrentEnemy => _enemy;
 
+    public TMP_Text _forecastText;
     internal EnemyTurnHandler _enemyTurnHandler;
 
     // Player Turn Data
@@ -172,6 +174,9 @@ public class BattleManager : MonoBehaviour
                 TileSelector.INSTANCE._isSelectingEnabled = true;
 				_enemyTurnHandler.StartRound();
                 Debug.Log("Forecast: " + _enemy.FormattedForecast()); 
+                //change forecast text
+                _forecastText.text = _enemy.FormattedForecast();
+
                 break;
 
             case BattleState.Post_Player_Turn:
@@ -347,6 +352,7 @@ public class BattleManager : MonoBehaviour
                 {
                     SetBattleState(BattleState.Enemy_Turn);
                 }
+
 
                 break;
         }

@@ -57,6 +57,7 @@ MonoBehaviour:
     _effects:
     - _afterEffectDelay: 0
       _endsTurn: 1
+      _forecastDescription: '[Do Nothing Placeholder]'
       _isInterruptCheckpoint: 0
       _effectKind: 0
       _damage: 0
@@ -65,6 +66,7 @@ MonoBehaviour:
       _numTiles: 0
     - _afterEffectDelay: 0
       _endsTurn: 0
+      _forecastDescription: '[Bassic Attack Placeholder]'
       _isInterruptCheckpoint: 0
       _effectKind: 1
       _damage: 25
@@ -74,6 +76,8 @@ MonoBehaviour:
   _interruptRules: []
   _attackPriority: 0
   _canRepeatLastAction: 1
+  _currentForecast: 
+  _defaultForecast: $NAME is waiting.
 --- !u!212 &4992852760536227360
 SpriteRenderer:
   m_ObjectHideFlags: 0

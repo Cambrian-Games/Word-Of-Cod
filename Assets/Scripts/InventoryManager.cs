@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public class InventoryManager : MonoBehaviour
     private Dictionary<RelicEffect.EventTiming, HashSet<Relic>> _sortedPassiveRelics;
 
     public List<int> _passiveRelicInventory = new List<int>();
+
+    public GameObject _relicGrid;
+
+    private int _prevNumRelics = 1;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -39,12 +44,32 @@ public class InventoryManager : MonoBehaviour
         }
 
         _passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
+
+        //sets the starting relic icon
+        _relicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
+            _passiveRelics[_passiveRelicInventory[0]].Icon;
     }
 
     // Update is called once per frame
     void Update()
     {
         
+        //if number of relics has changed:
+        if (_passiveRelicInventory.Count > _prevNumRelics)
+        {
+            //for each new relic:
+            for (int i = _prevNumRelics; i < _passiveRelicInventory.Count; i++)
+            {
+                //set its icon...
+                _relicGrid.transform.GetChild(i).gameObject.GetComponent<Image>().sprite =
+                    _passiveRelics[_passiveRelicInventory[i]].Icon;
+                //and enable the element in the grid
+                _relicGrid.transform.GetChild(i).gameObject.SetActive(true);
+            }
+            
+        }
+
+        _prevNumRelics = _passiveRelicInventory.Count;
     }
 
     public void OnWordSubmit(Word word)

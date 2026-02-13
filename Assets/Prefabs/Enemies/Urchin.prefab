@@ -60,6 +60,7 @@ MonoBehaviour:
     _effects:
     - _afterEffectDelay: 0
       _endsTurn: 0
+      _forecastDescription: '[Urchin Spiny Placeholder]'
       _isInterruptCheckpoint: 0
       _effectKind: 2
       _damage: 25
@@ -68,6 +69,7 @@ MonoBehaviour:
       _numTiles: 2
     - _afterEffectDelay: 0
       _endsTurn: 0
+      _forecastDescription: 
       _isInterruptCheckpoint: 0
       _effectKind: 1
       _damage: 20
@@ -77,6 +79,8 @@ MonoBehaviour:
   _interruptRules: []
   _attackPriority: 0
   _canRepeatLastAction: 1
+  _currentForecast: 
+  _defaultForecast: $NAME is waiting.
 --- !u!212 &418575595738273908
 SpriteRenderer:
   m_ObjectHideFlags: 0

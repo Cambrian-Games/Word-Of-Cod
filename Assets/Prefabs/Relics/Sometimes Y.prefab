@@ -45,7 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: Sometimes Y
-  _icon: {fileID: 0}
+  _description: 
+  _icon: {fileID: 975767265599224733, guid: 3fcd182d01454dea78b8246d9644010d, type: 3}
   _effects:
   - _event: 0
     _condition: 2

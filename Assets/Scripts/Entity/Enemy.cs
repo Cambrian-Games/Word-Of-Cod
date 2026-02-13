@@ -37,6 +37,7 @@ public class Enemy : Entity
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
 
+	[SerializeField] //can be temporary, but for testing forecast display i need to see current forecast
     internal string _currentForecast = "";
 
     [SerializeField]
