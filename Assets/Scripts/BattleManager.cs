@@ -353,7 +353,6 @@ public class BattleManager : MonoBehaviour
                     SetBattleState(BattleState.Enemy_Turn);
                 }
 
-
                 break;
         }
     }

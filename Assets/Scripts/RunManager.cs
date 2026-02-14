@@ -207,7 +207,6 @@ public class RunManager : MonoBehaviour
 
 				if (encounter == EncounterPoolKind.Shop)
 				{
-					// do nothing for now
 					_storeObject.SetActive(true);
 				}
 				else
