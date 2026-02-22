@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f139dddfa4b9b5e4392827c973cf3b69, type: 3}
+  m_Name: 300 CharacterSet
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSet
+  _letterSprites:
+  - {fileID: 21300000, guid: 3056806f516e75f4fa9f33634b1b4760, type: 3}
+  - {fileID: 21300000, guid: 334d9b68c929c984eb16bf5eb286030e, type: 3}
+  - {fileID: 21300000, guid: c9662c994e983054fbffb384276529b0, type: 3}
+  - {fileID: 21300000, guid: ac59875465821d844abe6bfe62014f12, type: 3}
+  - {fileID: 21300000, guid: 6994a46959da886488528876d6220a51, type: 3}
+  - {fileID: 21300000, guid: 1b3ac59c393367a4f999ef06651d5f9c, type: 3}
+  - {fileID: 21300000, guid: 89a196e2d46453246934d5786fb651ae, type: 3}
+  - {fileID: 21300000, guid: b616a73cbe6f4b14999c4cb16f1afd97, type: 3}
+  - {fileID: 21300000, guid: 25fd0686e783167408db6e7785a27b99, type: 3}
+  - {fileID: 21300000, guid: 875662698b27d0b48a6d941f1196a677, type: 3}
+  - {fileID: 21300000, guid: 06f176d220a9aaf47a7b21bed03505fa, type: 3}
+  - {fileID: 21300000, guid: 9e06694da6fc2b3489d1380e637de86e, type: 3}
+  - {fileID: 21300000, guid: 78f46ed43d1f0454183cf11b0b72030a, type: 3}
+  - {fileID: 21300000, guid: 655510ff0b1372747bb87745684be836, type: 3}
+  - {fileID: 21300000, guid: 3ad709ae1d17b994daa0c03fba4f7338, type: 3}
+  - {fileID: 21300000, guid: 1f237bfee5c78b54c882da46980c5834, type: 3}
+  - {fileID: 21300000, guid: 4a301e97c9c84034db0400a94a1677ab, type: 3}
+  - {fileID: 21300000, guid: 3c4850572249fea49972b3f136c5b2f1, type: 3}
+  - {fileID: 21300000, guid: c64f41d4dfb1f7f4da8ab3e5356eab20, type: 3}
+  - {fileID: 21300000, guid: 9c3b693f8fc1a0443bcd1f51ced9563f, type: 3}
+  - {fileID: 21300000, guid: e4028fd9adb096c4699bfe9052b78c7a, type: 3}
+  - {fileID: 21300000, guid: aeb9b0b1d5d82c849ad3ec9125e30dd6, type: 3}
+  - {fileID: 21300000, guid: e1258db71b5bcc945860f49c518268c6, type: 3}
+  - {fileID: 21300000, guid: 35fa364b4b6b8eb40a00ef5ee5a673c7, type: 3}
+  - {fileID: 21300000, guid: c6c1d120f8139924c947b2a6262834a4, type: 3}
+  - {fileID: 21300000, guid: da1cdb2038b42f142b193cab6df035d5, type: 3}
+  _letterOffsets:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  _quSprite: {fileID: 0}
+  _quOffset: {x: 0, y: 0, z: 0}

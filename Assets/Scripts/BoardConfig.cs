@@ -16,6 +16,10 @@ public class BoardConfig : MonoBehaviour
 	private CharacterWeights _characterWeights;
 	public CharacterWeights Weights => _characterWeights;
 
+    [SerializeField]
+    private CharacterSet _charset;
+    public CharacterSet CharSet => _charset;
+
 	[SerializeField]
 	private BoardLayout _layout;
 	public BoardLayout Layout { get => _layout; set => _layout = value; }

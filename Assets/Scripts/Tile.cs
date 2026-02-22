@@ -34,7 +34,10 @@ public class Tile: MonoBehaviour
 	public int _spinyDamage = 10;
 
 	[SerializeField]
-	private SpriteRenderer _spriteRenderer;
+	private SpriteRenderer _bgSpriteRenderer;
+
+    [SerializeField]
+    private SpriteRenderer _letterSpriteRenderer;
 
 	[SerializeField]
 	private Color _normalColor, _highlightedColor, _selectedColor, _selectedAndHighlightedColor;
@@ -42,11 +45,13 @@ public class Tile: MonoBehaviour
 	private HighlightState _highlightState = HighlightState.Normal;
 	public HighlightState HighlightState { get => _highlightState; set => SetHighlightState(value); }
 
+    private static readonly Vector3 DEFAULT_POSITION = new Vector3(0, 0, -1);
+
     private void Start()
     {
-        if (_spriteRenderer)
+        if (_bgSpriteRenderer)
         {
-            _spriteRenderer.sprite = _tileKind switch
+            _bgSpriteRenderer.sprite = _tileKind switch
             {
                 TileKind.Normal => _normalSprite,
                 TileKind.Spiny => _spinySprite,
@@ -68,6 +73,21 @@ public class Tile: MonoBehaviour
 				_tmpro.text = strGoal;
 			}
 		}
+
+        if (_letterSpriteRenderer)
+        {
+            Sprite spriteLast = _letterSpriteRenderer.sprite;
+
+            // TODO check if letter is Qu
+
+            Sprite spriteGoal = _tileKind == TileKind.Sandy ? null : BoardConfig.INSTANCE.CharSet.GetSprite(_letter);
+
+            if (spriteLast != spriteGoal)
+            {
+                _letterSpriteRenderer.sprite = spriteGoal;
+                _letterSpriteRenderer.transform.localPosition = DEFAULT_POSITION + BoardConfig.INSTANCE.CharSet.GetOffset(_letter);
+            }
+        }
 	}
 
 	public bool IsSelectable => _tileKind != TileKind.Sandy;
@@ -102,9 +122,9 @@ public class Tile: MonoBehaviour
 	{
 		_highlightState = tileSelectState;
 
-		if (_spriteRenderer)
+		if (_bgSpriteRenderer)
 		{
-			_spriteRenderer.color = _highlightState switch
+			_bgSpriteRenderer.color = _highlightState switch
 			{
 				HighlightState.Normal => _normalColor,
 				HighlightState.Highlighted => _highlightedColor,
@@ -122,9 +142,9 @@ public class Tile: MonoBehaviour
 
 		_tileKind = tileKind;
 
-		if (_spriteRenderer)
+		if (_bgSpriteRenderer)
 		{
-			_spriteRenderer.sprite = _tileKind switch
+			_bgSpriteRenderer.sprite = _tileKind switch
 			{
 				TileKind.Normal => _normalSprite,
 				TileKind.Spiny => _spinySprite,
