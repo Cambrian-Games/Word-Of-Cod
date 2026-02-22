@@ -230,6 +230,9 @@ public class TileSelector : MonoBehaviour
 
 	internal void ClickTile(Tile tile)
 	{
+        if (!_isSelectingEnabled)
+            return;
+
         if (_selectionKind == TileSelectionKind.Click_Each_Letter)
         {
             int tileIndex = _selectedTiles.IndexOf(tile);
@@ -267,7 +270,16 @@ public class TileSelector : MonoBehaviour
 			return;
 
 		_selectedTiles.Add(tile);
-		_word += tile._letter;
+
+        if (tile.IsQuTile())
+        {
+            _word += "QU";
+        }
+        else
+        {
+            _word += tile._letter;
+        }
+
 		tile.HighlightState = HighlightState.Selected_And_Highlighted;
 
 		_lineRenderer.positionCount++;
@@ -278,7 +290,16 @@ public class TileSelector : MonoBehaviour
 	{
         Debug.Assert(_selectedTiles[^1] == tile);
 		_selectedTiles.Remove(_selectedTiles[^1]);
-		_word = _word[..^1];
+        
+        if (tile.IsQuTile())
+        {
+            _word = _word[..^2];
+        }
+        else
+        {
+            _word = _word[..^1];
+        }
+
 		tile.HighlightState = HighlightState.Normal;
 
 		_lineRenderer.positionCount--;
@@ -323,5 +344,13 @@ public class TileSelector : MonoBehaviour
         _selectedTiles.Clear();
         _word = "";
         _lineRenderer.positionCount = 0;
+    }
+
+    internal void RightClickTile(Tile tile)
+    {
+        if (!_isSelectingEnabled || !tile.IsSelectable)
+            return;
+
+        tile.TryToggleQu();
     }
 }

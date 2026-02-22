@@ -66,5 +66,5 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
-  _quSprite: {fileID: 0}
+  _quSprite: {fileID: 21300000, guid: aa4732ac8e21eea40a63d12e6a08e08d, type: 3}
   _quOffset: {x: 0, y: 0, z: 0}

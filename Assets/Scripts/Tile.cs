@@ -20,6 +20,8 @@ public class Tile: MonoBehaviour
 
 	public TextMeshPro _tmpro;
 	public char _letter;
+    public bool _isQu;
+
 	// should not be editor-accessible, should be accessed by code
 	internal Vector2Int _coord;
 
@@ -63,6 +65,9 @@ public class Tile: MonoBehaviour
 
     void Update()
 	{
+        if (_letter != 'Q')
+            _isQu = false;
+
 		if (_tmpro)
 		{
 			string strLast = _tmpro.text;
@@ -80,12 +85,19 @@ public class Tile: MonoBehaviour
 
             // TODO check if letter is Qu
 
-            Sprite spriteGoal = _tileKind == TileKind.Sandy ? null : BoardConfig.INSTANCE.CharSet.GetSprite(_letter);
+            Sprite spriteGoal = null;
+
+            if (_tileKind != TileKind.Sandy)
+            {
+                spriteGoal = IsQuTile() ? BoardConfig.INSTANCE.CharSet.GetQuSprite() : BoardConfig.INSTANCE.CharSet.GetSprite(_letter);
+            }
 
             if (spriteLast != spriteGoal)
             {
                 _letterSpriteRenderer.sprite = spriteGoal;
-                _letterSpriteRenderer.transform.localPosition = DEFAULT_POSITION + BoardConfig.INSTANCE.CharSet.GetOffset(_letter);
+
+                Vector3 letterOffset = IsQuTile() ? BoardConfig.INSTANCE.CharSet.GetQuOffset() : BoardConfig.INSTANCE.CharSet.GetOffset(_letter);
+                _letterSpriteRenderer.transform.localPosition = DEFAULT_POSITION + letterOffset;
             }
         }
 	}
@@ -118,7 +130,15 @@ public class Tile: MonoBehaviour
 		TileSelector.INSTANCE.ClickTile(this);
 	}
 
-	private void SetHighlightState(HighlightState tileSelectState)
+    private void OnMouseOver()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            TileSelector.INSTANCE.RightClickTile(this);
+        }
+    }
+
+    private void SetHighlightState(HighlightState tileSelectState)
 	{
 		_highlightState = tileSelectState;
 
@@ -153,4 +173,14 @@ public class Tile: MonoBehaviour
 			};
 		}
 	}
+
+    public void TryToggleQu()
+    {
+        if (_letter == 'Q' && (_highlightState & HighlightState.Selected) == 0)
+        {
+            _isQu = !_isQu;
+        }
+    }
+
+    public bool IsQuTile() => _letter == 'Q' && _isQu;
 }
