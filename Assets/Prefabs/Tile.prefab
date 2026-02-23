@@ -139,9 +139,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Tile
   _tmpro: {fileID: 0}
   _letter: 0
+  _isQu: 0
   _normalSprite: {fileID: 21300000, guid: d5dd23e17fabc404886416bfc86f438c, type: 3}
   _spinySprite: {fileID: 21300000, guid: 44e7f864256e38744a2acb20a2a7e9c3, type: 3}
-  _sandySprite: {fileID: 0}
+  _sandySprite: {fileID: 21300000, guid: 217a1464f373de747848a15f37d528b8, type: 3}
   _spinyDamage: 10
   _bgSpriteRenderer: {fileID: 4036130178732745845}
   _letterSpriteRenderer: {fileID: 370031305921002513}

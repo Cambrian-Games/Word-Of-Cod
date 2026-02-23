@@ -317,6 +317,11 @@ public class BattleManager : MonoBehaviour
                     _directions.Add(destPosition - TilesInWord[i].transform.position);
                 }
 
+                // TODO this will probably need to move somewhere else eventually, but this is safe for now
+
+                GameBoard board = GameBoard.INSTANCE;
+                TilesInWord.ForEach(tile => board.ClearSurroundingSandTiles(tile._coord));
+
                 _timeElapsed = 0.0f;
                 break;
 

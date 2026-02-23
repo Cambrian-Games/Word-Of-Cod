@@ -345,7 +345,10 @@ public class GameBoard : MonoBehaviour
 
     internal void TransformTile(Vector2Int coord, Tile.TileKind newKind)
     {
-        _playableBoard[coord.x, coord.y].Kind = newKind;
+        if (_playableBoard[coord.x, coord.y])
+        {
+            _playableBoard[coord.x, coord.y].Kind = newKind;
+        }
     }
 
     internal void ClearSurroundingSandTiles(Vector2Int tileCoord)
@@ -371,7 +374,7 @@ public class GameBoard : MonoBehaviour
 
         if (tileCoord.y < dims.y - 1)
         {
-            TransformTile(new Vector2Int(tileCoord.x + 1, tileCoord.y + 1), Tile.TileKind.Normal);
+            TransformTile(new Vector2Int(tileCoord.x, tileCoord.y + 1), Tile.TileKind.Normal);
         }
     }
 }
