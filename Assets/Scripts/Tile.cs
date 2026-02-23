@@ -113,6 +113,10 @@ public class Tile: MonoBehaviour
 				Player.INSTANCE.CurrentHealth -= _spinyDamage;
 				break;
 		}
+
+        // TODO this will probably need to move somewhere else eventually, but this is safe for now
+
+        GameBoard.INSTANCE.ClearSurroundingSandTiles(_coord);
 	}
 
 	private void OnMouseEnter()

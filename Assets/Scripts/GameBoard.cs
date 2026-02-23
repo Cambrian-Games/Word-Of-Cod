@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -324,7 +325,7 @@ public class GameBoard : MonoBehaviour
         return _resolveState == ResolveState.Nil;
     }
 
-	internal void TransformTiles(Tile.TileKind oldKind, Tile.TileKind newKind, int num)
+	internal void TransformRandomTiles(Tile.TileKind oldKind, Tile.TileKind newKind, int num)
 	{
 		int converted = 0;
 		Vector2Int dims = _config.Layout.Dims();
@@ -336,9 +337,41 @@ public class GameBoard : MonoBehaviour
 
 			if (_playableBoard[randCol, randRow] && _playableBoard[randCol, randRow].Kind == oldKind)
 			{
-				_playableBoard[randCol, randRow].Kind = newKind;
+                TransformTile(new Vector2Int(randCol, randRow), newKind);
 				converted++;
 			}
 		}
 	}
+
+    internal void TransformTile(Vector2Int coord, Tile.TileKind newKind)
+    {
+        _playableBoard[coord.x, coord.y].Kind = newKind;
+    }
+
+    internal void ClearSurroundingSandTiles(Vector2Int tileCoord)
+    {
+        Vector2Int dims = _config.Layout.Dims();
+        Debug.Assert(tileCoord.x >= 0 && tileCoord.x < dims.x);
+        Debug.Assert(tileCoord.y >= 0 && tileCoord.y < dims.y);
+
+        if (tileCoord.x > 0)
+        {
+            TransformTile(new Vector2Int(tileCoord.x - 1, tileCoord.y), Tile.TileKind.Normal);
+        }
+
+        if (tileCoord.x < dims.x - 1)
+        {
+            TransformTile(new Vector2Int(tileCoord.x + 1, tileCoord.y), Tile.TileKind.Normal);
+        }
+
+        if (tileCoord.y > 0)
+        {
+            TransformTile(new Vector2Int(tileCoord.x, tileCoord.y - 1), Tile.TileKind.Normal);
+        }
+
+        if (tileCoord.y < dims.y - 1)
+        {
+            TransformTile(new Vector2Int(tileCoord.x + 1, tileCoord.y + 1), Tile.TileKind.Normal);
+        }
+    }
 }

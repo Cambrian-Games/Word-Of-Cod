@@ -349,7 +349,7 @@ public class AttackEffect
 				break;
 
 			case EffectKind.Transform_Tiles:
-				GameBoard.INSTANCE.TransformTiles(oldKind: _from, newKind: _to, num: _numTiles);
+				GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
 				((TransformTilesData)data)._hasTransformed = true;
 				break;
 		}
