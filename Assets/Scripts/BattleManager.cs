@@ -34,10 +34,10 @@ public class BattleManager : MonoBehaviour
     // sub-states
 
     private PostPlayerTurnState _pptState = PostPlayerTurnState.Nil;
-    
+
     [SerializeField]
     private Enemy _enemyPrefab;
-    
+
     [SerializeField]
     private GameObject _enemyDamagePopup;
 
@@ -52,7 +52,7 @@ public class BattleManager : MonoBehaviour
     Word _wordToSubmit;
     Word _previousWord;
 
-	internal Word PreviousWord => _previousWord;
+    internal Word PreviousWord => _previousWord;
     internal Word MostRecentWord => _wordToSubmit;
 
     // probably should replace all instances long-term
@@ -94,6 +94,17 @@ public class BattleManager : MonoBehaviour
 
     private void UpdateBattleState()
     {
+#if UNITY_EDITOR
+        bool holdingShift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool holdingSpace = Input.GetKey(KeyCode.Space);
+
+        if (holdingShift && holdingSpace)
+        {
+            Destroy(_enemy.gameObject);
+            SetBattleState(BattleState.Win);
+        }
+#endif
+
         while (true)
         {
             BattleState stateCur = _battleState;
@@ -139,41 +150,41 @@ public class BattleManager : MonoBehaviour
                 TileSelector.INSTANCE._isSelectingEnabled = false;
                 break;
 
-			case BattleState.Enemy_Turn:
-				_enemyTurnHandler.EndTurn();
-				break;
+            case BattleState.Enemy_Turn:
+                _enemyTurnHandler.EndTurn();
+                break;
         }
 
         _battleState = newState;
 
         switch (_battleState)
         {
-			case BattleState.Nil:
-				_enemy = null;
+            case BattleState.Nil:
+                _enemy = null;
 
-				_enemyTurnHandler = null;
+                _enemyTurnHandler = null;
 
-				GameBoard.INSTANCE.DeleteBoard();
-				break;
+                GameBoard.INSTANCE.DeleteBoard();
+                break;
 
             case BattleState.Load:
 
-				// expensive, just here for testing
-				CameraTracker tracker = FindAnyObjectByType<CameraTracker>();
+                // expensive, just here for testing
+                CameraTracker tracker = FindAnyObjectByType<CameraTracker>();
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
-				_enemy.transform.localPosition = (Vector2)(-tracker._targetOffset);
+                _enemy.transform.localPosition = (Vector2)(-tracker._targetOffset);
 
                 _enemyTurnHandler = new EnemyTurnHandler(_enemy);
 
-				GameBoard.INSTANCE.GenerateBoard();
+                GameBoard.INSTANCE.GenerateBoard();
 
                 SetBattleState(BattleState.Player_Turn);
                 break;
 
             case BattleState.Player_Turn:
                 TileSelector.INSTANCE._isSelectingEnabled = true;
-				_enemyTurnHandler.StartRound();
-                Debug.Log("Forecast: " + _enemy.FormattedForecast()); 
+                _enemyTurnHandler.StartRound();
+                Debug.Log("Forecast: " + _enemy.FormattedForecast());
                 //change forecast text
                 _forecastText.text = _enemy.FormattedForecast();
 
@@ -204,14 +215,14 @@ public class BattleManager : MonoBehaviour
                 GameBoard.INSTANCE.LockStateMachine(false);
                 break;
 
-			case BattleState.Lose:
-				RunManager.INSTANCE.SetRunState(RunManager.RunState.Lose);
-				break;
+            case BattleState.Lose:
+                RunManager.INSTANCE.SetRunState(RunManager.RunState.Lose);
+                break;
 
-			case BattleState.Win:
-				RunManager.INSTANCE.SetRunState(RunManager.RunState.Post_Event);
-				break;
-		}
+            case BattleState.Win:
+                RunManager.INSTANCE.SetRunState(RunManager.RunState.Post_Event);
+                break;
+        }
     }
 
     private void UpdatePPT()
@@ -264,8 +275,8 @@ public class BattleManager : MonoBehaviour
                     if (_timeElapsed > _timeToDestination)
                     {
                         Debug.Log($"{_enemy.CurrentHealth} - {_wordToSubmit.EffectiveDamage}");
-                        _enemyDamagePopup.GetComponent<DamagePopupScript>().Popup(_wordToSubmit.EffectiveDamage);
-						_enemy.CurrentHealth -= _wordToSubmit.EffectiveDamage;
+						_enemyDamagePopup.GetComponent<DamagePopupScript>().Popup(_wordToSubmit.EffectiveDamage);
+                        _enemy.CurrentHealth -= _wordToSubmit.EffectiveDamage;
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
                     break;
@@ -285,13 +296,13 @@ public class BattleManager : MonoBehaviour
         {
             case PostPlayerTurnState.Display_Word:
                 _directions.Clear();
-				TilesInWord.ForEach(tile => tile.OnSubmit());
+                TilesInWord.ForEach(tile => tile.OnSubmit());
 
-				if (Player.INSTANCE.CurrentHealth <= 0)
-				{
-					// interrupt state change to lose the game. Should probably be its own step instead.
-					SetBattleState(BattleState.Lose);
-				}
+                if (Player.INSTANCE.CurrentHealth <= 0)
+                {
+                    // interrupt state change to lose the game. Should probably be its own step instead.
+                    SetBattleState(BattleState.Lose);
+                }
                 break;
 
             case PostPlayerTurnState.Attack_Enemy:
@@ -340,7 +351,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case PostPlayerTurnState.Cleanup:
-                
+
                 for (int i = 0; i < TilesInWord.Count; i++)
                 {
                     Destroy(TilesInWord[i].gameObject);
@@ -350,8 +361,8 @@ public class BattleManager : MonoBehaviour
 
                 if (_enemy.CurrentHealth <= 0)
                 {
-					Destroy(_enemy.gameObject); // long term there will probably be an animation here so we may wait before going to Win State
-					SetBattleState(BattleState.Win);
+                    Destroy(_enemy.gameObject); // long term there will probably be an animation here so we may wait before going to Win State
+                    SetBattleState(BattleState.Win);
                 }
                 else
                 {
@@ -384,18 +395,18 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-	internal void SetEnemy(Enemy prefab)
-	{
-		_enemyPrefab = prefab;
-	}
+    internal void SetEnemy(Enemy prefab)
+    {
+        _enemyPrefab = prefab;
+    }
 
-	internal void Unload()
-	{
-		SetBattleState(BattleState.Nil);
-	}
+    internal void Unload()
+    {
+        SetBattleState(BattleState.Nil);
+    }
 
-	internal void Load()
-	{
-		SetBattleState(BattleState.Load);
-	}
+    internal void Load()
+    {
+        SetBattleState(BattleState.Load);
+    }
 }

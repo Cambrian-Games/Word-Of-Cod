@@ -106,7 +106,16 @@ public class GameBoard : MonoBehaviour
 		_resolveState = ResolveState.Nil;
 
 		_currState = _nextState = null;
-		_playableBoard = _stagingBoard = null;
+
+        foreach (Tile tile in _stagingBoard)
+        {
+            if (tile)
+            {
+                Destroy(tile.gameObject);
+            }
+        }
+
+        _playableBoard = _stagingBoard = null;
 	}
 
 	private void DeleteSelectedTiles()

@@ -441,6 +441,7 @@ public class EncounterPool
 
 	public Enemy EncounterPrefab(int index)
 	{
+        Debug.Assert(0 <= index && index < _entries.Length);
 		return _entries[index].Prefab;
 	}
 }
