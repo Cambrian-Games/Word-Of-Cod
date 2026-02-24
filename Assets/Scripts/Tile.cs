@@ -20,7 +20,7 @@ public class Tile: MonoBehaviour
 
 	public TextMeshPro _tmpro;
 	public char _letter;
-    public bool _isQu;
+    private bool _isQu;
 
 	// should not be editor-accessible, should be accessed by code
 	internal Vector2Int _coord;
@@ -47,7 +47,7 @@ public class Tile: MonoBehaviour
 	private HighlightState _highlightState = HighlightState.Normal;
 	public HighlightState HighlightState { get => _highlightState; set => SetHighlightState(value); }
 
-    private static readonly Vector3 DEFAULT_POSITION = new Vector3(0, 0, -1);
+    private static readonly Vector3 DEFAULT_LETTER_POSITION = new Vector3(0, 0, -1);
 
     private void Start()
     {
@@ -68,6 +68,7 @@ public class Tile: MonoBehaviour
         if (_letter != 'Q')
             _isQu = false;
 
+		// Currently unused; tiles no longer use tmpro
 		if (_tmpro)
 		{
 			string strLast = _tmpro.text;
@@ -97,7 +98,7 @@ public class Tile: MonoBehaviour
                 _letterSpriteRenderer.sprite = spriteGoal;
 
                 Vector3 letterOffset = IsQuTile() ? BoardConfig.INSTANCE.CharSet.GetQuOffset() : BoardConfig.INSTANCE.CharSet.GetOffset(_letter);
-                _letterSpriteRenderer.transform.localPosition = DEFAULT_POSITION + letterOffset;
+                _letterSpriteRenderer.transform.localPosition = DEFAULT_LETTER_POSITION + letterOffset;
             }
         }
 	}
