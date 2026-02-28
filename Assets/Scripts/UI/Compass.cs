@@ -18,35 +18,42 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
     {
         UpdateNeedle(eventData);
-        Debug.Log("mouse Down");
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        //Debug.Log("drag");
         UpdateNeedle(eventData);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
         UpdateNeedle(eventData);
-        Debug.Log("mouse up");
+        if (transform.eulerAngles.z == 0)
+        {
+            BoardConfig.INSTANCE.SetOverrideSettlekUp();
+            Debug.Log("current up");
+        }
+        else if (transform.eulerAngles.z == 90)
+        {
+            BoardConfig.INSTANCE.SetOverrideSettlekRight();
+            Debug.Log("current left");
+
+        }
+        else if (transform.eulerAngles.z == -90 || transform.eulerAngles.z == 270)
+        {
+            BoardConfig.INSTANCE.SetOverrideSettlekLeft();
+            Debug.Log("current right");
+        }
+        else if (transform.eulerAngles.z == 180 || transform.eulerAngles.z == -180)
+        {
+            BoardConfig.INSTANCE.SetOverrideSettlekDown();
+            Debug.Log("current down");
+        }
+        
     }
     
     private void UpdateNeedle(PointerEventData eventData)
     {
-        Vector2 screenpos = Camera.main.WorldToScreenPoint(transform.position);
-        ////Debug.Log("update needle");
-        //Vector2 posDiff = eventData.position - screenpos;
-        //posDiff.Normalize();
-        //Debug.Log(posDiff);
-        //float angle = Vector3.Angle(Input.mousePosition, screenpos);
-        //Debug.Log(angle);
-        //transform.eulerAngles= new Vector3(0, 0, angle);
-        //transform.Rotate(new Vector3(0,0,1), angle);
-        //transform.LookAt(eventData.position);
-        Vector2 mouseScreenPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Debug.Log("moustPos: " + eventData.position + "\nneedlepos: " + transform.position);
         Vector2 difference = eventData.position - new Vector2(transform.position.x, transform.position.y);
         float rotationZ = Mathf.Atan2(difference.x, difference.y) * Mathf.Rad2Deg;
         float clampedAngle = MathF.Round(rotationZ / 90) * 90;
