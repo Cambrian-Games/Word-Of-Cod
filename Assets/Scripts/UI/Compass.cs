@@ -48,8 +48,9 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
         Vector2 mouseScreenPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Debug.Log("moustPos: " + eventData.position + "\nneedlepos: " + transform.position);
         Vector2 difference = eventData.position - new Vector2(transform.position.x, transform.position.y);
-        float rotationZ = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0.0f, 0.0f, rotationZ);
+        float rotationZ = Mathf.Atan2(difference.x, difference.y) * Mathf.Rad2Deg;
+        float clampedAngle = MathF.Round(rotationZ / 90) * 90;
+        transform.rotation = Quaternion.Euler(0.0f, 0.0f, -clampedAngle);
     }
     
 }
