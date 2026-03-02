@@ -45,7 +45,7 @@ public class Relic : MonoBehaviour
             if (effect.Event != RelicEffect.EventTiming.On_Word_Submit)
                 continue;
 
-            res += effect.OnWordSubmit(word);
+            res += effect.OnWordSubmit(word, _id);
         }
 
         return res;
@@ -60,7 +60,7 @@ public class Relic : MonoBehaviour
             if (effect.Event != RelicEffect.EventTiming.On_Enemy_Attack)
                 continue;
 
-            res += effect.OnEnemyAttack(baseDamage);
+            res += effect.OnEnemyAttack(baseDamage, _id);
         }
 
         return res;
@@ -160,6 +160,7 @@ public class RelicEffect
 
     internal class Result
     {
+		public HashSet<int> _passiveRelicIDs = new HashSet<int>();
         public Dictionary<ValueToModify, float> _values = new Dictionary<ValueToModify, float>();
 
         public static Result operator +(Result lhs, Result rhs)
@@ -176,11 +177,14 @@ public class RelicEffect
                 }
             }
 
+			resNew._passiveRelicIDs.UnionWith(lhs._passiveRelicIDs);
+			resNew._passiveRelicIDs.UnionWith(rhs._passiveRelicIDs);
+
             return resNew;
         }
     }
 
-    internal Result OnWordSubmit(Word word)
+    internal Result OnWordSubmit(Word word, int sourceRelicID)
     {
         int numPasses = CountWordSubmitConditionPasses(word, _condition);
 
@@ -214,13 +218,14 @@ public class RelicEffect
             {
                 res._values.Remove(_valueToModify);
             }
-            
-        }
+
+			res._passiveRelicIDs.Add(sourceRelicID);
+		}
 
         return res;
     }
 
-    internal Result OnEnemyAttack(float baseDamage)
+    internal Result OnEnemyAttack(float baseDamage, int sourceRelicID)
     {
         int numPasses = CountEnemyAttackConditionPasses(baseDamage, _condition);
 
@@ -251,6 +256,8 @@ public class RelicEffect
             {
                 res._values.Remove(_valueToModify);
             }
+
+			res._passiveRelicIDs.Add(sourceRelicID);
         }
 
         return res;

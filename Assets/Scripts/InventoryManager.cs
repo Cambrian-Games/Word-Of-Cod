@@ -102,6 +102,8 @@ public class InventoryManager : MonoBehaviour
 
             Debug.LogError($"Unsupported modification of {item.Key} during OnWordSubmit");
         }
+
+		word.LogPassiveRelicsUsed(result);
     }
 
     internal void OnEnemyAttack(float baseDamage, out float modifiedDamage)
