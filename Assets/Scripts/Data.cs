@@ -31,7 +31,8 @@ public class Word
 
     private List<Tile> _tilesUsed;
     public List<Tile> Tiles => _tilesUsed;
-	public int _numTilesUsed;
+	private int _numTilesUsed;
+	public int NumTilesUsed => _numTilesUsed;
 
 	private List<int> _passiveRelicsTriggered;
 	public List<int> PassiveRelicsTriggered => _passiveRelicsTriggered;
