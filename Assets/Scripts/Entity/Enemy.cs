@@ -277,7 +277,9 @@ public class Enemy : Entity
 				break;
 
 			case AttackPriority.Random_From_All_Available:
-				List<int> ruleCandidates = new List<int>();
+
+				List<(int ruleIndex, float weight)> ruleCandidates = new List<(int id, float weight)>();
+				float totalWeight = 0.0f;
 
 				for (int i = 0; i < _rules.Count; i++)
 				{
@@ -286,14 +288,31 @@ public class Enemy : Entity
 
 					if (_rules[i].CanRun(this))
 					{
-						ruleCandidates.Add(i);
+						ruleCandidates.Add((i, _rules[i]._weight));
+						totalWeight += _rules[i]._weight;
 					}
 				}
 
 				if (ruleCandidates.Count > 0)
 				{
-					int index = Random.Range(0, ruleCandidates.Count);
-					_currentRuleIndex = ruleCandidates[index];
+					if (totalWeight == 0)
+					{
+						int index = Random.Range(0, ruleCandidates.Count);
+						_currentRuleIndex = ruleCandidates[index].ruleIndex;
+					}
+					else
+					{
+						float output = Random.Range(0, totalWeight);
+
+						int index = 0;
+						while (output > ruleCandidates[index].weight)
+						{
+							output -= ruleCandidates[index].weight;
+							index++;
+						}
+
+						_currentRuleIndex = ruleCandidates[index].ruleIndex;
+					}
 				}
 				else
 				{

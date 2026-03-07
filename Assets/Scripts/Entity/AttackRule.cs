@@ -23,6 +23,8 @@ public class AttackRule
 
 	public bool _uninterruptible;
 
+	public float _weight = 1.0f;
+
 	public List<AttackEffect> _effects;
 
 	EffectData _effectData;
@@ -31,6 +33,7 @@ public class AttackRule
 	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
 
 	internal int _roundsSinceLastUsed;
+
 
 	public bool CanRun(Enemy owner)
 	{
@@ -198,6 +201,7 @@ public class AttackCondition
 		Combo_Break,
 		[InspectorName(null), Obsolete]
 		Enemy_Killed,
+		//damage taken / percentage, can only be a cancel condition
 	}
 
 	public enum Comparator
@@ -274,6 +278,8 @@ public class AttackEffect
 		Standard_Attack,
 		[InspectorName("Transform Tiles")]
 		Transform_Tiles,
+		[InspectorName("Schooling Attack")]
+		Schooling_Attack,
 	}
 
 	[SerializeField]
@@ -299,9 +305,14 @@ public class AttackEffect
 
 	[Min(0), SerializeField]
 	public int _damage = 0;
-	public int Damage => (_effectKind == EffectKind.Standard_Attack) ? _damage : throw new InvalidOperationException();
 
-    [SerializeField]
+	[Min(1), SerializeField]
+	public int _minSchoolAttackHits = 1;
+
+	[Min(1), SerializeField]
+	public int _maxSchoolAttackHits = 1;
+
+	[SerializeField]
 	private Tile.TileKind _from;
 	[SerializeField]
 	private Tile.TileKind _to;
@@ -312,9 +323,10 @@ public class AttackEffect
 	{
 		return _effectKind switch
 		{
-			EffectKind.Do_Nothing => new EffectData(EffectKind.Do_Nothing),
+			EffectKind.Do_Nothing => new WaitTurnData(),
 			EffectKind.Standard_Attack => new StandardAttackData(),
 			EffectKind.Transform_Tiles => new TransformTilesData(),
+			EffectKind.Schooling_Attack => new SchoolingAttackData(_minSchoolAttackHits, _maxSchoolAttackHits),
 			_ => null,
 		};
 	}
@@ -341,9 +353,9 @@ public class AttackEffect
 		{
 			case EffectKind.Standard_Attack:
                 
-                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedDamage);
-                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedDamage);
-                Player.INSTANCE.CurrentHealth -= (int) modifiedDamage;
+                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedStandardDamage);
+                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedStandardDamage);
+                Player.INSTANCE.CurrentHealth -= (int) modifiedStandardDamage;
 
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
@@ -351,6 +363,27 @@ public class AttackEffect
 			case EffectKind.Transform_Tiles:
 				GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
 				((TransformTilesData)data)._hasTransformed = true;
+				break;
+
+			case EffectKind.Schooling_Attack:
+				SchoolingAttackData schoolData = (SchoolingAttackData)data;
+
+				// animations would play here
+
+				if (schoolData._numHits < schoolData._targetHits)
+				{
+					schoolData._numHits++;
+				}
+
+				if (schoolData._numHits < schoolData._targetHits)
+				{
+					break;
+				}
+
+				Player.INSTANCE._inventory.OnEnemyAttack(_damage * schoolData._targetHits, out float modifiedSchoolDamage);
+				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedSchoolDamage);
+				Player.INSTANCE.CurrentHealth -= (int) modifiedSchoolDamage;
+				schoolData._hasDamaged = true;
 				break;
 		}
 
@@ -364,6 +397,7 @@ public class AttackEffect
 			EffectKind.Do_Nothing => true,
 			EffectKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
 			EffectKind.Transform_Tiles => ((TransformTilesData)data)._hasTransformed,
+			EffectKind.Schooling_Attack => ((SchoolingAttackData)data)._hasDamaged,
 			_ => throw new NotImplementedException($"IsComplete() does not handle {_effectKind}"),
 		};
 	}
@@ -386,6 +420,7 @@ public class EffectData
 
 public class WaitTurnData : EffectData
 {
+	// TODO support multiple turns of waiting to avoid having to create multiple effects for a multi-turn wait
 	public int _turnsWaited = 0;
 
 	public WaitTurnData() : base(AttackEffect.EffectKind.Do_Nothing)
@@ -423,5 +458,26 @@ public class TransformTilesData : EffectData
 	public override string ToString()
 	{
 		return "Has Transformed: " + _hasTransformed;
+	}
+}
+
+public class SchoolingAttackData : EffectData
+{
+	public int _numHits = 0;
+	public int _targetHits = 0;
+
+	public bool _hasDamaged = false;
+
+	public SchoolingAttackData(int minHits, int maxHits) : base(AttackEffect.EffectKind.Schooling_Attack)
+	{
+		_targetHits = minHits + (int)((BattleManager.INSTANCE.CurrentEnemy.HealthPercent() / 100f) * (maxHits - minHits + 1));
+
+		// if minhits is 1 and maxHits is 20, we have [0, 0.05) = 1 hit, [0.05, 0.1) = 2 hits, etc
+		//  but at 1 exactly, it would equal 21 hits, so we clamp it.
+
+		if (_targetHits > maxHits)
+		{
+			_targetHits = maxHits;
+		}
 	}
 }
