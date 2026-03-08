@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class BattleManager : MonoBehaviour
 {
@@ -143,7 +145,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    void SetBattleState(BattleState newState)
+    internal void SetBattleState(BattleState newState)
     {
         if (_battleState == newState)
             return;
@@ -155,6 +157,10 @@ public class BattleManager : MonoBehaviour
             case BattleState.Player_Turn:
                 TileSelector.INSTANCE._isSelectingEnabled = false;
                 break;
+
+			case BattleState.Post_Player_Turn:
+				_pptState = PostPlayerTurnState.Nil;
+				break;
 
             case BattleState.Enemy_Turn:
                 _enemyTurnHandler.EndTurn();
@@ -207,10 +213,17 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Post_Player_Turn:
-                GameBoard.INSTANCE.DisconnectTiles(TilesInWord, newParent: this.transform);
-                GameBoard.INSTANCE.LockStateMachine(true);
-                SetPostPlayerTurnState(PostPlayerTurnState.Display_Word);
-                break;
+				if (_wordToSubmit != null)
+				{
+					GameBoard.INSTANCE.DisconnectTiles(TilesInWord, newParent: this.transform);
+					GameBoard.INSTANCE.LockStateMachine(true);
+					SetPostPlayerTurnState(PostPlayerTurnState.Display_Word);
+				}
+				else
+				{
+					SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
+				}
+				break;
 
             case BattleState.Enemy_Turn:
                 _enemyTurnHandler.StartTurn();
@@ -368,12 +381,15 @@ public class BattleManager : MonoBehaviour
 
             case PostPlayerTurnState.Cleanup:
 
-                for (int i = 0; i < TilesInWord.Count; i++)
-                {
-                    Destroy(TilesInWord[i].gameObject);
-                }
+				if (_wordToSubmit != null)
+				{
+					for (int i = 0; i < TilesInWord.Count; i++)
+					{
+						Destroy(TilesInWord[i].gameObject);
+					}
 
-                TilesInWord.Clear();
+					TilesInWord.Clear();
+				}
 
                 if (_enemy.CurrentHealth <= 0)
                 {
@@ -426,4 +442,9 @@ public class BattleManager : MonoBehaviour
     {
         SetBattleState(BattleState.Load);
     }
+
+	internal void BreakCombo()
+	{
+		_previousWord = null;
+	}
 }
