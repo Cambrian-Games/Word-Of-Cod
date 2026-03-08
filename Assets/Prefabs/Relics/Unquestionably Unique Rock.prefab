@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: Unquestionably Unique Rock
-  _description: 
+  _description: '[UUR Desc]'
   _icon: {fileID: -3268270820148773124, guid: e5e43467b7316570e94db1dda926a248, type: 3}
   _effects:
   - _event: 0
