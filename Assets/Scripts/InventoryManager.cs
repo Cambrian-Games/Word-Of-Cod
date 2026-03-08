@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -48,6 +49,8 @@ public class InventoryManager : MonoBehaviour
         //sets the starting relic icon
         _relicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
             _passiveRelics[_passiveRelicInventory[0]].Icon;
+
+        GameObject.Find("Tooltip Text").GetComponent<TMP_Text>().text = "";
     }
 
     // Update is called once per frame
