@@ -1705,7 +1705,9 @@ MonoBehaviour:
       _weight: 1
   - _poolKind: 1
     _canRepeat: 0
-    _entries: []
+    _entries:
+    - _prefab: {fileID: 3799837967197732049, guid: 07ef0dae21f527d4e99cc77a5508ce60, type: 3}
+      _weight: 1
   _runFormat:
   - _eventKinds: 00000000
   - _eventKinds: 00000000
