@@ -17,17 +17,27 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
     {
-        UpdateNeedle(eventData);
+        if (GameBoard.INSTANCE.IsSettled())
+        {
+            UpdateNeedle(eventData);
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        UpdateNeedle(eventData);
+        if (GameBoard.INSTANCE.IsSettled())
+        {
+            UpdateNeedle(eventData);
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        UpdateNeedle(eventData);
+        if (GameBoard.INSTANCE.IsSettled())
+        {
+            UpdateNeedle(eventData);
+        }
+        
         if (transform.eulerAngles.z == 0)
         {
             BoardConfig.INSTANCE.SetOverrideSettlekUp();
@@ -56,7 +66,7 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
     {
         Vector2 difference = eventData.position - new Vector2(transform.position.x, transform.position.y);
         float rotationZ = Mathf.Atan2(difference.x, difference.y) * Mathf.Rad2Deg;
-        float clampedAngle = MathF.Round(rotationZ / 90) * 90;
+        float clampedAngle = Mathf.Round(rotationZ / 90) * 90;
         transform.rotation = Quaternion.Euler(0.0f, 0.0f, -clampedAngle);
     }
     
