@@ -55,6 +55,12 @@ public class BattleManager : MonoBehaviour
     internal Word PreviousWord => _previousWord;
     internal Word MostRecentWord => _wordToSubmit;
 
+	// currently we log word length, tile count, and triggered relics.
+	//  other possible things to log are the number of spiny tiles used and the number of sandy tiles cleared.
+	//  Once combo system is in we could log that too.
+	//  We also don't store full-run word history but that can be added later if needed, and we can extract best/worst word stuff from that
+	internal List<Word> _wordHistory = new List<Word>();
+
     // probably should replace all instances long-term
     List<Tile> TilesInWord => _wordToSubmit.Tiles;
 
@@ -98,7 +104,7 @@ public class BattleManager : MonoBehaviour
         bool holdingShift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         bool holdingSpace = Input.GetKey(KeyCode.Space);
 
-        if (holdingShift && holdingSpace)
+        if (holdingShift && holdingSpace && _enemy)
         {
             Destroy(_enemy.gameObject);
             SetBattleState(BattleState.Win);
@@ -153,6 +159,14 @@ public class BattleManager : MonoBehaviour
             case BattleState.Enemy_Turn:
                 _enemyTurnHandler.EndTurn();
                 break;
+
+			case BattleState.Nil:
+				if (_wordHistory == null)
+				{
+					_wordHistory = new List<Word>();
+				}
+				_wordHistory.Clear();
+				break;
         }
 
         _battleState = newState;
@@ -165,6 +179,8 @@ public class BattleManager : MonoBehaviour
                 _enemyTurnHandler = null;
 
                 GameBoard.INSTANCE.DeleteBoard();
+
+				_wordHistory.Clear();
                 break;
 
             case BattleState.Load:
@@ -385,6 +401,7 @@ public class BattleManager : MonoBehaviour
             // This may need to move elsewhere if we have visual feedback
 
             Player.INSTANCE._inventory.OnWordSubmit(_wordToSubmit);
+			_wordHistory.Add(word);
 
             SetBattleState(BattleState.Post_Player_Turn);
             return true;

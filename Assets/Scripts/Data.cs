@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // Word Data
@@ -27,8 +28,15 @@ public class Word
 
     private float _baseDamage;
     public float BaseDamage => _baseDamage;
+
     private List<Tile> _tilesUsed;
     public List<Tile> Tiles => _tilesUsed;
+	private int _numTilesUsed;
+	public int NumTilesUsed => _numTilesUsed;
+
+	private List<int> _passiveRelicsTriggered;
+	public List<int> PassiveRelicsTriggered => _passiveRelicsTriggered;
+
     private float _modifiedDamage = 0;
     public int EffectiveDamage => _modifiedDamage != 0 ? Mathf.RoundToInt(_modifiedDamage) : Mathf.RoundToInt(_baseDamage);
 
@@ -37,6 +45,7 @@ public class Word
         _text = text;
         _pOS = pOS;
         _tilesUsed = new List<Tile>(tilesUsed);
+		_numTilesUsed = _tilesUsed.Count;
 
         foreach (char c in text)
         {
@@ -53,6 +62,11 @@ public class Word
         _modifiedDamage = _baseDamage * (1 + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Damage_Percent_Increase));
         _modifiedDamage += result._values.GetValueOrDefault(RelicEffect.ValueToModify.Damage_Bonus);
     }
+
+	internal void LogPassiveRelicsUsed(RelicEffect.Result result)
+	{
+		_passiveRelicsTriggered = new List<int>(result._passiveRelicIDs);
+	}
 }
 
 // Board Data
