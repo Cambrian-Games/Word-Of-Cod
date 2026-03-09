@@ -1172,7 +1172,7 @@ Transform:
   m_GameObject: {fileID: 416029075}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: -0.25, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1191,7 +1191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _target: {fileID: 1342681907}
-  _targetOffset: {x: -6, y: 0.25, z: 0}
+  _targetOffset: {x: -6, y: -0.25, z: 0}
   _cameraOffset: -10
 --- !u!1 &426003708
 GameObject:
@@ -5666,7 +5666,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3122789982281046568, guid: 38244eab106481d4282cfe564163e2ca, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 3122789982281046568, guid: 38244eab106481d4282cfe564163e2ca, type: 3}
       propertyPath: m_LocalPosition.z
