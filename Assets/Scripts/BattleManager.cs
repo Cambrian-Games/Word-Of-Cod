@@ -194,7 +194,10 @@ public class BattleManager : MonoBehaviour
                 // expensive, just here for testing
                 CameraTracker tracker = FindAnyObjectByType<CameraTracker>();
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
-                _enemy.transform.localPosition = (Vector2)(-tracker._targetOffset);
+				Vector3 enemyLocalPos = Player.INSTANCE.transform.position - tracker.transform.position;
+				enemyLocalPos.x *= -1;
+				_enemy.transform.localPosition = enemyLocalPos;
+
 
                 _enemyTurnHandler = new EnemyTurnHandler(_enemy);
 
