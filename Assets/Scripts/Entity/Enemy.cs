@@ -37,6 +37,9 @@ public class Enemy : Entity
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
 
+	// create once, never re-assign
+	internal readonly Dictionary<string, float> _attackBlackboard = new Dictionary<string, float>();
+
 	[SerializeField] //can be temporary, but for testing forecast display i need to see current forecast
     internal string _currentForecast = "";
 
@@ -47,6 +50,7 @@ public class Enemy : Entity
 	{
 		base.Awake();
 
+#if UNITY_EDITOR
 		bool hasNullRules = false;
 
 		for (int i = _rules.Count - 1; i >= 0; i--)
@@ -68,6 +72,7 @@ public class Enemy : Entity
 		}
 
 		Debug.Assert(!hasNullRules, $"Enemy {name} has at least one null rule! Removing all null rules.");
+#endif
 	}
 
 	public override void UpdateTurn()

@@ -337,9 +337,14 @@ public class GameBoard : MonoBehaviour
 	internal void TransformRandomTiles(Tile.TileKind oldKind, Tile.TileKind newKind, int num)
 	{
 		int converted = 0;
+
+		// TODO make this a bit more intelligent. Maybe grab all eligible tiles before selecting
+		int maxAttempts = num * 2;
+		int numAttempts = 0;
+
 		Vector2Int dims = _config.Layout.Dims();
 
-		while (converted < num)
+		while (converted < num && numAttempts < maxAttempts)
 		{
 			int randCol = UnityEngine.Random.Range(0, dims.x);
 			int randRow = UnityEngine.Random.Range(0, dims.y);
@@ -349,10 +354,22 @@ public class GameBoard : MonoBehaviour
                 TransformTile(new Vector2Int(randCol, randRow), newKind);
 				converted++;
 			}
+			numAttempts++;
 		}
 	}
 
-    internal void TransformTile(Vector2Int coord, Tile.TileKind newKind)
+	internal void TransformAllTiles(Tile.TileKind oldKind, Tile.TileKind newKind)
+	{
+		foreach (Tile tile in _playableBoard)
+		{
+			if (tile && tile.Kind == oldKind)
+			{
+				TransformTile(tile._coord, newKind);
+			}
+		}
+	}
+
+	internal void TransformTile(Vector2Int coord, Tile.TileKind newKind)
     {
         if (_playableBoard[coord.x, coord.y])
         {
@@ -386,4 +403,19 @@ public class GameBoard : MonoBehaviour
             TransformTile(new Vector2Int(tileCoord.x, tileCoord.y + 1), Tile.TileKind.Normal);
         }
     }
+
+	internal int CountTiles(Tile.TileKind kind)
+	{
+		int result = 0;
+
+		foreach (Tile tile in _playableBoard)
+		{
+			if (tile && tile.Kind == kind)
+			{
+				result++;
+			}
+		}
+
+		return result;
+	}
 }

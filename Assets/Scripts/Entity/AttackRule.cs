@@ -191,7 +191,7 @@ public class AttackCondition
 		Not_First_Turn,
 		[InspectorName("Turns Since Last Action")]
 		Turns_Since_Last_Action,
-		[InspectorName(null), Obsolete]
+		[InspectorName("Last Attack")]
 		Last_Action_Index,
 		[InspectorName("Length of Last Word")]
 		Last_Word_Length,
@@ -201,7 +201,10 @@ public class AttackCondition
 		Combo_Break,
 		[InspectorName(null), Obsolete]
 		Enemy_Killed,
+
 		//damage taken / percentage, can only be a cancel condition
+		[InspectorName("Damage Taken")]
+		Damage_Taken
 	}
 
 	public enum Comparator
@@ -251,6 +254,7 @@ public class AttackCondition
 			ConditionField.Last_Action_Index => owner.LastRuleIndex,
 			ConditionField.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord.Text.Length,
 			ConditionField.Combo_Length => throw new NotImplementedException(),
+			ConditionField.Damage_Taken => owner.LastDamageTaken,
 			_ => throw new NotImplementedException()
 		};
 
@@ -280,6 +284,11 @@ public class AttackEffect
 		Transform_Tiles,
 		[InspectorName("Schooling Attack")]
 		Schooling_Attack,
+
+		[InspectorName("Count Variant Tiles")]
+		Count_Variant_Tiles,
+		[InspectorName("Attack Per Variant Tile")]
+		Variant_Tile_Attack,
 	}
 
 	[SerializeField]
@@ -326,7 +335,11 @@ public class AttackEffect
 			EffectKind.Do_Nothing => new WaitTurnData(),
 			EffectKind.Standard_Attack => new StandardAttackData(),
 			EffectKind.Transform_Tiles => new TransformTilesData(),
+
 			EffectKind.Schooling_Attack => new SchoolingAttackData(_minSchoolAttackHits, _maxSchoolAttackHits),
+
+			EffectKind.Count_Variant_Tiles => new EffectData(EffectKind.Count_Variant_Tiles),
+			EffectKind.Variant_Tile_Attack => throw new NotImplementedException(),
 			_ => null,
 		};
 	}
@@ -361,7 +374,14 @@ public class AttackEffect
 				break;
 
 			case EffectKind.Transform_Tiles:
-				GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
+				if (_numTiles > 0)
+				{
+					GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
+				}
+				else
+				{
+					GameBoard.INSTANCE.TransformAllTiles(oldKind: _from, newKind: _to);
+				}
 				((TransformTilesData)data)._hasTransformed = true;
 				break;
 
@@ -385,6 +405,10 @@ public class AttackEffect
 				Player.INSTANCE.CurrentHealth -= (int) modifiedSchoolDamage;
 				schoolData._hasDamaged = true;
 				break;
+
+			case EffectKind.Count_Variant_Tiles:
+				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
+				break;
 		}
 
 		return IsComplete(data);
@@ -404,7 +428,7 @@ public class AttackEffect
 }
 
 /// <summary>
-/// Any extra metadata we need to complete an AttackRule
+/// Any extra metadata we need to complete an AttackEffect
 /// </summary>
 public class EffectData
 {
@@ -481,3 +505,4 @@ public class SchoolingAttackData : EffectData
 		}
 	}
 }
+

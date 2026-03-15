@@ -57,6 +57,11 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 				position.y += Y_OFFSET;
 				EditorGUI.PropertyField(position, property.FindPropertyRelative("_damage"), new GUIContent("Base Damage"));
 				break;
+
+			case AttackEffect.EffectKind.Count_Variant_Tiles:
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_to"), new GUIContent("Kind"));
+				break;
 		}
 
 		position.y += Y_OFFSET;
@@ -80,6 +85,8 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 			AttackEffect.EffectKind.Standard_Attack => 1,
 			AttackEffect.EffectKind.Transform_Tiles => 2,
 			AttackEffect.EffectKind.Schooling_Attack => 3,
+
+			AttackEffect.EffectKind.Count_Variant_Tiles => 1,
 			_ => 0,
 		};
 
