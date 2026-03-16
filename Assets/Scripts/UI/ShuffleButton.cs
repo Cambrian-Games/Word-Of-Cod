@@ -19,6 +19,7 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 			_timeSinceLastClick += Time.deltaTime;
 		}
 	}
+
 	public void OnPointerDown(PointerEventData eventData)
 	{
 		if (!GameBoard.INSTANCE.IsSettled())
