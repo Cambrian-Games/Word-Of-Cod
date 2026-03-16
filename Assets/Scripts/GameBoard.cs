@@ -51,6 +51,35 @@ public class GameBoard : MonoBehaviour
         }
 	}
 
+	internal void Shuffle()
+	{
+		int numSpinyTiles = 0;
+		int numSandyTiles = 0;
+
+		foreach (Vector2Int coord in new Vector2IntIterator(_config.Layout.BottomRight()))
+		{
+			switch (_playableBoard[coord.x, coord.y].Kind)
+			{
+				case Tile.TileKind.Spiny:
+					numSpinyTiles++;
+					break;
+
+				case Tile.TileKind.Sandy:
+					numSandyTiles++;
+					break;
+			}
+		}
+
+		DeleteBoard();
+
+		// TODO tell Update to wait some amount of time before spawning new board, for animations
+
+		GenerateBoard();
+
+		TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Spiny, numSpinyTiles);
+		TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Sandy, numSandyTiles);
+	}
+
 	private void UpdateResolveState()
 	{
 		switch (_resolveState)
