@@ -51,20 +51,17 @@ public class BattleManager : MonoBehaviour
 
     // Player Turn Data
 
-    Word _wordToSubmit;
-    Word _previousWord;
+    private Word _wordToSubmit;
+    private Word _previousWord;
 
-    internal Word PreviousWord => _previousWord;
-    internal Word MostRecentWord => _wordToSubmit;
+	// this is questionable, given how attack rules care about it, but it's fine for now.
+	public Word MostRecentWord => _wordToSubmit;
 
 	// currently we log word length, tile count, and triggered relics.
 	//  other possible things to log are the number of spiny tiles used and the number of sandy tiles cleared.
 	//  Once combo system is in we could log that too.
 	//  We also don't store full-run word history but that can be added later if needed, and we can extract best/worst word stuff from that
 	internal List<Word> _wordHistory = new List<Word>();
-
-    // probably should replace all instances long-term
-    List<Tile> TilesInWord => _wordToSubmit.Tiles;
 
     public Transform _tileDestination;
     List<Vector3> _directions = new List<Vector3>();
@@ -213,12 +210,16 @@ public class BattleManager : MonoBehaviour
                 //change forecast text
                 _forecastText.text = _enemy.FormattedForecast();
 
+				_previousWord = _wordToSubmit;
+				_wordToSubmit = null;
+
                 break;
 
             case BattleState.Post_Player_Turn:
 				if (_wordToSubmit != null)
 				{
-					GameBoard.INSTANCE.DisconnectTiles(TilesInWord, newParent: this.transform);
+					// TODO this needs to change due to durable vowels and the changing attack animation
+					GameBoard.INSTANCE.DisconnectTiles(_wordToSubmit.Tiles, newParent: this.transform);
 					GameBoard.INSTANCE.LockStateMachine(true);
 					SetPostPlayerTurnState(PostPlayerTurnState.Display_Word);
 				}
@@ -268,9 +269,9 @@ public class BattleManager : MonoBehaviour
                 case PostPlayerTurnState.Display_Word:
 
                     float dTWord = Time.deltaTime;
-                    for (int i = 0; i < TilesInWord.Count; i++)
+                    for (int i = 0; i < _wordToSubmit.Tiles.Count; i++)
                     {
-                        TilesInWord[i].transform.position += _directions[i] * dTWord / _timeToDestination;
+						_wordToSubmit.Tiles[i].transform.position += _directions[i] * dTWord / _timeToDestination;
                     }
 
                     _timeElapsed += dTWord;
@@ -297,9 +298,9 @@ public class BattleManager : MonoBehaviour
                 case PostPlayerTurnState.Attack_Enemy:
 
                     float dTAttack = Time.deltaTime;
-                    for (int i = 0; i < TilesInWord.Count; i++)
+                    for (int i = 0; i < _wordToSubmit.Tiles.Count; i++)
                     {
-                        TilesInWord[i].transform.position += _directions[i] * dTAttack / _timeToDestination;
+						_wordToSubmit.Tiles[i].transform.position += _directions[i] * dTAttack / _timeToDestination;
                     }
 
                     _timeElapsed += dTAttack;
@@ -328,7 +329,7 @@ public class BattleManager : MonoBehaviour
         {
             case PostPlayerTurnState.Display_Word:
                 _directions.Clear();
-                TilesInWord.ForEach(tile => tile.OnSubmit());
+				_wordToSubmit.Tiles.ForEach(tile => tile.OnSubmit());
 
                 if (Player.INSTANCE.CurrentHealth <= 0)
                 {
@@ -347,23 +348,25 @@ public class BattleManager : MonoBehaviour
         switch (_pptState)
         {
             case PostPlayerTurnState.Display_Word:
-                // TODO this hard-codes the width of the tile in the first Vector3.left
+				// TODO this hard-codes the width of the tile in the first Vector3.left
 
-                Vector2 farLeft = _tileDestination.transform.position +
-                    (TilesInWord.Count / 2.0f) * Vector3.left +
-                    ((TilesInWord.Count - 1) / 2.0f) * (BoardConfig.INSTANCE.TileSpacing.x) * Vector3.left;
+				int tileCount = _wordToSubmit.Tiles.Count;
 
-                for (int i = 0; i < TilesInWord.Count; i++)
+				Vector2 farLeft = _tileDestination.transform.position +
+                    (tileCount / 2.0f) * Vector3.left +
+                    ((tileCount - 1) / 2.0f) * (BoardConfig.INSTANCE.TileSpacing.x) * Vector3.left;
+
+                for (int i = 0; i < tileCount; i++)
                 {
                     // TODO this hardcodes the width of the tile with the 1 and 0.5f
                     Vector3 destPosition = farLeft + ((1 + BoardConfig.INSTANCE.TileSpacing.x) * i + 0.5f) * Vector2.right;
-                    _directions.Add(destPosition - TilesInWord[i].transform.position);
+                    _directions.Add(destPosition - _wordToSubmit.Tiles[i].transform.position);
                 }
 
                 // TODO this will probably need to move somewhere else eventually, but this is safe for now
 
                 GameBoard board = GameBoard.INSTANCE;
-                TilesInWord.ForEach(tile => board.ClearSurroundingSandTiles(tile._coord));
+				_wordToSubmit.Tiles.ForEach(tile => board.ClearSurroundingSandTiles(tile._coord));
 
                 _timeElapsed = 0.0f;
                 break;
@@ -374,9 +377,9 @@ public class BattleManager : MonoBehaviour
 
             case PostPlayerTurnState.Attack_Enemy:
 
-                for (int i = 0; i < TilesInWord.Count; i++)
+                for (int i = 0; i < _wordToSubmit.Tiles.Count; i++)
                 {
-                    _directions.Add(_enemy.transform.position - TilesInWord[i].transform.position);
+                    _directions.Add(_enemy.transform.position - _wordToSubmit.Tiles[i].transform.position);
                 }
 
                 _timeElapsed = 0.0f;
@@ -386,12 +389,12 @@ public class BattleManager : MonoBehaviour
 
 				if (_wordToSubmit != null)
 				{
-					for (int i = 0; i < TilesInWord.Count; i++)
+					for (int i = 0; i < _wordToSubmit.Tiles.Count; i++)
 					{
-						Destroy(TilesInWord[i].gameObject);
+						Destroy(_wordToSubmit.Tiles[i].gameObject);
 					}
 
-					TilesInWord.Clear();
+					_wordToSubmit.Tiles.Clear();
 				}
 
                 if (_enemy.CurrentHealth <= 0)
@@ -414,7 +417,6 @@ public class BattleManager : MonoBehaviour
 
         if (WordChecker.INSTANCE.TryGetWord(text, tilesUsed, out Word word))
         {
-            _previousWord = _wordToSubmit;
             _wordToSubmit = word;
 
             // This may need to move elsewhere if we have visual feedback
@@ -445,9 +447,4 @@ public class BattleManager : MonoBehaviour
     {
         SetBattleState(BattleState.Load);
     }
-
-	internal void BreakCombo()
-	{
-		_previousWord = null;
-	}
 }

@@ -5398,7 +5398,7 @@ MonoBehaviour:
   _selectionKind: 2
   _lineRenderer: {fileID: 1896358450}
   _debugWordConfirmer: {fileID: 0}
-  _wordDisplay: {fileID: 0}
+  _wordDisplay: {fileID: 657686899}
 --- !u!4 &1896358449
 Transform:
   m_ObjectHideFlags: 0

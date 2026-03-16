@@ -34,9 +34,6 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 			GameBoard.INSTANCE.Shuffle();
 			_hasFirstClick = false;
 			
-			// break combo if it exists
-
-			BattleManager.INSTANCE.BreakCombo();
 			BattleManager.INSTANCE.SetBattleState(BattleManager.BattleState.Post_Player_Turn);
 		}
 	}
