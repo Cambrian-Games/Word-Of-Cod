@@ -57,7 +57,7 @@ public class AttackRule
 		if (_cancelConditions.Count == 0)
 			return false;
 
-		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
+		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _cancelConditions.Any(cond => cond.IsConditionSatisfied(owner));
 	}
 
 	public void StartRule()
@@ -204,7 +204,13 @@ public class AttackCondition
 
 		//damage taken / percentage, can only be a cancel condition
 		[InspectorName("Damage Taken")]
-		Damage_Taken
+		Damage_Taken,
+
+		[InspectorName("Vacuumed Sandy Tiles")]
+		Vacuumed_Sandy_Tiles,
+
+		[InspectorName("Sandy Tiles on Board")]
+		Sandy_Tile_Count,
 	}
 
 	public enum Comparator
@@ -255,6 +261,8 @@ public class AttackCondition
 			ConditionField.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord?.Text.Length ?? 0,
 			ConditionField.Combo_Length => throw new NotImplementedException(),
 			ConditionField.Damage_Taken => owner.LastDamageTaken,
+			ConditionField.Sandy_Tile_Count => GameBoard.INSTANCE.CountTiles(Tile.TileKind.Sandy),
+			ConditionField.Vacuumed_Sandy_Tiles => (int) owner._attackBlackboard.GetValueOrDefault(Tile.TileKind.Sandy.ToString(), 0),
 			_ => throw new NotImplementedException()
 		};
 
@@ -339,7 +347,7 @@ public class AttackEffect
 			EffectKind.Schooling_Attack => new SchoolingAttackData(_minSchoolAttackHits, _maxSchoolAttackHits),
 
 			EffectKind.Count_Variant_Tiles => new EffectData(EffectKind.Count_Variant_Tiles),
-			EffectKind.Variant_Tile_Attack => throw new NotImplementedException(),
+			EffectKind.Variant_Tile_Attack => new VariantTileAttackData(),
 			_ => null,
 		};
 	}
@@ -409,6 +417,20 @@ public class AttackEffect
 			case EffectKind.Count_Variant_Tiles:
 				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
 				break;
+
+			case EffectKind.Variant_Tile_Attack:
+
+				VariantTileAttackData variantData = (VariantTileAttackData)data;
+
+				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()], out float modifiedVariantDamage);
+				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedVariantDamage);
+				Player.INSTANCE.CurrentHealth -= (int) modifiedVariantDamage;
+
+				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard.Remove(_to.ToString());
+				variantData._hasAttacked = true;
+				break;
+
+
 		}
 
 		return IsComplete(data);
@@ -422,6 +444,8 @@ public class AttackEffect
 			EffectKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
 			EffectKind.Transform_Tiles => ((TransformTilesData)data)._hasTransformed,
 			EffectKind.Schooling_Attack => ((SchoolingAttackData)data)._hasDamaged,
+			EffectKind.Count_Variant_Tiles => true,
+			EffectKind.Variant_Tile_Attack => ((VariantTileAttackData)data)._hasAttacked,
 			_ => throw new NotImplementedException($"IsComplete() does not handle {_effectKind}"),
 		};
 	}
@@ -503,6 +527,16 @@ public class SchoolingAttackData : EffectData
 		{
 			_targetHits = maxHits;
 		}
+	}
+}
+
+public class VariantTileAttackData : EffectData
+{
+	public bool _hasAttacked = false;
+
+	public VariantTileAttackData() : base(AttackEffect.EffectKind.Variant_Tile_Attack)
+	{
+
 	}
 }
 
