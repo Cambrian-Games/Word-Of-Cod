@@ -10,57 +10,57 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9cfd0df6478740a4bb6a36d493c8f354, type: 3}
-  m_Name: ModifiedCharacterWeights
+  m_Name: New Char Weights
   m_EditorClassIdentifier: Assembly-CSharp::CharacterWeights
   _weights:
-  - 1.872
-  - 1.5
-  - 2.5
-  - 2.4
-  - 2.64
-  - 1.2
+  - 6.24
   - 2
-  - 1.65
-  - 2.064
-  - 0.605
-  - 0.985
-  - 3.15
-  - 1.85
-  - 4.1
-  - 1.464
-  - 1.9
-  - 0.595
-  - 4.15
-  - 4.85
-  - 3.85
-  - 0.792
+  - 4
+  - 3.8
+  - 8.8
+  - 1.4
+  - 3
+  - 2.3
+  - 6.88
+  - 0.21
+  - 0.97
+  - 5.3
+  - 2.7
+  - 7.2
+  - 4.88
+  - 2.8
+  - 0.19
+  - 7.3
+  - 8.7
+  - 6.7
+  - 2.64
   - 1
-  - 0.955
-  - 0.635
-  - 1.04
-  - 0.72
+  - 0.91
+  - 0.27
+  - 1.6
+  - 0.44
   _minVowelRate: 0.2
-  _baseScores: 0100000002000000020000000200000001000000020000000200000002000000010000000400000003000000020000000200000001000000010000000200000004000000010000000100000001000000020000000200000003000000040000000200000003000000
+  _baseScores: 0100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
   _vowelCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 1
-      inSlope: -0.18650733
+      inSlope: -0.041753106
       outSlope: -1
-      tangentMode: 69
+      tangentMode: 65
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.11904792
+      outWeight: 0.25613618
     - serializedVersion: 3
       time: 1
       value: 0
       inSlope: -1
-      outSlope: -0.7581171
+      outSlope: 0
       tangentMode: 5
       weightedMode: 0
-      inWeight: 0.08361626
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

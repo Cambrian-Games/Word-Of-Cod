@@ -70,13 +70,13 @@ public class CharacterWeights : ScriptableObject
 
 		for (; charIndex < count; charIndex++)
 		{
-			if (((float)vowelCount / playableTileCount) < _minVowelRate)
-			{
-				newChars[charIndex] = RandomVowel(state, newChars, charIndex);
-				vowelCount++;
-			}
-			else
-			{
+			//if (((float)vowelCount / playableTileCount) < _minVowelRate)
+			//{
+			//	newChars[charIndex] = RandomVowel(state, newChars, charIndex);
+			//	vowelCount++;
+			//}
+			//else
+			//{
 				newChars[charIndex] = RandomLetter(state, newChars, charIndex);
 
 				switch (newChars[charIndex])
@@ -89,8 +89,11 @@ public class CharacterWeights : ScriptableObject
 						vowelCount++;
 						break;
 				}
-			}
+			//}
 		}
+
+		// check characters in board, if total vowels <= _minVowelRate, replace first 5 consonants with vowels.
+		//  how do we check for decay when replacing letters???
 
 		// shuffle characters
 

@@ -3766,7 +3766,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _defaultSettleKind: 1
-  _characterWeights: {fileID: 11400000, guid: cdee6ea1f1318e240b89eb92db19f15e, type: 2}
+  _characterWeights: {fileID: 11400000, guid: 5019cf9c0cc23c242804c50c7cbce745, type: 2}
   _charset: {fileID: 11400000, guid: e2c5fe67f99581948a346f84aea30e4e, type: 2}
   _layout: {fileID: 11400000, guid: 878692dcb8b61c04e9cd4e821141bc39, type: 2}
   _defaultTilePrefab: {fileID: 3947973941020287808, guid: ccc8c4e3ee13711429938ff2c8876ca3, type: 3}
