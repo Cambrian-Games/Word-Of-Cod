@@ -200,9 +200,54 @@ public class CharacterWeights : ScriptableObject
 			}
 		}
 
-		if (_reducePercent)
+		if (_reducePercent && false)
 		{
-			// how on earth do we do this math... 
+			float totalDefaultWeight = _weights.Sum();
+
+			float[] percentScalars = new float[VOWELS.Length];
+			float[] defaultPercents = new float[VOWELS.Length];
+
+			for (int vowelIter = 0; vowelIter < VOWELS.Length; vowelIter++)
+			{
+				defaultPercents[vowelIter] = _weights[VOWELS[vowelIter] - 'A'] / totalDefaultWeight;
+			}
+
+			for (int vowelIter = 0; vowelIter < VOWELS.Length; vowelIter++)
+			{
+				int numPresent = state.CountLetter(VOWELS[vowelIter]);
+
+				for (int i = 0; i < numPreviouslyAddedChars; i++)
+				{
+					if (previouslyAddedChars[i] == VOWELS[vowelIter])
+						numPresent++;
+				}
+
+				if (numPresent >= _defaultZeroThreshold)
+				{
+					percentScalars[vowelIter] = 0;
+					continue;
+				}
+
+				if (numPresent > _defaultDecayThreshold && !_reducePercent)
+				{
+					// a(1-u) + b(u) = x
+					// a = _defaultDecayThreshold
+					// b = _defaultZeroThreshold - 1
+					// x = numPresent
+
+					// u = (a-x) / (a-b)
+
+					float u = (_defaultDecayThreshold - numPresent) / (float)(_defaultDecayThreshold - (_defaultZeroThreshold - 1));
+					percentScalars[vowelIter] = _vowelCurve.Evaluate(u);
+					continue;
+				}
+
+				percentScalars[vowelIter] = 1.0f;
+			}
+
+			// how on earth do we do this math...
+			// target percents are known, it's the defaultPercent * the percentScalar,
+			// but reducing the percent of any vowel necessarily increases the percents of the others
 		}
 
 		return result;
