@@ -1,3 +1,4 @@
+using Unity.Services.Core;
 using UnityEngine;
 
 public class AnalyticsManager : MonoBehaviour
@@ -9,6 +10,7 @@ public class AnalyticsManager : MonoBehaviour
     {
         _analyticsEnabled = false;
         DontDestroyOnLoad(gameObject);
+        UnityServices.InitializeAsync();
     }
 
     // Update is called once per frame

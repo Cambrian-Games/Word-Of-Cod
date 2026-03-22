@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
+using UnityEngine.Analytics;
+using UnityEngine.UnityConsent;
 
 public class RunManager : MonoBehaviour
 {
@@ -31,6 +33,8 @@ public class RunManager : MonoBehaviour
 	private Vector3 _destination;
 
 	private bool _hasSelectedNextEvent = false;
+
+	public AnalyticsManager _analyticsManager;
 
 	public enum RunState
 	{
@@ -66,6 +70,19 @@ public class RunManager : MonoBehaviour
 	void Start()
     {
 		SetRunState(RunState.Run_Start);
+		GameObject analyticsGameObject = GameObject.Find("Analytics Manager");
+		if (analyticsGameObject)
+		{
+			_analyticsManager = analyticsGameObject.GetComponent<AnalyticsManager>();
+			if (_analyticsManager._analyticsEnabled)
+			{
+				EndUserConsent.SetConsentState(new ConsentState
+				{
+					AnalyticsIntent = ConsentStatus.Granted
+				});
+				Debug.Log("start Data Collection");
+			}
+		}
     }
 
     // Update is called once per frame

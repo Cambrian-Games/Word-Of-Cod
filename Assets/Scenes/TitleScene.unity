@@ -177,8 +177,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: Do you consent to minimal data collection to help with development? We
-    collect no identifying data on your or your device, and send only data about
-    word and relic usage and in-game statistics. The Default is No.
+    collect only the identifying data Unity does not allow us to disable, and send
+    only data about word and relic usage and in-game statistics. The Default is No.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
