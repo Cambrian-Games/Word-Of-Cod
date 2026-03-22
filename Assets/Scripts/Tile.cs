@@ -2,7 +2,7 @@
 using TMPro;
 using UnityEngine;
 
-public class Tile: MonoBehaviour
+public class Tile : MonoBehaviour
 {
 	public enum TileKind
 	{

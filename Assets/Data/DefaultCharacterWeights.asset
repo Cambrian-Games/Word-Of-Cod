@@ -41,3 +41,30 @@ MonoBehaviour:
   - 0.44
   _minVowelRate: 0.2
   _baseScores: 0100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  _vowelCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -0.041753106
+      outSlope: -1
+      tangentMode: 65
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.25613618
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 5
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _reducePercent: 0
+  _defaultDecayThreshold: 2
+  _defaultZeroThreshold: 6

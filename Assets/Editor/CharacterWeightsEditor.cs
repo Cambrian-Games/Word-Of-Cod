@@ -22,6 +22,13 @@ public class CharacterWeightsEditor : Editor
 		}
 
 		charweights._minVowelRate = EditorGUILayout.Slider(new GUIContent("Vowel Threshold", "The fraction of tiles that are vowels will never drop below this."), charweights._minVowelRate, 0, 1);
+		charweights._vowelCurve = EditorGUILayout.CurveField("Vowel Curve", charweights._vowelCurve);
+		//charweights._reducePercent = EditorGUILayout.Toggle(charweights._reducePercent ? "Modify Percentage" : "Modify Raw Weight", charweights._reducePercent);
+		EditorGUILayout.LabelField("How many of a vowel can be present before curve-weighting applies");
+		charweights._defaultDecayThreshold = EditorGUILayout.IntField("Default Decay Threshold", Mathf.Max(2, charweights._defaultDecayThreshold));
+		EditorGUILayout.LabelField("How many of a vowel can be present before the vowel will never appear");
+		EditorGUILayout.LabelField("One less than this is treated as the end of the curve");
+		charweights._defaultZeroThreshold = EditorGUILayout.IntField("Default Zero Threshold", Mathf.Max(charweights._defaultZeroThreshold, charweights._defaultDecayThreshold + 2));
 
 		EditorGUILayout.Separator();
 

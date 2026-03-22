@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // Word Data
@@ -131,7 +132,6 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 		get => _chars[coord.x, coord.y];
 		set => _chars[coord.x, coord.y] = value;
 	}
-
 
 	public BoardState CloneSettled(SettleKind settlek, out BoardDelta delta)
 	{
@@ -402,6 +402,8 @@ public class BoardState // the layout _can_ change mid battle due to enemy disru
 
 		return result;
 	}
+
+	internal int CountLetter(char letter) => _chars.OfType<char>().Count(boardLetter => boardLetter == letter);
 }
 
 /// <summary>

@@ -1,4 +1,5 @@
 ﻿using odin.serialize.OdinSerializer;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BoardLayout", menuName = "Scriptable Objects/Board Layout")]
@@ -44,6 +45,8 @@ public class BoardLayout : SerializedScriptableObject
 
 	public Vector2Int Dims() => new Vector2Int(_length, _height);
 	public Vector2Int BottomRight() => Dims() - Vector2Int.one;
+
+	public int PlayableCells() => _grid.OfType<CellKind>().Count(kind => kind == CellKind.Standard);
 
 	// should Layout have TopRow, BottomRow, LeftCol, and RightCol properties?
 }

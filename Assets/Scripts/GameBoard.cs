@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameBoard : MonoBehaviour
@@ -415,4 +416,8 @@ public class GameBoard : MonoBehaviour
             TransformTile(new Vector2Int(tileCoord.x, tileCoord.y + 1), Tile.TileKind.Normal);
         }
     }
+
+	internal int CountTiles(char letter) => _playableBoard.OfType<Tile>().Count(tile => tile && tile._letter == letter);
+	internal int CountTiles(Tile.TileKind kind) => _playableBoard.OfType<Tile>().Count(tile => tile && tile.Kind == kind);
+	internal int TotalTiles() => _playableBoard.OfType<Tile>().Count(tile => tile);
 }
