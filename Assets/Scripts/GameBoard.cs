@@ -59,6 +59,9 @@ public class GameBoard : MonoBehaviour
 
 		foreach (Vector2Int coord in new Vector2IntIterator(_config.Layout.BottomRight()))
 		{
+			if (!_playableBoard[coord.x, coord.y])
+				continue;
+
 			switch (_playableBoard[coord.x, coord.y].Kind)
 			{
 				case Tile.TileKind.Spiny:

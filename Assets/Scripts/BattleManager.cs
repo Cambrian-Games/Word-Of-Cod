@@ -150,7 +150,7 @@ public class BattleManager : MonoBehaviour
             // if we leave this state for ANY reason, we want to turn off input.
 
             case BattleState.Player_Turn:
-                TileSelector.INSTANCE._isSelectingEnabled = false;
+				TileSelector.INSTANCE.IsSelectingEnabled = false;
                 break;
 
 			case BattleState.Post_Player_Turn:
@@ -202,7 +202,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Player_Turn:
-                TileSelector.INSTANCE._isSelectingEnabled = true;
+				TileSelector.INSTANCE.IsSelectingEnabled = true;
                 _enemyTurnHandler.StartRound();
                 Debug.Log("Forecast: " + _enemy.FormattedForecast());
                 //change forecast text

@@ -27,16 +27,28 @@ public class TileSelector : MonoBehaviour
 	[SerializeField]
 	private LineRenderer _lineRenderer;
 
-	[SerializeField]
-	private SpriteRenderer _debugWordConfirmer;
-
 	private List<Tile> _selectedTiles = new List<Tile>();
 	private Tile _currentHighlightedTile;
 	private string _word = "";
 
 	public TMP_Text _wordDisplay;
 	private bool _isMouseSelecting = false;
-	internal bool _isSelectingEnabled = true;
+
+	private bool _isSelectingEnabled = true;
+
+	public bool IsSelectingEnabled
+	{
+		get => _isSelectingEnabled;
+		set
+		{
+			if (value == false)
+			{
+				DeselectAllTiles();
+			}
+
+			_isSelectingEnabled = value;
+		}
+	}
 
 	public static TileSelector INSTANCE;
 
@@ -310,6 +322,27 @@ public class TileSelector : MonoBehaviour
         }
 	}
 
+	internal void DeselectAllTiles()
+	{
+		// would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
+
+		foreach (Tile tile in _selectedTiles)
+		{
+			if (tile == _currentHighlightedTile)
+			{
+				tile.HighlightState = HighlightState.Highlighted;
+			}
+			else
+			{
+				tile.HighlightState = HighlightState.Normal;
+			}
+		}
+
+		_selectedTiles.Clear();
+		_word = "";
+		_lineRenderer.positionCount = 0;
+	}
+
     public void SendSelectedWord()
     {
         List<string> coordList = _selectedTiles.Select(tile => tile._coord).Select(coord => $"<{coord.x},{coord.y}>").ToList();
@@ -326,24 +359,7 @@ public class TileSelector : MonoBehaviour
             Debug.Log("");
         }
 
-        // would be interesting to check the performance of this vs setting all to normal and THEN highlighting a tile
-
-        foreach (Tile tile in _selectedTiles)
-        {
-            if (tile == _currentHighlightedTile)
-            {
-                tile.HighlightState = HighlightState.Highlighted;
-            }
-            else
-            {
-                tile.HighlightState = HighlightState.Normal;
-            }
-        }
-
-        // Deselect all tiles
-        _selectedTiles.Clear();
-        _word = "";
-        _lineRenderer.positionCount = 0;
+		DeselectAllTiles();
     }
 
     internal void RightClickTile(Tile tile)

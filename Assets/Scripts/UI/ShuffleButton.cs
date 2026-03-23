@@ -32,6 +32,7 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 		}
 		else
 		{
+			TileSelector.INSTANCE.DeselectAllTiles();
 			GameBoard.INSTANCE.Shuffle();
 			_hasFirstClick = false;
 			
