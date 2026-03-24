@@ -33,11 +33,8 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 		switch (ruleKind)
 		{
 			case AttackEffect.EffectKind.Do_Nothing:
-				position.y += Y_OFFSET;
-				EditorGUI.LabelField(position, "Only recommended when Attack Priority", EditorStyles.boldLabel);
-				position.y += Y_OFFSET;
-				EditorGUI.LabelField(position, "\tis set to Loop", EditorStyles.boldLabel);
 				break;
+
 			case AttackEffect.EffectKind.Standard_Attack:
 				position.y += Y_OFFSET;
 				EditorGUI.PropertyField(position, property.FindPropertyRelative("_damage"));
@@ -50,6 +47,27 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 				EditorGUI.PropertyField(position, property.FindPropertyRelative("_numTiles"), new GUIContent("Change"));
 				position.y += Y_OFFSET;
 				EditorGUI.MultiPropertyField(position, new GUIContent[] { new GUIContent("From"), new GUIContent("To") }, property.FindPropertyRelative("_from"));
+				break;
+
+			case AttackEffect.EffectKind.Schooling_Attack:
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_minSchoolAttackHits"), new GUIContent("Minimum Hits"));
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_maxSchoolAttackHits"), new GUIContent("Maximum Hits"));
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_damage"), new GUIContent("Base Damage"));
+				break;
+
+			case AttackEffect.EffectKind.Count_Variant_Tiles:
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_to"), new GUIContent("Kind"));
+				break;
+
+			case AttackEffect.EffectKind.Variant_Tile_Attack:
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_to"), new GUIContent("Kind"));
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_damage"), new GUIContent("Base Damage"));
 				break;
 		}
 
@@ -70,9 +88,13 @@ public class AttackEffectPropertyDrawer : PropertyDrawer
 
 		int lines = ruleKind switch
 		{
-			AttackEffect.EffectKind.Do_Nothing => 2,
+			AttackEffect.EffectKind.Do_Nothing => 0,
 			AttackEffect.EffectKind.Standard_Attack => 1,
 			AttackEffect.EffectKind.Transform_Tiles => 2,
+			AttackEffect.EffectKind.Schooling_Attack => 3,
+
+			AttackEffect.EffectKind.Count_Variant_Tiles => 1,
+			AttackEffect.EffectKind.Variant_Tile_Attack => 2,
 			_ => 0,
 		};
 

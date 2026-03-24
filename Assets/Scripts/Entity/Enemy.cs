@@ -37,6 +37,9 @@ public class Enemy : Entity
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
 
+	// create once, never re-assign
+	internal readonly Dictionary<string, float> _attackBlackboard = new Dictionary<string, float>();
+
 	[SerializeField] //can be temporary, but for testing forecast display i need to see current forecast
     internal string _currentForecast = "";
 
@@ -47,6 +50,7 @@ public class Enemy : Entity
 	{
 		base.Awake();
 
+#if UNITY_EDITOR
 		bool hasNullRules = false;
 
 		for (int i = _rules.Count - 1; i >= 0; i--)
@@ -68,6 +72,7 @@ public class Enemy : Entity
 		}
 
 		Debug.Assert(!hasNullRules, $"Enemy {name} has at least one null rule! Removing all null rules.");
+#endif
 	}
 
 	public override void UpdateTurn()
@@ -277,7 +282,9 @@ public class Enemy : Entity
 				break;
 
 			case AttackPriority.Random_From_All_Available:
-				List<int> ruleCandidates = new List<int>();
+
+				List<(int ruleIndex, float weight)> ruleCandidates = new List<(int id, float weight)>();
+				float totalWeight = 0.0f;
 
 				for (int i = 0; i < _rules.Count; i++)
 				{
@@ -286,14 +293,31 @@ public class Enemy : Entity
 
 					if (_rules[i].CanRun(this))
 					{
-						ruleCandidates.Add(i);
+						ruleCandidates.Add((i, _rules[i]._weight));
+						totalWeight += _rules[i]._weight;
 					}
 				}
 
 				if (ruleCandidates.Count > 0)
 				{
-					int index = Random.Range(0, ruleCandidates.Count);
-					_currentRuleIndex = ruleCandidates[index];
+					if (totalWeight == 0)
+					{
+						int index = Random.Range(0, ruleCandidates.Count);
+						_currentRuleIndex = ruleCandidates[index].ruleIndex;
+					}
+					else
+					{
+						float output = Random.Range(0, totalWeight);
+
+						int index = 0;
+						while (output > ruleCandidates[index].weight)
+						{
+							output -= ruleCandidates[index].weight;
+							index++;
+						}
+
+						_currentRuleIndex = ruleCandidates[index].ruleIndex;
+					}
 				}
 				else
 				{

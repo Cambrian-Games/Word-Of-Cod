@@ -23,6 +23,8 @@ public class AttackRule
 
 	public bool _uninterruptible;
 
+	public float _weight = 1.0f;
+
 	public List<AttackEffect> _effects;
 
 	EffectData _effectData;
@@ -31,6 +33,7 @@ public class AttackRule
 	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
 
 	internal int _roundsSinceLastUsed;
+
 
 	public bool CanRun(Enemy owner)
 	{
@@ -54,7 +57,7 @@ public class AttackRule
 		if (_cancelConditions.Count == 0)
 			return false;
 
-		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
+		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _cancelConditions.Any(cond => cond.IsConditionSatisfied(owner));
 	}
 
 	public void StartRule()
@@ -188,7 +191,7 @@ public class AttackCondition
 		Not_First_Turn,
 		[InspectorName("Turns Since Last Action")]
 		Turns_Since_Last_Action,
-		[InspectorName(null), Obsolete]
+		[InspectorName("Last Attack")]
 		Last_Action_Index,
 		[InspectorName("Length of Last Word")]
 		Last_Word_Length,
@@ -198,6 +201,16 @@ public class AttackCondition
 		Combo_Break,
 		[InspectorName(null), Obsolete]
 		Enemy_Killed,
+
+		//damage taken / percentage, can only be a cancel condition
+		[InspectorName("Damage Taken")]
+		Damage_Taken,
+
+		[InspectorName("Vacuumed Sandy Tiles")]
+		Vacuumed_Sandy_Tiles,
+
+		[InspectorName("Sandy Tiles on Board")]
+		Sandy_Tile_Count,
 	}
 
 	public enum Comparator
@@ -247,6 +260,9 @@ public class AttackCondition
 			ConditionField.Last_Action_Index => owner.LastRuleIndex,
 			ConditionField.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord?.Text.Length ?? 0,
 			ConditionField.Combo_Length => throw new NotImplementedException(),
+			ConditionField.Damage_Taken => owner.LastDamageTaken,
+			ConditionField.Sandy_Tile_Count => GameBoard.INSTANCE.CountTiles(Tile.TileKind.Sandy),
+			ConditionField.Vacuumed_Sandy_Tiles => (int) owner._attackBlackboard.GetValueOrDefault(Tile.TileKind.Sandy.ToString(), 0),
 			_ => throw new NotImplementedException()
 		};
 
@@ -274,6 +290,13 @@ public class AttackEffect
 		Standard_Attack,
 		[InspectorName("Transform Tiles")]
 		Transform_Tiles,
+		[InspectorName("Schooling Attack")]
+		Schooling_Attack,
+
+		[InspectorName("Count Variant Tiles")]
+		Count_Variant_Tiles,
+		[InspectorName("Attack Per Variant Tile")]
+		Variant_Tile_Attack,
 	}
 
 	[SerializeField]
@@ -299,9 +322,14 @@ public class AttackEffect
 
 	[Min(0), SerializeField]
 	public int _damage = 0;
-	public int Damage => (_effectKind == EffectKind.Standard_Attack) ? _damage : throw new InvalidOperationException();
 
-    [SerializeField]
+	[Min(1), SerializeField]
+	public int _minSchoolAttackHits = 1;
+
+	[Min(1), SerializeField]
+	public int _maxSchoolAttackHits = 1;
+
+	[SerializeField]
 	private Tile.TileKind _from;
 	[SerializeField]
 	private Tile.TileKind _to;
@@ -312,9 +340,14 @@ public class AttackEffect
 	{
 		return _effectKind switch
 		{
-			EffectKind.Do_Nothing => new EffectData(EffectKind.Do_Nothing),
+			EffectKind.Do_Nothing => new WaitTurnData(),
 			EffectKind.Standard_Attack => new StandardAttackData(),
 			EffectKind.Transform_Tiles => new TransformTilesData(),
+
+			EffectKind.Schooling_Attack => new SchoolingAttackData(_minSchoolAttackHits, _maxSchoolAttackHits),
+
+			EffectKind.Count_Variant_Tiles => new EffectData(EffectKind.Count_Variant_Tiles),
+			EffectKind.Variant_Tile_Attack => new VariantTileAttackData(),
 			_ => null,
 		};
 	}
@@ -341,17 +374,63 @@ public class AttackEffect
 		{
 			case EffectKind.Standard_Attack:
                 
-                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedDamage);
-                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedDamage);
-                Player.INSTANCE.CurrentHealth -= (int) modifiedDamage;
+                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedStandardDamage);
+                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedStandardDamage);
+                Player.INSTANCE.CurrentHealth -= (int) modifiedStandardDamage;
 
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
 
 			case EffectKind.Transform_Tiles:
-				GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
+				if (_numTiles > 0)
+				{
+					GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
+				}
+				else
+				{
+					GameBoard.INSTANCE.TransformAllTiles(oldKind: _from, newKind: _to);
+				}
 				((TransformTilesData)data)._hasTransformed = true;
 				break;
+
+			case EffectKind.Schooling_Attack:
+				SchoolingAttackData schoolData = (SchoolingAttackData)data;
+
+				// animations would play here
+
+				if (schoolData._numHits < schoolData._targetHits)
+				{
+					schoolData._numHits++;
+				}
+
+				if (schoolData._numHits < schoolData._targetHits)
+				{
+					break;
+				}
+
+				Player.INSTANCE._inventory.OnEnemyAttack(_damage * schoolData._targetHits, out float modifiedSchoolDamage);
+				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedSchoolDamage);
+				Player.INSTANCE.CurrentHealth -= (int) modifiedSchoolDamage;
+				schoolData._hasDamaged = true;
+				break;
+
+			case EffectKind.Count_Variant_Tiles:
+				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
+				break;
+
+			case EffectKind.Variant_Tile_Attack:
+
+				VariantTileAttackData variantData = (VariantTileAttackData)data;
+
+				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()], out float modifiedVariantDamage);
+				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedVariantDamage);
+				Player.INSTANCE.CurrentHealth -= (int) modifiedVariantDamage;
+
+				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard.Remove(_to.ToString());
+				variantData._hasAttacked = true;
+				break;
+
+
 		}
 
 		return IsComplete(data);
@@ -364,13 +443,16 @@ public class AttackEffect
 			EffectKind.Do_Nothing => true,
 			EffectKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
 			EffectKind.Transform_Tiles => ((TransformTilesData)data)._hasTransformed,
+			EffectKind.Schooling_Attack => ((SchoolingAttackData)data)._hasDamaged,
+			EffectKind.Count_Variant_Tiles => true,
+			EffectKind.Variant_Tile_Attack => ((VariantTileAttackData)data)._hasAttacked,
 			_ => throw new NotImplementedException($"IsComplete() does not handle {_effectKind}"),
 		};
 	}
 }
 
 /// <summary>
-/// Any extra metadata we need to complete an AttackRule
+/// Any extra metadata we need to complete an AttackEffect
 /// </summary>
 public class EffectData
 {
@@ -386,6 +468,7 @@ public class EffectData
 
 public class WaitTurnData : EffectData
 {
+	// TODO support multiple turns of waiting to avoid having to create multiple effects for a multi-turn wait
 	public int _turnsWaited = 0;
 
 	public WaitTurnData() : base(AttackEffect.EffectKind.Do_Nothing)
@@ -425,3 +508,35 @@ public class TransformTilesData : EffectData
 		return "Has Transformed: " + _hasTransformed;
 	}
 }
+
+public class SchoolingAttackData : EffectData
+{
+	public int _numHits = 0;
+	public int _targetHits = 0;
+
+	public bool _hasDamaged = false;
+
+	public SchoolingAttackData(int minHits, int maxHits) : base(AttackEffect.EffectKind.Schooling_Attack)
+	{
+		_targetHits = minHits + (int)((BattleManager.INSTANCE.CurrentEnemy.HealthPercent() / 100f) * (maxHits - minHits + 1));
+
+		// if minhits is 1 and maxHits is 20, we have [0, 0.05) = 1 hit, [0.05, 0.1) = 2 hits, etc
+		//  but at 1 exactly, it would equal 21 hits, so we clamp it.
+
+		if (_targetHits > maxHits)
+		{
+			_targetHits = maxHits;
+		}
+	}
+}
+
+public class VariantTileAttackData : EffectData
+{
+	public bool _hasAttacked = false;
+
+	public VariantTileAttackData() : base(AttackEffect.EffectKind.Variant_Tile_Attack)
+	{
+
+	}
+}
+
