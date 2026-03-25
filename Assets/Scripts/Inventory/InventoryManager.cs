@@ -1,62 +1,84 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
     public List<Relic> _passiveRelics;
+	public List<Item> _activeRelics;
 
     private Dictionary<RelicEffect.EventTiming, HashSet<Relic>> _sortedPassiveRelics;
 
     public List<int> _passiveRelicInventory = new List<int>();
+	public List<int> _activeRelicInventory = new List<int>();
 
-    public GameObject _relicGrid;
+    public GameObject _passiveRelicGrid;
+    public GameObject _activeRelicGrid;
 
     private int _prevNumRelics = 1;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Debug.Log(_passiveRelicInventory);
+		InitPassiveRelics();
+		InitActiveRelics();
 
-        if (_sortedPassiveRelics != null)
-        {
-            _sortedPassiveRelics.Clear();
-        }
+		GameObject.Find("Tooltip Text").GetComponent<TMP_Text>().text = "";
+	}
 
-        _sortedPassiveRelics = new Dictionary<RelicEffect.EventTiming, HashSet<Relic>>();
+	private void InitPassiveRelics()
+	{
+		Debug.Log(_passiveRelicInventory);
 
-        for (int i = 0; i < _passiveRelics.Count; i++)
-        {
-            _passiveRelics[i].SetID(i);
+		_sortedPassiveRelics?.Clear();
 
-            List<RelicEffect> effects = _passiveRelics[i].Effects;
+		_sortedPassiveRelics = new Dictionary<RelicEffect.EventTiming, HashSet<Relic>>();
 
-            foreach (RelicEffect eff in effects)
-            {
-                if (!_sortedPassiveRelics.ContainsKey(eff.Event))
-                {
-                    _sortedPassiveRelics.Add(eff.Event, new HashSet<Relic>());
-                }
+		for (int i = 0; i < _passiveRelics.Count; i++)
+		{
+			_passiveRelics[i].SetID(i);
 
-                _sortedPassiveRelics[eff.Event].Add(_passiveRelics[i]);
-            }
-        }
+			List<RelicEffect> effects = _passiveRelics[i].Effects;
 
-        _passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
+			foreach (RelicEffect eff in effects)
+			{
+				if (!_sortedPassiveRelics.ContainsKey(eff.Event))
+				{
+					_sortedPassiveRelics.Add(eff.Event, new HashSet<Relic>());
+				}
 
-        //sets the starting relic icon
-        _relicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
-            _passiveRelics[_passiveRelicInventory[0]].Icon;
+				_sortedPassiveRelics[eff.Event].Add(_passiveRelics[i]);
+			}
+		}
 
-        GameObject.Find("Tooltip Text").GetComponent<TMP_Text>().text = "";
-    }
+		_passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
 
-    // Update is called once per frame
-    void Update()
+		//sets the starting relic icon
+		_passiveRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
+			_passiveRelics[_passiveRelicInventory[0]].Icon;
+	}
+	private void InitActiveRelics()
+	{
+		Debug.Log(_activeRelicInventory);
+
+		for (int i = 0; i < _activeRelics.Count; i++)
+		{
+			_activeRelics[i].SetID(i);
+		}
+
+		_activeRelicInventory.Add(Random.Range(0, _activeRelics.Count));
+
+		_activeRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
+			_activeRelics[_activeRelicInventory[0]].Icon;
+
+		_activeRelicGrid.transform.GetChild(0).gameObject.SetActive(true);
+	}
+
+	// Update is called once per frame
+	void Update()
     {
-        
         //if number of relics has changed:
         if (_passiveRelicInventory.Count > _prevNumRelics)
         {
@@ -64,10 +86,10 @@ public class InventoryManager : MonoBehaviour
             for (int i = _prevNumRelics; i < _passiveRelicInventory.Count; i++)
             {
                 //set its icon...
-                _relicGrid.transform.GetChild(i).gameObject.GetComponent<Image>().sprite =
+                _passiveRelicGrid.transform.GetChild(i).gameObject.GetComponent<Image>().sprite =
                     _passiveRelics[_passiveRelicInventory[i]].Icon;
                 //and enable the element in the grid
-                _relicGrid.transform.GetChild(i).gameObject.SetActive(true);
+                _passiveRelicGrid.transform.GetChild(i).gameObject.SetActive(true);
             }
             
         }
@@ -158,4 +180,25 @@ public class InventoryManager : MonoBehaviour
             Debug.LogError($"Unsupported modification of {item.Key} during OnEnemyAttack");
         }
     }
+
+	internal void OnActiveRelicClicked(int inventoryIndex)
+	{
+		_activeRelics[_activeRelicInventory[inventoryIndex]].OnSelect();
+	}
+
+	internal void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
+	{
+		foreach (int activeRelicID in _activeRelicInventory)
+		{
+			_activeRelics[activeRelicID].OnBattleStateChanged(oldState, newState);
+		}
+	}
+
+	internal void OnTileClicked(Tile tile)
+	{
+		foreach (int activeRelicID in _activeRelicInventory)
+		{
+			_activeRelics[activeRelicID].OnTileClicked(tile);
+		}
+	}
 }

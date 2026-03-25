@@ -436,8 +436,16 @@ public class GameBoard : MonoBehaviour
             TransformTile(new Vector2Int(tileCoord.x, tileCoord.y + 1), Tile.TileKind.Normal);
         }
     }
-
 	internal int CountTiles(char letter) => _playableBoard.OfType<Tile>().Count(tile => tile && tile._letter == letter);
 	internal int CountTiles(Tile.TileKind kind) => _playableBoard.OfType<Tile>().Count(tile => tile && tile.Kind == kind);
 	internal int TotalTiles() => _playableBoard.OfType<Tile>().Count(tile => tile);
+
+	// Not the best implementation but the only option we have unless we significantly alter how the board is managed
+	public void ChangeTileLetter(Tile tile, char newLetter)
+	{
+		Debug.Assert(IsSettled());
+		Debug.Assert(tile._letter == _currState[tile._coord]);
+		Debug.Assert('A' <= newLetter && newLetter <= 'Z');
+		tile._letter = _currState[tile._coord] = newLetter;
+	}
 }

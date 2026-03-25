@@ -7,7 +7,7 @@ using UnityEngine.InputSystem.LowLevel;
 
 public class TileSelector : MonoBehaviour
 {
-	public enum TileSelectionKind
+	public enum LetterSelectionKind
 	{
 		[InspectorName("Click and Drag")]
 		Click_And_Drag,
@@ -22,7 +22,7 @@ public class TileSelector : MonoBehaviour
 	}
 
 	[SerializeField]
-	private TileSelectionKind _selectionKind = TileSelectionKind.Click_And_Drag;
+	private LetterSelectionKind _selectionKind = LetterSelectionKind.Click_And_Drag;
 
 	[SerializeField]
 	private LineRenderer _lineRenderer;
@@ -34,19 +34,26 @@ public class TileSelector : MonoBehaviour
 	public TMP_Text _wordDisplay;
 	private bool _isMouseSelecting = false;
 
-	private bool _isSelectingEnabled = true;
-
-	public bool IsSelectingEnabled
+	public enum SelectionMode
 	{
-		get => _isSelectingEnabled;
+		None,
+		Letter_Selection,
+		Item_Use
+	}
+
+	private SelectionMode _selectionMode = SelectionMode.None;
+
+	public SelectionMode Mode
+	{
+		get => _selectionMode;
 		set
 		{
-			if (value == false)
+			if (value == SelectionMode.None)
 			{
 				DeselectAllTiles();
 			}
 
-			_isSelectingEnabled = value;
+			_selectionMode = value;
 		}
 	}
 
@@ -74,7 +81,7 @@ public class TileSelector : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if (_isSelectingEnabled)
+		if (_selectionMode == SelectionMode.Letter_Selection)
 		{
 			UpdateTileSelection();
 		}
@@ -86,19 +93,19 @@ public class TileSelector : MonoBehaviour
 	{
 		switch (_selectionKind)
 		{
-			case TileSelectionKind.Click_And_Drag:
+			case LetterSelectionKind.Click_And_Drag:
 				UpdateMouseSelect(drag: true);
 				return;
-			case TileSelectionKind.Click_And_Move:
+			case LetterSelectionKind.Click_And_Move:
 				UpdateMouseSelect(drag: false);
 				return;
-			case TileSelectionKind.Click_Each_Letter:
+			case LetterSelectionKind.Click_Each_Letter:
 				UpdateClickLetter();
 				return;
-			case TileSelectionKind.Keyboard_Move:
+			case LetterSelectionKind.Keyboard_Move:
 				UpdateKeyboardMove();
 				return;
-			case TileSelectionKind.Type:
+			case LetterSelectionKind.Type:
 				UpdateType();
 				return;
 		}
@@ -174,7 +181,7 @@ public class TileSelector : MonoBehaviour
 	{
 		_currentHighlightedTile = tile;
 
-		bool hoverSelecting = (_selectionKind == TileSelectionKind.Click_And_Drag || _selectionKind == TileSelectionKind.Click_And_Move) && _isMouseSelecting;
+		bool hoverSelecting = (_selectionKind == LetterSelectionKind.Click_And_Drag || _selectionKind == LetterSelectionKind.Click_And_Move) && _isMouseSelecting;
 
 		if (hoverSelecting)
 		{
@@ -242,38 +249,47 @@ public class TileSelector : MonoBehaviour
 
 	internal void ClickTile(Tile tile)
 	{
-        if (!_isSelectingEnabled)
-            return;
+		switch (_selectionMode)
+		{
+			case SelectionMode.None:
+				break;
 
-        if (_selectionKind == TileSelectionKind.Click_Each_Letter)
-        {
-            int tileIndex = _selectedTiles.IndexOf(tile);
+			case SelectionMode.Letter_Selection:
+				if (_selectionKind == LetterSelectionKind.Click_Each_Letter)
+				{
+					int tileIndex = _selectedTiles.IndexOf(tile);
 
-            if (tileIndex == -1)
-            {
-                if (_selectedTiles.Count > 0)
-                {
-                    Tile lastTile = _selectedTiles[^1];
+					if (tileIndex == -1)
+					{
+						if (_selectedTiles.Count > 0)
+						{
+							Tile lastTile = _selectedTiles[^1];
 
-                    if (Math.Abs(lastTile._coord.x - tile._coord.x) <= 1 && Math.Abs(lastTile._coord.y - tile._coord.y) <= 1)
-                    {
-                        TrySelectTile(tile);
-                    }
-                }
-                else
-                {
-                    TrySelectTile(tile);
-                }
-                
-            }
-            else if (tileIndex == _selectedTiles.Count - 1)
-            {
-                DeselectTile(tile);
-            }
+							if (Math.Abs(lastTile._coord.x - tile._coord.x) <= 1 && Math.Abs(lastTile._coord.y - tile._coord.y) <= 1)
+							{
+								TrySelectTile(tile);
+							}
+						}
+						else
+						{
+							TrySelectTile(tile);
+						}
 
-            // otherwise do nothing
-        }
-		// this could drive selection starting instead of UpdateMouseSelect
+					}
+					else if (tileIndex == _selectedTiles.Count - 1)
+					{
+						DeselectTile(tile);
+					}
+
+					// otherwise do nothing
+				}
+				// this could drive selection starting instead of UpdateMouseSelect
+				break;
+
+			case SelectionMode.Item_Use:
+				Player.INSTANCE._inventory.OnTileClicked(tile);
+				break;
+		}
 	}
 
 	internal void TrySelectTile(Tile tile)
@@ -316,7 +332,7 @@ public class TileSelector : MonoBehaviour
 
 		_lineRenderer.positionCount--;
 
-        if (_selectedTiles.Count > 0 && (_selectionKind == TileSelectionKind.Click_And_Drag || _selectionKind == TileSelectionKind.Click_And_Move))
+        if (_selectedTiles.Count > 0 && (_selectionKind == LetterSelectionKind.Click_And_Drag || _selectionKind == LetterSelectionKind.Click_And_Move))
         {
             _selectedTiles[^1].HighlightState = HighlightState.Selected_And_Highlighted;
         }
@@ -364,7 +380,7 @@ public class TileSelector : MonoBehaviour
 
     internal void RightClickTile(Tile tile)
     {
-        if (!_isSelectingEnabled || !tile.IsSelectable)
+        if (_selectionMode != SelectionMode.Letter_Selection || !tile.IsSelectable)
             return;
 
         tile.TryToggleQu();

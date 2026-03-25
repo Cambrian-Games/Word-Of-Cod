@@ -30,6 +30,7 @@ public class BattleManager : MonoBehaviour
     }
 
     private BattleState _battleState = BattleState.Nil;
+	public BattleState CurrentState => _battleState;
 
     // sub-states
 
@@ -150,7 +151,7 @@ public class BattleManager : MonoBehaviour
             // if we leave this state for ANY reason, we want to turn off input.
 
             case BattleState.Player_Turn:
-				TileSelector.INSTANCE.IsSelectingEnabled = false;
+				TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.None;
                 break;
 
 			case BattleState.Post_Player_Turn:
@@ -170,9 +171,11 @@ public class BattleManager : MonoBehaviour
 				break;
         }
 
+		BattleState oldState = _battleState;
         _battleState = newState;
+		Player.INSTANCE._inventory.OnBattleStateChanged(oldState, newState);
 
-        switch (_battleState)
+		switch (_battleState)
         {
             case BattleState.Nil:
                 _enemy = null;
@@ -202,7 +205,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Player_Turn:
-				TileSelector.INSTANCE.IsSelectingEnabled = true;
+				TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
                 _enemyTurnHandler.StartRound();
                 Debug.Log("Forecast: " + _enemy.FormattedForecast());
                 //change forecast text
