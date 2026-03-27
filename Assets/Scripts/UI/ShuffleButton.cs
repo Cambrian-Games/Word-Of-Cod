@@ -1,3 +1,4 @@
+using Unity.Services.Analytics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -33,7 +34,11 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 		else
 		{
 			GameBoard.INSTANCE.Shuffle();
-			//TODO Add Shuffle Log analytics
+			//Shuffle Log analytics
+			ShuffleEvent shuffleEvent = new ShuffleEvent() { _enemyIndex = RunManager.INSTANCE.GetCurrentEvent()._eventIndex, 
+				_enemyName = BattleManager.INSTANCE.CurrentEnemy.name};
+			AnalyticsService.Instance.RecordEvent(shuffleEvent);
+
 			_hasFirstClick = false;
 			
 			BattleManager.INSTANCE.SetBattleState(BattleManager.BattleState.Post_Player_Turn);

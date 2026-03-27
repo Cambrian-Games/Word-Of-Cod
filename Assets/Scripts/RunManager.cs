@@ -20,7 +20,7 @@ public class RunManager : MonoBehaviour
 	[Header("Do not modify this! This shows what has been selected so far")]
 	[SerializeField]
 	private List<SelectedEvent> _currentRun;
-
+	public SelectedEvent GetCurrentEvent() { return _currentRun.Last(); }
 	public static RunManager INSTANCE;
 
 	public float _distanceBetweenEvents = 7.5f;

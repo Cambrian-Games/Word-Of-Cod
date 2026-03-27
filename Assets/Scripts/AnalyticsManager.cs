@@ -41,3 +41,15 @@ public class WordFailedEvent : Unity.Services.Analytics.Event
     public string _failedWord { set { SetParameter("failedWord" , value);}}
 
 }
+
+public class ShuffleEvent : Unity.Services.Analytics.Event
+{
+    public ShuffleEvent() : base("shuffle")
+    {
+        
+    }
+    
+    public int _enemyIndex { set { SetParameter("enemyIndex" , value);}}
+    public string _enemyName { set { SetParameter("enemyName" , value);}}
+
+}
