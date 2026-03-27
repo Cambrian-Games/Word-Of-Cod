@@ -433,6 +433,7 @@ public class BattleManager : MonoBehaviour
             //Analytics for Failed Word Here0
             WordFailedEvent wordFailedEvent = new WordFailedEvent { _failedWord = text };
             AnalyticsService.Instance.RecordEvent(wordFailedEvent);
+            Debug.Log("FailedWordEventSent");
             return false;
         }
     }

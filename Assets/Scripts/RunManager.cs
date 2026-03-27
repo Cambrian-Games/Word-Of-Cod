@@ -407,6 +407,9 @@ public class RunManager : MonoBehaviour
 			_numWords = this._sortedWordLengths.Count()
 		};
 		AnalyticsService.Instance.RecordEvent(winEvent);
+		//need to flush to force upload before user quits
+		AnalyticsService.Instance.Flush();
+		Debug.Log("WinEventSent");
 	}
 	private void SendLoseEvent()
 	{
@@ -426,6 +429,9 @@ public class RunManager : MonoBehaviour
 			_enemyName = BattleManager.INSTANCE.CurrentEnemy.name
 		};
 		AnalyticsService.Instance.RecordEvent(loseEvent);
+		//need to flush to force upload before user quits
+		AnalyticsService.Instance.Flush();
+		Debug.Log("LoseEventSent");
 	}
 
 

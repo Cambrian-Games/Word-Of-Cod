@@ -38,6 +38,7 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 			ShuffleEvent shuffleEvent = new ShuffleEvent() { _enemyIndex = RunManager.INSTANCE.GetCurrentEvent()._eventIndex, 
 				_enemyName = BattleManager.INSTANCE.CurrentEnemy.name};
 			AnalyticsService.Instance.RecordEvent(shuffleEvent);
+			Debug.Log("ShuffleEventSent");
 
 			_hasFirstClick = false;
 			

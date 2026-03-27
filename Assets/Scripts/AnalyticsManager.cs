@@ -44,7 +44,8 @@ public class WordFailedEvent : Unity.Services.Analytics.Event
 
 public class ShuffleEvent : Unity.Services.Analytics.Event
 {
-    public ShuffleEvent() : base("shuffle")
+    //can't rename in dashboard, so this one is capitalized
+    public ShuffleEvent() : base("Shuffle")
     {
         
     }
