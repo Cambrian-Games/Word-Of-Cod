@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Services.Analytics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
@@ -249,10 +250,12 @@ public class RunManager : MonoBehaviour
 				break;
 			case RunState.Win:
 				//TODO Add Analytics for End Game
+				SendWinEvent();
 				break;
 			case RunState.Lose:
 				//TODO Add analytics for lost run
 				//    same as End Game, but with added "what you lost to" event
+				SendLoseEvent();
 				SceneManager.LoadScene(_loseScene.name);
 				break;
 		}
@@ -343,7 +346,7 @@ public class RunManager : MonoBehaviour
 		if (_sortedWordDamages.Count == 0)
 		{
 			_sortedWordDamages.Add(word.EffectiveDamage);
-			_sortedWordLengths.Add(word.Text.Length);
+			_sortedWordLengths.Add(word.NumTilesUsed);
 			_longestWord = word.Text;
 			_mostDamagingWord = word.Text;
 		}
@@ -361,15 +364,70 @@ public class RunManager : MonoBehaviour
 				_mostDamagingWord = word.Text;
 			}
 			//insert sorted to appropriate list
-			int index = _sortedWordLengths.BinarySearch(word.Text.Length);
+			int index = _sortedWordLengths.BinarySearch(word.NumTilesUsed);
 			if (index < 0) index = ~index;
-			_sortedWordLengths.Insert(index, word.Text.Length);
+			_sortedWordLengths.Insert(index, word.NumTilesUsed);
 			
 			index = _sortedWordDamages.BinarySearch(word.EffectiveDamage);
 			if (index < 0) index = ~index;
 			_sortedWordDamages.Insert(index, word.EffectiveDamage);
 		}
 	}
+
+	private void CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength,
+		out float medianLength)
+	{
+		meanDamage = (float) _sortedWordDamages.Average();
+		meanLength = (float) _sortedWordLengths.Average();
+		if (_sortedWordDamages.Count % 2 != 0)
+		{
+			medianLength = _sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2);
+			medianDamage = _sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2);
+		}
+		else
+		{
+			medianLength = (_sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2) + _sortedWordLengths.ElementAt((_sortedWordLengths.Count / 2) - 1)) / 2.0f;
+			medianDamage = (_sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2) + _sortedWordDamages.ElementAt((_sortedWordDamages.Count / 2) - 1)) / 2.0f;
+		}
+	}
+	
+	private void SendWinEvent()
+	{
+		CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength, out float medianLength);
+		WinEvent winEvent = new WinEvent()
+		{
+			_longestWord = this._longestWord,
+			_mostDamagingWord = this._mostDamagingWord,
+			_relicList = Player.INSTANCE._inventory._passiveRelicInventory.ToString(),
+			_highestDamage = this._sortedWordDamages.Last(),
+			_meanDamage = meanDamage,
+			_meanLength = meanLength,
+			_medianDamage = medianDamage,
+			_medianLength = medianLength,
+			_numWords = this._sortedWordLengths.Count()
+		};
+		AnalyticsService.Instance.RecordEvent(winEvent);
+	}
+	private void SendLoseEvent()
+	{
+		CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength, out float medianLength);
+		LoseEvent loseEvent = new LoseEvent()
+		{
+			_longestWord = this._longestWord,
+			_mostDamagingWord = this._mostDamagingWord,
+			_relicList = Player.INSTANCE._inventory._passiveRelicInventory.ToString(),
+			_highestDamage = this._sortedWordDamages.Last(),
+			_meanDamage = meanDamage,
+			_meanLength = meanLength,
+			_medianDamage = medianDamage,
+			_medianLength = medianLength,
+			_numWords = this._sortedWordLengths.Count(),
+			_enemyIndex = RunManager.INSTANCE.GetCurrentEvent()._eventIndex, 
+			_enemyName = BattleManager.INSTANCE.CurrentEnemy.name
+		};
+		AnalyticsService.Instance.RecordEvent(loseEvent);
+	}
+
 
 	public RunEvent Event(int index) => _runFormat[index];
 	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
