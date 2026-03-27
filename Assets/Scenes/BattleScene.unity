@@ -2163,6 +2163,11 @@ MonoBehaviour:
   _loseScene: {fileID: 102900000, guid: 10aff388008011c4fbd00c7cdaf9cce8, type: 3}
   _winScene: {fileID: 102900000, guid: 5b4fa5be8a142d04698b939da9f71374, type: 3}
   _storeObject: {fileID: 1786051286}
+  _analyticsManager: {fileID: 0}
+  _longestWord: 
+  _mostDamagingWord: 
+  _sortedWordLengths: 
+  _sortedWordDamages: 
 --- !u!4 &628337404
 Transform:
   m_ObjectHideFlags: 0
