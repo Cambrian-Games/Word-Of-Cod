@@ -31,15 +31,18 @@ public class MWSwitch : ActiveRelic
 		bool isM = tile._letter == 'M';
 		bool isW = tile._letter == 'W';
 
-		bool isHighlighted = (tile.HighlightState & HighlightState.Selected) == 0;
+		bool isSelected = (tile.HighlightState & HighlightState.Selected) != 0;
 
-		if (isHighlighted)
+		if (isSelected)
 			return;
 
 		if (!isM && !isW)
 		{
 			_inUse = false;
+			// this does not result in selecting the new tile, might want to fix?
 			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
+
+			return;
 		}
 
 		GameBoard.INSTANCE.ChangeTileLetter(tile, isM ? 'W' : 'M');
