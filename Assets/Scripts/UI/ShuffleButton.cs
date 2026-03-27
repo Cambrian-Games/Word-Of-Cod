@@ -33,6 +33,7 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 		else
 		{
 			GameBoard.INSTANCE.Shuffle();
+			//TODO Add Shuffle Log analytics
 			_hasFirstClick = false;
 			
 			BattleManager.INSTANCE.SetBattleState(BattleManager.BattleState.Post_Player_Turn);

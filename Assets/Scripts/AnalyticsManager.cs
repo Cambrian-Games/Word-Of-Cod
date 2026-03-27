@@ -30,3 +30,14 @@ public class AnalyticsManager : MonoBehaviour
     }
     
 }
+
+public class WordFailedEvent : Unity.Services.Analytics.Event
+{
+    public WordFailedEvent() : base("failToSubmit")
+    {
+
+    }
+
+    public string _failedWord { set { SetParameter("failedWord" , value);}}
+
+}

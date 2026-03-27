@@ -36,6 +36,11 @@ public class RunManager : MonoBehaviour
 
 	public AnalyticsManager _analyticsManager;
 
+	public string _longestWord ="";
+	public string _mostDamagingWord = "";
+	public List<int> _sortedWordLengths;
+	public List<int> _sortedWordDamages;
+
 	public enum RunState
 	{
 		Nil = -1,
@@ -83,6 +88,9 @@ public class RunManager : MonoBehaviour
 				Debug.Log("start Data Collection");
 			}
 		}
+
+		_sortedWordDamages = new List<int>();
+		_sortedWordLengths = new List<int>();
     }
 
     // Update is called once per frame
@@ -240,8 +248,11 @@ public class RunManager : MonoBehaviour
 				BattleManager.INSTANCE.Unload();
 				break;
 			case RunState.Win:
+				//TODO Add Analytics for End Game
 				break;
 			case RunState.Lose:
+				//TODO Add analytics for lost run
+				//    same as End Game, but with added "what you lost to" event
 				SceneManager.LoadScene(_loseScene.name);
 				break;
 		}
@@ -324,6 +335,40 @@ public class RunManager : MonoBehaviour
 		_currentRun.Add(selectedEvent);
 
 		_hasSelectedNextEvent = true;
+	}
+
+	public void AddWordToStats (Word word)
+	{
+		//if first word, simply set all
+		if (_sortedWordDamages.Count == 0)
+		{
+			_sortedWordDamages.Add(word.EffectiveDamage);
+			_sortedWordLengths.Add(word.Text.Length);
+			_longestWord = word.Text;
+			_mostDamagingWord = word.Text;
+		}
+		//if not first word
+		else
+		{
+			//check for new longest
+			if (word.Text.Length > _sortedWordLengths.Last())
+			{
+				_longestWord = word.Text;
+			}
+			//check for new highest damage
+			if (word.EffectiveDamage > _sortedWordDamages.Last())
+			{
+				_mostDamagingWord = word.Text;
+			}
+			//insert sorted to appropriate list
+			int index = _sortedWordLengths.BinarySearch(word.Text.Length);
+			if (index < 0) index = ~index;
+			_sortedWordLengths.Insert(index, word.Text.Length);
+			
+			index = _sortedWordDamages.BinarySearch(word.EffectiveDamage);
+			if (index < 0) index = ~index;
+			_sortedWordDamages.Insert(index, word.EffectiveDamage);
+		}
 	}
 
 	public RunEvent Event(int index) => _runFormat[index];
