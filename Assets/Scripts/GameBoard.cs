@@ -418,24 +418,45 @@ public class GameBoard : MonoBehaviour
 
         if (tileCoord.x > 0)
         {
-            TransformTile(new Vector2Int(tileCoord.x - 1, tileCoord.y), Tile.TileKind.Normal);
+			Tile targetTile = _playableBoard[tileCoord.x - 1, tileCoord.y];
+
+			if (targetTile.Kind == Tile.TileKind.Sandy)
+			{
+				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+			}
         }
 
         if (tileCoord.x < dims.x - 1)
         {
-            TransformTile(new Vector2Int(tileCoord.x + 1, tileCoord.y), Tile.TileKind.Normal);
-        }
+			Tile targetTile = _playableBoard[tileCoord.x + 1, tileCoord.y];
+
+			if (targetTile.Kind == Tile.TileKind.Sandy)
+			{
+				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+			}
+		}
 
         if (tileCoord.y > 0)
         {
-            TransformTile(new Vector2Int(tileCoord.x, tileCoord.y - 1), Tile.TileKind.Normal);
-        }
+			Tile targetTile = _playableBoard[tileCoord.x, tileCoord.y - 1];
+
+			if (targetTile.Kind == Tile.TileKind.Sandy)
+			{
+				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+			}
+		}
 
         if (tileCoord.y < dims.y - 1)
         {
-            TransformTile(new Vector2Int(tileCoord.x, tileCoord.y + 1), Tile.TileKind.Normal);
-        }
+			Tile targetTile = _playableBoard[tileCoord.x, tileCoord.y + 1];
+
+			if (targetTile.Kind == Tile.TileKind.Sandy)
+			{
+				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+			}
+		}
     }
+
 	internal int CountTiles(char letter) => _playableBoard.OfType<Tile>().Count(tile => tile && tile._letter == letter);
 	internal int CountTiles(Tile.TileKind kind) => _playableBoard.OfType<Tile>().Count(tile => tile && tile.Kind == kind);
 	internal int TotalTiles() => _playableBoard.OfType<Tile>().Count(tile => tile);
