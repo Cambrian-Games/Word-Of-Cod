@@ -377,7 +377,7 @@ public class AttackEffect
                 Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedStandardDamage);
                 GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedStandardDamage);
                 Player.INSTANCE.CurrentHealth -= (int) modifiedStandardDamage;
-
+				Player.INSTANCE._inventory.OnPlayerTakeDamage();
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
 
@@ -411,6 +411,7 @@ public class AttackEffect
 				Player.INSTANCE._inventory.OnEnemyAttack(_damage * schoolData._targetHits, out float modifiedSchoolDamage);
 				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedSchoolDamage);
 				Player.INSTANCE.CurrentHealth -= (int) modifiedSchoolDamage;
+				Player.INSTANCE._inventory.OnPlayerTakeDamage();
 				schoolData._hasDamaged = true;
 				break;
 
@@ -425,7 +426,7 @@ public class AttackEffect
 				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()], out float modifiedVariantDamage);
 				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedVariantDamage);
 				Player.INSTANCE.CurrentHealth -= (int) modifiedVariantDamage;
-
+				Player.INSTANCE._inventory.OnPlayerTakeDamage();
 				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard.Remove(_to.ToString());
 				variantData._hasAttacked = true;
 				break;
