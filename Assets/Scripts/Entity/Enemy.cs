@@ -1,9 +1,26 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+public enum AttackSchedulePolicy
+{
+	[InspectorName("Repeat Current Until Next Is Available")]
+	Repeat_Until_Next_Available,
+	[InspectorName("Next Available")]
+	Next_Available,
+	[InspectorName("Select First Available")]
+	First_Available,
+	[InspectorName("Select Random From All Available")]
+	Random_From_All_Available
+}
 
 public class Enemy : Entity
 {
 	// config
+
+	[SerializeField]
+	private AttackSchedulePolicy _schedulePolicy;
+	public AttackSchedulePolicy SchedulePolicy => _schedulePolicy;
 
 	[SerializeField]
 	private List<AttackRule> _rules;
@@ -13,38 +30,22 @@ public class Enemy : Entity
 	private List<AttackRule> _interruptRules;
 	public List<AttackRule> InterruptRules => new List<AttackRule>(_interruptRules);
 
-	#region Attack Rule Priority
-	[SerializeField]
-	private AttackPriority _attackPriority;
-	public AttackPriority Priority => _attackPriority;
-	[SerializeField]
-	private bool _canRepeatLastAction = true;
-	#endregion
-
 	// attack state
 
 	internal int _currentRuleIndex = -1;
-	public AttackRule CurrentRule => _currentRuleIndex == -1 ? null : _rules[_currentRuleIndex];
-
-	private int _lastRuleIndex = -1;
-	internal int LastRuleIndex => _lastRuleIndex;
-
-	internal int _roundsSinceLastAction = 0;
-
 	internal int _currentInterruptIndex = -1;
+	private int _lastRuleIndex = -1;
+
+	public AttackRule CurrentRule => _currentRuleIndex == -1 ? null : _rules[_currentRuleIndex];
 	public AttackRule CurrentInterrupt => _currentInterruptIndex == -1 ? null : _interruptRules[_currentInterruptIndex];
 
 	private bool _isTurnComplete = false;
 	public bool IsTurnComplete => _isTurnComplete;
 
+	private string _currentForecast;
+
 	// create once, never re-assign
-	internal readonly Dictionary<string, float> _attackBlackboard = new Dictionary<string, float>();
-
-	[SerializeField] //can be temporary, but for testing forecast display i need to see current forecast
-    internal string _currentForecast = "";
-
-    [SerializeField]
-    private string _defaultForecast = "$NAME is waiting.";
+	internal readonly Dictionary<string, float> _blackboard = new Dictionary<string, float>();
 
 	protected override void Awake()
 	{
@@ -75,263 +76,239 @@ public class Enemy : Entity
 #endif
 	}
 
-	public override void UpdateTurn()
+	private void OnValidate()
 	{
-		base.UpdateTurn();
+		for (int ruleIndex = 0; ruleIndex < _rules.Count; ruleIndex++)
+		{
+			_rules[ruleIndex]._index = ruleIndex;
+		}
 
-		if (_isTurnComplete)
-			return;
+		for (int ruleIndex = 0; ruleIndex < _interruptRules.Count; ruleIndex++)
+		{
+			_interruptRules[ruleIndex]._index = ruleIndex;
+		}
+	}
+
+	public bool SelectRule()
+	{
+		Debug.Assert((CurrentRule != null) != (CurrentInterrupt != null), "One of CurrentRule and CurrentInterrupt should always be null");
+
+		// check if the current interrupt should continue to run
 
 		if (CurrentInterrupt != null)
 		{
-			_isTurnComplete = CurrentInterrupt.UpdateTurn();
-			return;
+			if (CurrentInterrupt.InCriticalEffect())
+				return false;
+
+			else if (!CurrentInterrupt.CanRun(this))
+			{
+				CurrentRule.Cancel(this);
+				_currentInterruptIndex = -1;
+			}
 		}
+
+		// check if the current rule should continue to run. CurrentRule and CurrentInterrupt should never both be non-null
 
 		if (CurrentRule != null)
 		{
-			_isTurnComplete = CurrentRule.UpdateTurn();
-			return;
+			if (CurrentRule.InCriticalEffect())
+				return false;
+
+			else if (!CurrentRule.CanRun(this))
+			{
+				CurrentRule.Cancel(this);
+				_currentRuleIndex = -1;
+			}
 		}
 
-		// safeguard, if there is no interrupt and no rule, the turn ends.
+		// check for an interrupt
 
-		_isTurnComplete = true;
+		List<AttackRule> interruptCandidates = _interruptRules.Where(interrupt => interrupt.CanRun(this)).ToList();
+
+		if (interruptCandidates.Count > 0)
+		{
+			int newInterruptIndex = -1;
+
+			float totalWeight = interruptCandidates.Sum(rule => rule._weight);
+
+			if (totalWeight == 0)
+			{
+				newInterruptIndex = interruptCandidates[Random.Range(0, interruptCandidates.Count)]._index;
+			}
+			else
+			{
+				float output = Random.Range(0, totalWeight);
+
+				int index = 0;
+
+				while (output > interruptCandidates[index]._weight)
+				{
+					output -= interruptCandidates[index]._weight;
+					index++;
+				}
+
+				newInterruptIndex = interruptCandidates[index]._index;
+			}
+
+			if (newInterruptIndex != -1)
+			{
+				Debug.Assert(_interruptRules[newInterruptIndex].CanRun(this));
+
+				_currentInterruptIndex = newInterruptIndex;
+
+				// ensure that CurrentRule is null because CurrentInterrupt is now non-null
+
+				_lastRuleIndex = _currentRuleIndex;
+				_currentRuleIndex = -1;
+
+				CurrentInterrupt.StartRule(this);
+
+				return true;
+			}
+		}
+
+		// no applicable interrupt was found, and we have an in-progress rule
+
+		if (CurrentRule != null && !CurrentRule.IsComplete(this))
+			return false;
+
+		#region Local Selection Functions
+			int RepeatUntilNextAvailable()
+			{
+				int nextRuleIndex = (_lastRuleIndex + 1) % _rules.Count;
+
+				if (_rules[nextRuleIndex].CanRun(this))
+					return nextRuleIndex;
+
+				Debug.Assert(_rules[_lastRuleIndex].CanRun(this), "Can't select a rule! Please check configuration.");
+				return _lastRuleIndex;
+			}
+
+			int NextAvailable()
+			{
+				int nextRuleIndex = (_lastRuleIndex + 1) % _rules.Count;
+
+				// loop through every rule starting with the next in line, checking whether it can run.
+				// The loop will terminate the first time it can run a rule, or if nextRuleIndex == _lastRuleIndex (after checking if it can run)
+
+				while (!_rules[nextRuleIndex].CanRun(this) && nextRuleIndex != _lastRuleIndex)
+					nextRuleIndex = nextRuleIndex + 1 % _rules.Count;
+
+				Debug.Assert(_rules[nextRuleIndex].CanRun(this), "Can't select a rule! Please check configuration.");
+				return nextRuleIndex;
+			}
+
+			int FirstAvailable()
+			{
+				int nextRuleIndex = 0;
+				int numRules = _rules.Count;
+
+				// loop through every rule starting at 0, checking whether it can run.
+				// The loop will terminate after checking every rule or when it can find a valid rule.
+
+				while (nextRuleIndex < numRules && !_rules[nextRuleIndex].CanRun(this))
+					nextRuleIndex = nextRuleIndex + 1;
+
+				Debug.Assert(nextRuleIndex < numRules && _rules[nextRuleIndex].CanRun(this), "Can't select a rule! Please check configuration.");
+				return nextRuleIndex < numRules ? nextRuleIndex : 0;
+			}
+
+			int RandomFromAllAvailable()
+			{
+				List<AttackRule> candidates = _rules.Where(rule => rule.CanRun(this)).ToList();
+
+				if (candidates.Count == 0)
+				{
+					Debug.Assert(candidates.Count > 0, "Can't select a rule! Please check configuration.");
+					return 0;
+				}
+
+				float totalWeight = candidates.Sum(rule => rule._weight);
+
+				if (totalWeight == 0)
+				{
+					return interruptCandidates[Random.Range(0, interruptCandidates.Count)]._index;
+				}
+				else
+				{
+					float output = Random.Range(0, totalWeight);
+
+					int index = 0;
+
+					while (output > interruptCandidates[index]._weight)
+					{
+						output -= interruptCandidates[index]._weight;
+						index++;
+					}
+
+					return interruptCandidates[index]._index;
+				}
+
+			}
+			#endregion
+
+		int pendingRule = _schedulePolicy switch
+		{
+			AttackSchedulePolicy.Repeat_Until_Next_Available => RepeatUntilNextAvailable(),
+			AttackSchedulePolicy.Next_Available => NextAvailable(),
+			AttackSchedulePolicy.First_Available => FirstAvailable(),
+			AttackSchedulePolicy.Random_From_All_Available => RandomFromAllAvailable(),
+			_ => throw new System.NotImplementedException(),
+		};
+
+		Debug.Assert(_rules[pendingRule].CanRun(this));
+
+		// ensure that CurrentRule is non-null and CurrentInterrupt is null
+
+		_lastRuleIndex = _currentRuleIndex = pendingRule;
+		_currentInterruptIndex = -1;
+
+		CurrentRule.StartRule(this);
+
+		return true;
 	}
 
 	public void StartRound()
 	{
-		_roundsSinceLastAction++;
-		_rules.ForEach(rule => rule._roundsSinceLastUsed++);
-		_interruptRules.ForEach(interrupt => interrupt._roundsSinceLastUsed++);
+		_lastDamageTaken = 0;
 
-		if (CurrentInterrupt != null)
-		{
-			CurrentInterrupt.StartRound(); // set turns since last use to 0 in AttackRule::StartTurn instead of here?
-			CurrentInterrupt._roundsSinceLastUsed = 0;
-			_roundsSinceLastAction = 0;
-			UpdateForecast();
-			return;
-		}
+		SelectRule();
 
-		// if we don't have a rule, find one.
-
-		if (CurrentRule == null)
-		{
-			TryFindRule();
-		}
-
-		// if we have a rule (whether from the previous turn or newly-selected), start the round.
-
-		if (CurrentRule != null)
-		{
-			CurrentRule.StartRound(); // set turns since last use to 0 in AttackRule::StartTurn instead of here?
-			CurrentRule._roundsSinceLastUsed = 0;
-			_roundsSinceLastAction = 0;
-			UpdateForecast();
-			return;
-		}
+		(CurrentInterrupt ?? CurrentRule).StartRound(this);
 
 		UpdateForecast();
+
+	}
+
+	public void StartTurn()
+	{
+		_isTurnComplete = false;
+
+		if (SelectRule())
+		{
+			// if the current attack has changed, start the round for the new rule and update the forecast
+
+			(CurrentInterrupt ?? CurrentRule).StartRound(this);
+			UpdateForecast();
+		}
+
+		(CurrentInterrupt ?? CurrentRule).StartTurn(this);
+	}
+
+	public void UpdateTurn()
+	{
+		if (_isTurnComplete)
+			return;
+
+		_isTurnComplete = (CurrentInterrupt ?? CurrentRule).UpdateTurn(this);
 	}
 
 	private void UpdateForecast()
 	{
-        _currentForecast = null;
+        _currentForecast = (CurrentInterrupt ?? CurrentRule).Forecast();
 
-        if (CurrentInterrupt != null)
-            _currentForecast = CurrentInterrupt.GetForecast();
-
-        else if (CurrentRule != null)
-            _currentForecast = CurrentRule.GetForecast();
-
-        // if the above attempts fail, fall back to _defaultForecast
-
-        if (_currentForecast == null || _currentForecast.Length == 0)
-            _currentForecast = _defaultForecast;
+		Debug.Assert(_currentForecast != null, "CurrentInterrupt or CurrentRule should be non-null.");
     }
-
-	public override void StartTurn()
-	{
-		_isTurnComplete = false;
-
-		// if we don't have an interrupt, look for one. An interrupt can't override another interrupt for now.
-
-		bool newInterrupt = false;
-
-		if (CurrentInterrupt == null && (CurrentRule == null || !CurrentRule._uninterruptible))
-		{
-			_currentInterruptIndex = _interruptRules.FindIndex(interrupt => interrupt.CanRun(this));
-			newInterrupt = (CurrentInterrupt != null);
-		}
-
-		// if we have an interrupt, run it
-
-		if (CurrentInterrupt != null)
-		{
-			if (CurrentRule != null)  // this should never happen but is a good safeguard.
-			{
-				if (CurrentRule.PastInterruptCheckpoint())
-				{
-					_lastRuleIndex = _currentRuleIndex;
-				}
-
-				CurrentRule.Cancel();
-				_currentRuleIndex = -1;
-			}
-
-			if (newInterrupt)
-			{
-				_interruptRules[_currentInterruptIndex].StartRule();
-				_interruptRules[_currentInterruptIndex].StartRound();
-			}
-
-			_interruptRules[_currentInterruptIndex].StartTurn();
-		}
-
-		// if we don't have an interrupt but this rule should be cancelled for some other reason, cancel it
-
-		else if (CurrentRule != null)
-		{
-			if (CurrentRule.ShouldCancel(this))
-			{
-				if (CurrentRule.PastInterruptCheckpoint())
-				{
-					_lastRuleIndex = _currentRuleIndex;
-				}
-
-				CurrentRule.Cancel();
-				_currentRuleIndex = -1;
-			}
-			else
-			{
-				CurrentRule.StartTurn();
-			}
-		}
-		else // no rule, immediately mark the turn as complete
-		{
-			_isTurnComplete = true;
-		}
-	}
-
-	public override void EndTurn()
-	{
-		base.EndTurn();
-
-		if (CurrentRule != null)
-		{
-			CurrentRule.EndTurn();
-
-			if (CurrentRule.Complete())
-			{
-				CurrentRule.EndRule();
-				_lastRuleIndex = _currentRuleIndex;
-				_currentRuleIndex = -1;
-			}
-		}
-
-		else if (CurrentInterrupt != null)
-		{
-			CurrentInterrupt.EndTurn();
-
-			if (CurrentInterrupt.Complete())
-			{
-				CurrentInterrupt.EndRule();
-				_currentInterruptIndex = -1;
-			}
-		}
-	}
-
-	private void TryFindRule()
-	{
-		switch (_attackPriority)
-		{
-			case AttackPriority.Loop:
-				int nextRuleIndex = (_lastRuleIndex + 1) % _rules.Count;
-
-				if (_rules[nextRuleIndex].CanRun(this))
-				{
-					_currentRuleIndex = nextRuleIndex;
-				}
-				else
-				{
-					_currentRuleIndex = -1;
-				}
-				break;
-
-			case AttackPriority.First_Available:
-				bool foundViableRule = false;
-
-				for (int i = 0; i < _rules.Count; i++)
-				{
-					if (!_canRepeatLastAction && i == _lastRuleIndex)
-						continue;
-
-					if (_rules[i].CanRun(this))
-					{
-						_currentRuleIndex = i;
-						foundViableRule = true;
-						break;
-					}
-				}
-
-				if (!foundViableRule)
-				{
-					_currentRuleIndex = -1;
-				}
-				break;
-
-			case AttackPriority.Random_From_All_Available:
-
-				List<(int ruleIndex, float weight)> ruleCandidates = new List<(int id, float weight)>();
-				float totalWeight = 0.0f;
-
-				for (int i = 0; i < _rules.Count; i++)
-				{
-					if (!_canRepeatLastAction && i == _lastRuleIndex)
-						continue;
-
-					if (_rules[i].CanRun(this))
-					{
-						ruleCandidates.Add((i, _rules[i]._weight));
-						totalWeight += _rules[i]._weight;
-					}
-				}
-
-				if (ruleCandidates.Count > 0)
-				{
-					if (totalWeight == 0)
-					{
-						int index = Random.Range(0, ruleCandidates.Count);
-						_currentRuleIndex = ruleCandidates[index].ruleIndex;
-					}
-					else
-					{
-						float output = Random.Range(0, totalWeight);
-
-						int index = 0;
-						while (output > ruleCandidates[index].weight)
-						{
-							output -= ruleCandidates[index].weight;
-							index++;
-						}
-
-						_currentRuleIndex = ruleCandidates[index].ruleIndex;
-					}
-				}
-				else
-				{
-					_currentRuleIndex = -1;
-				}
-				break;
-		}
-
-		if (CurrentRule != null)
-		{
-			CurrentRule.StartRule();
-		}
-	}
-
     internal string FormattedForecast()
     {
         return _currentForecast.Replace("$NAME", this._displayName);

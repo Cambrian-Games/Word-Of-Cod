@@ -3,36 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum AttackPriority
-{
-	Loop,
-	[InspectorName("Select First Available")]
-	First_Available,
-	[InspectorName("Select Random From All Available")]
-	Random_From_All_Available
-}
-
 [Serializable]
 public class AttackRule
 {
-	public List<AttackCondition> _conditions;
-	public bool _matchAllToRun; // true = all
-
-	public List<AttackCondition> _cancelConditions;
-	public bool _matchAllToCancel;
-
-	public bool _uninterruptible;
-
+#if UNITY_EDITOR
+	public string _name;
+#endif
 	public float _weight = 1.0f;
+	internal int _index;
 
+	public List<Condition> _conditions;
 	public List<AttackEffect> _effects;
 
-	EffectData _effectData;
+	private int _currentEffectindex;
+	private bool _stayInCurrentEffect;
 
-	int _currentEffectindex;
 	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
-
-	internal int _roundsSinceLastUsed;
 
 
 	public bool CanRun(Enemy owner)
@@ -43,127 +29,141 @@ public class AttackRule
 		if (_conditions.Count == 0)
 			return true;
 
-		if (ShouldCancel(owner))
-			return false;
+		foreach (Condition cond in _conditions)
+		{
+			if (!cond.Passes(owner))
+			{
+				if (cond._cancelKind == Condition.FCANCEL.IGNORE)
+					continue;
 
-		return _matchAllToRun ? _conditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
+				// conditions may have different situations where they can cancel an attack.
+				//  if a condition fails, we check the battle state and see whether the
+				//  condition would cancel an attack at that point
+
+				BattleManager.BattleState battleState = BattleManager.INSTANCE.CurrentState;
+
+				switch (battleState)
+				{
+					case BattleManager.BattleState.Pre_Player_Turn:
+						if ((cond._cancelKind & Condition.FCANCEL.START_OF_ROUND) != 0)
+						{
+							return false;
+						}
+						continue;
+
+					case BattleManager.BattleState.Player_Turn:
+						if ((cond._cancelKind & Condition.FCANCEL.DURING_PLAYER_TURN) != 0)
+						{
+							return false;
+						}
+						continue;
+
+					case BattleManager.BattleState.Enemy_Turn:
+						if ((cond._cancelKind & Condition.FCANCEL.START_OF_ENEMY_TURN) != 0)
+						{
+							return false;
+						}
+						continue;
+				}
+			}
+		}
+
+		return true;
 	}
 
-	public bool ShouldCancel(Enemy owner)
-	{
-		if (_uninterruptible)
-			return false;
-
-		if (_cancelConditions.Count == 0)
-			return false;
-
-		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _cancelConditions.Any(cond => cond.IsConditionSatisfied(owner));
-	}
+	public bool HasStarted() => _currentEffectindex >= 0;
 
 	public void StartRule()
 	{
 		if (_effects.Count == 0)
 		{
 			Debug.LogError("No effects found!");
-			return;
 		}
 
 		_currentEffectindex = -1; // no current effect
+		_stayInCurrentEffect = false;
 	}
 
-	internal void StartRound()
+	public void Cancel(Enemy owner)
 	{
-		// update next effect here because it's required for the forecast
-
-		_currentEffectindex++;
-		Debug.Assert(_currentEffectindex < _effects.Count);
-		_effectData = CurrentEffect.GenerateData();
+		_currentEffectindex = -1;
 	}
 
-	internal void StartTurn()
+	internal void StartRound(Enemy owner)
+	{
+		bool advanceToNextEffect = !(CurrentEffect != null && _stayInCurrentEffect);
+
+		if (advanceToNextEffect)
+		{
+			// update next effect here because it's required for the forecast
+
+			_currentEffectindex++;
+			CurrentEffect.StartEffect(owner);
+		}
+
+		_stayInCurrentEffect = false;
+
+		Debug.Assert(_currentEffectindex < _effects.Count);
+	}
+
+	internal void StartTurn(Enemy owner)
 	{
 		// TBD, may not do anything aside from animations.
 	}
 
-	public bool UpdateTurn()
+	public bool UpdateTurn(Enemy owner)
 	{
-		if (_effectData == null)
+		if (CurrentEffect == null)
 		{
-			Debug.LogError("No effect data, can't update rule.");
+			Debug.LogError("No effect exists.");
 			return true;
 		}
 
-		// current effect is incomplete
+		// current effect is incomplete. This first check should be true in most cases but is a good safeguard.
 
-		if (_effectData._effectEndTime <= 0.0f)
+		if (!CurrentEffect.IsTurnComplete(owner))
 		{
-			bool isEffectComplete = CurrentEffect.UpdateEffect(_effectData);
-
-			if (isEffectComplete)
-			{
-				// if the final effect is complete, exit
-
-				if (_currentEffectindex + 1 >= _effects.Count)
-					return true;
-				
-				// if the turn is over, exit
-
-				if (CurrentEffect.EndsTurn)
-					return true;
-
-				_effectData._effectEndTime = Time.time;
-			}
+			CurrentEffect.UpdateEffect(owner);
 		}
 
-		// if current effect is complete but turn is not over, move to next effect
-
-		if (_effectData._effectEndTime > 0 &&
-			(_effectData._effectEndTime + CurrentEffect.AfterEffectDelay) <= Time.time)
+		if (CurrentEffect.IsTurnComplete(owner))
 		{
+			// If this is a multiturn effect and it has turns remaining, end turn and prevent advancing to next effect
+
+			if (!CurrentEffect.IsEffectComplete(owner))
+			{
+				_stayInCurrentEffect = true;
+				return true;
+			}
+				
+			// This explicitly ends the turn
+
+			if (CurrentEffect.EndsTurn(owner))
+				return true;
+
+			// try to go to next effect. If none exists, return true, otherwise start next effect.
+
 			_currentEffectindex++;
-			_effectData = CurrentEffect.GenerateData();
+
+			if (_currentEffectindex >= _effects.Count)
+				return true;
+
+			CurrentEffect.StartEffect(owner);
+
+			return false;
 		}
 
 		return false;
 	}
 
-	internal void EndTurn()
+	public bool IsComplete(Enemy owner)
 	{
-		_effectData = null;
+		// we want to end the rule if the player is dead, otherwise check if the final effect is complete
+
+		return Player.INSTANCE.CurrentHealth <= 0 || _effects[^1].IsEffectComplete(owner);
 	}
 
-	public void EndRule()
-	{
-		// TBD, might be animations
-	}
-
-	public bool Complete()
-	{
-		// we want to end the rule if the player is dead
-
-		return Player.INSTANCE.CurrentHealth <= 0 || _currentEffectindex >= _effects.Count - 1;
-	}
-
-	internal bool PastInterruptCheckpoint()
-	{
-		int checkpointIndex = _effects.FindIndex(effect => effect.IsInterruptCheckpoint);
-		if (checkpointIndex == -1)
-			return false;
-
-		// if we've already completed the checkpoint effect, this rule is safe to mark as complete if interrupted
-
-		return _currentEffectindex > checkpointIndex;
-	}
-
-	internal void Cancel()
-	{
-		// mostly TBD
-
-		_currentEffectindex = -1;
-		_effectData = null;
-	}
-
-    internal string GetForecast()
+    internal string Forecast()
     {
         if (CurrentEffect != null)
             return CurrentEffect.ForecastDescription;
@@ -173,44 +173,42 @@ public class AttackRule
 }
 
 [Serializable]
-public class AttackCondition
+public class Condition
 {
-	public enum ConditionField
+	public enum Category
 	{
-		[InspectorName("Enemy Health")]
-		Enemy_Health,
+		// No Parameter
+
 		[InspectorName("Enemy Health (Percentage)")]
 		Enemy_Health_Percent,
-		[InspectorName("Player Health")]
-		Player_Health,
 		[InspectorName("Player Health (Percentage)")]
 		Player_Health_Percent,
-		[InspectorName("First Turn")]
-		First_Turn,
-		[InspectorName("Not First Turn")]
-		Not_First_Turn,
-		[InspectorName("Turns Since Last Action")]
-		Turns_Since_Last_Action,
-		[InspectorName("Last Attack")]
-		Last_Action_Index,
-		[InspectorName("Length of Last Word")]
+		[InspectorName("Round Number")]
+		Round_Number,
+
+		// Usually Interrupt/Cancel Conditions
+
+		[InspectorName("Damage Taken")]
+		Damage_Taken = 100,
+		[InspectorName("Length of Last Word Submitted")]
 		Last_Word_Length,
 		[InspectorName("Combo Length")]
 		Combo_Length,
+
+		// No Value Needed
+
 		[InspectorName("Combo Broken")]
-		Combo_Break,
-		[InspectorName(null), Obsolete]
-		Enemy_Killed,
+		Combo_Break = 200,
 
-		//damage taken / percentage, can only be a cancel condition
-		[InspectorName("Damage Taken")]
-		Damage_Taken,
+		// Parameter Required
 
-		[InspectorName("Vacuumed Sandy Tiles")]
-		Vacuumed_Sandy_Tiles,
+		[InspectorName("Variant Tiles On Board")]
+		Variant_Tiles_On_Board = 300,
 
-		[InspectorName("Sandy Tiles on Board")]
-		Sandy_Tile_Count,
+		// Misc lookup
+
+		[InspectorName("Blackboard Value")]
+		Blackboard_Value = 400
 	}
 
 	public enum Comparator
@@ -229,44 +227,53 @@ public class AttackCondition
 		Greater_Than_Or_Equal,
 	}
 
+	[Flags]
+	public enum FCANCEL
+	{
+		IGNORE = 0,
+		START_OF_ENEMY_TURN = 1,
+		START_OF_ROUND = 2,
+		DURING_PLAYER_TURN = 4,
+	}
+
 	[SerializeField]
-	private ConditionField _field;
+	private Category _category;
 	[SerializeField]
-	private Comparator _is;
+	private string _parameter;
+	[SerializeField]
+	private Comparator _comparator;
 	[SerializeField]
 	private float _value;
 
-	public bool IsConditionSatisfied(Enemy owner)
+	public FCANCEL _cancelKind;
+
+	public bool Passes(Enemy owner)
 	{
-		switch (_field)
+		switch (_category)
 		{
-			case ConditionField.Combo_Break:
-				throw new NotImplementedException();
-			case ConditionField.Enemy_Killed:
-				throw new NotImplementedException();
-			case ConditionField.First_Turn:
-				throw new NotImplementedException();
-			case ConditionField.Not_First_Turn:
+			case Category.Combo_Break:
 				throw new NotImplementedException();
 		}
 
-		int input = _field switch
+		float input = _category switch
 		{
-			ConditionField.Enemy_Health => owner.CurrentHealth,
-			ConditionField.Enemy_Health_Percent => owner.HealthPercent(),
-			ConditionField.Player_Health => Player.INSTANCE.CurrentHealth,
-			ConditionField.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
-			ConditionField.Turns_Since_Last_Action => owner._roundsSinceLastAction,
-			ConditionField.Last_Action_Index => owner.LastRuleIndex,
-			ConditionField.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord?.Text.Length ?? 0,
-			ConditionField.Combo_Length => throw new NotImplementedException(),
-			ConditionField.Damage_Taken => owner.LastDamageTaken,
-			ConditionField.Sandy_Tile_Count => GameBoard.INSTANCE.CountTiles(Tile.TileKind.Sandy),
-			ConditionField.Vacuumed_Sandy_Tiles => (int) owner._attackBlackboard.GetValueOrDefault(Tile.TileKind.Sandy.ToString(), 0),
-			_ => throw new NotImplementedException()
+			Category.Enemy_Health_Percent => owner.HealthPercent(),
+			Category.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
+			Category.Round_Number => throw new NotImplementedException(),
+			Category.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord?.Text.Length ?? 0,
+			Category.Combo_Length => throw new NotImplementedException(),
+			Category.Damage_Taken => owner.LastDamageTaken,
+			Category.Variant_Tiles_On_Board => GameBoard.INSTANCE.CountTiles((Tile.TileKind) Enum.Parse(typeof(Tile.TileKind), _parameter)),
+			Category.Blackboard_Value => (int) owner._blackboard.GetValueOrDefault(_parameter, 0),
+			_ => throw new InvalidOperationException()
 		};
 
-		return _is switch
+		bool categoryIsPercent = _category == Category.Enemy_Health_Percent || _category == Category.Player_Health_Percent;
+		bool comparatorIsEqual = _comparator == Comparator.Equal;
+
+		Debug.Assert(categoryIsPercent != comparatorIsEqual, "Trying to compare equality for two decimal numbers is not recommended.");
+
+		return _comparator switch
 		{
 			Comparator.Equal => input == _value,
 			Comparator.Not_Equal => input != _value,
@@ -376,7 +383,7 @@ public class AttackEffect
                 
                 Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedStandardDamage);
                 GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedStandardDamage);
-                Player.INSTANCE.CurrentHealth -= (int) modifiedStandardDamage;
+                Player.INSTANCE.Damage((int) modifiedStandardDamage);
 
 				((StandardAttackData)data)._hasAttacked = true;
 				break;
@@ -410,23 +417,23 @@ public class AttackEffect
 
 				Player.INSTANCE._inventory.OnEnemyAttack(_damage * schoolData._targetHits, out float modifiedSchoolDamage);
 				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedSchoolDamage);
-				Player.INSTANCE.CurrentHealth -= (int) modifiedSchoolDamage;
+				Player.INSTANCE.Damage((int) modifiedSchoolDamage);
 				schoolData._hasDamaged = true;
 				break;
 
 			case EffectKind.Count_Variant_Tiles:
-				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
+				BattleManager.INSTANCE.CurrentEnemy._blackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
 				break;
 
 			case EffectKind.Variant_Tile_Attack:
 
 				VariantTileAttackData variantData = (VariantTileAttackData)data;
 
-				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()], out float modifiedVariantDamage);
+				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._blackboard[_to.ToString()], out float modifiedVariantDamage);
 				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedVariantDamage);
-				Player.INSTANCE.CurrentHealth -= (int) modifiedVariantDamage;
+				Player.INSTANCE.Damage((int) modifiedVariantDamage);
 
-				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard.Remove(_to.ToString());
+				BattleManager.INSTANCE.CurrentEnemy._blackboard.Remove(_to.ToString());
 				variantData._hasAttacked = true;
 				break;
 

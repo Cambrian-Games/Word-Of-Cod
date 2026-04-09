@@ -8,9 +8,9 @@ public class Player : Entity
 
 	protected override void Awake()
 	{
-		// set up singleton
-
 		base.Awake();
+
+		// set up singleton
 
 		if (INSTANCE != null && INSTANCE != this)
 		{

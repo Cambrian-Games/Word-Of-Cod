@@ -9,11 +9,12 @@ public class BattleManager : MonoBehaviour
         Nil = -1,
         Load = 0,
 
-        Settle_Board,       // Board settles into place
+		Pre_Player_Turn,	// Start of Round, used for ticking effects and updating forecasts
         Player_Turn,        // Player can take actions, use consumable items, etc
         Post_Player_Turn,   // Resolve attack and check if fight has been won or lost
         Enemy_Turn,         // Enemy state machine runs to completion. Player death may occur during this and will have to be handled correctly
         Post_Enemy_Turn,    // TBD
+        Settle_Board,       // Board settles into place
 
         Win,
         Lose
@@ -131,7 +132,7 @@ public class BattleManager : MonoBehaviour
                 case BattleState.Settle_Board:
                     if (GameBoard.INSTANCE.IsSettled())
                     {
-                        SetBattleState(BattleState.Player_Turn);
+						SetBattleState(BattleState.Pre_Player_Turn);
                     }
                     break;
             }
@@ -201,12 +202,17 @@ public class BattleManager : MonoBehaviour
 
                 GameBoard.INSTANCE.GenerateBoard();
 
-                SetBattleState(BattleState.Player_Turn);
+                SetBattleState(BattleState.Pre_Player_Turn);
                 break;
 
-            case BattleState.Player_Turn:
+			case BattleState.Pre_Player_Turn:
+				_enemyTurnHandler.StartRound();
+				SetBattleState(BattleState.Player_Turn);
+				break;
+
+			case BattleState.Player_Turn:
 				TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
-                _enemyTurnHandler.StartRound();
+                
                 Debug.Log("Forecast: " + _enemy.FormattedForecast());
                 //change forecast text
                 _forecastText.text = _enemy.FormattedForecast();
@@ -310,7 +316,7 @@ public class BattleManager : MonoBehaviour
                     {
                         Debug.Log($"{_enemy.CurrentHealth} - {_wordToSubmit.EffectiveDamage}");
 						_enemyDamagePopup.GetComponent<DamagePopupScript>().Popup(_wordToSubmit.EffectiveDamage);
-                        _enemy.CurrentHealth -= _wordToSubmit.EffectiveDamage;
+                        _enemy.Damage(_wordToSubmit.EffectiveDamage);
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
                     break;
