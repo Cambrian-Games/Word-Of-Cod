@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEngine.Analytics.IAnalytic;
 
 [Serializable]
 public class AttackRule
 {
 #if UNITY_EDITOR
-	public string _name;
+	// variable must be named exactly like this to display correctly in a list
+	public string name;
 #endif
 	public float _weight = 1.0f;
 	internal int _index;
@@ -19,6 +21,7 @@ public class AttackRule
 	private bool _stayInCurrentEffect;
 
 	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
+
 
 
 	public bool CanRun(Enemy owner)
@@ -73,7 +76,7 @@ public class AttackRule
 
 	public bool HasStarted() => _currentEffectindex >= 0;
 
-	public void StartRule()
+	public void StartRule(Enemy owner)
 	{
 		if (_effects.Count == 0)
 		{
@@ -84,7 +87,7 @@ public class AttackRule
 		_stayInCurrentEffect = false;
 	}
 
-	public void Cancel(Enemy owner)
+	public void CancelRule(Enemy owner)
 	{
 		_currentEffectindex = -1;
 	}
@@ -108,7 +111,7 @@ public class AttackRule
 
 	internal void StartTurn(Enemy owner)
 	{
-		// TBD, may not do anything aside from animations.
+		CurrentEffect.StartTurn(owner);
 	}
 
 	public bool UpdateTurn(Enemy owner)
@@ -138,7 +141,7 @@ public class AttackRule
 				
 			// This explicitly ends the turn
 
-			if (CurrentEffect.EndsTurn(owner))
+			if (CurrentEffect.EndsTurn)
 				return true;
 
 			// try to go to next effect. If none exists, return true, otherwise start next effect.
@@ -163,13 +166,20 @@ public class AttackRule
 		return Player.INSTANCE.CurrentHealth <= 0 || _effects[^1].IsEffectComplete(owner);
 	}
 
-    internal string Forecast()
+	internal bool InCriticalEffect()
+	{
+		return CurrentEffect.IsCritical;
+	}
+
+	internal string Forecast()
     {
         if (CurrentEffect != null)
             return CurrentEffect.ForecastDescription;
 
         return "";
     }
+
+
 }
 
 [Serializable]
@@ -247,6 +257,8 @@ public class Condition
 
 	public FCANCEL _cancelKind;
 
+
+
 	public bool Passes(Enemy owner)
 	{
 		switch (_category)
@@ -289,261 +301,90 @@ public class Condition
 [Serializable]
 public class AttackEffect
 {
-	public enum EffectKind
-	{
-		[InspectorName("Do Nothing")]
-		Do_Nothing,
-		[InspectorName("Standard Attack")]
-		Standard_Attack,
-		[InspectorName("Transform Tiles")]
-		Transform_Tiles,
-		[InspectorName("Schooling Attack")]
-		Schooling_Attack,
-
-		[InspectorName("Count Variant Tiles")]
-		Count_Variant_Tiles,
-		[InspectorName("Attack Per Variant Tile")]
-		Variant_Tile_Attack,
-	}
+#if UNITY_EDITOR
+	// variable must be named exactly like this to display correctly in a list
+	public string name;
+#endif
 
 	[SerializeField]
-	private float _afterEffectDelay;
-	public float AfterEffectDelay => _afterEffectDelay;
+	private string _forecastDescription;
+	public string ForecastDescription => _forecastDescription;
+
+	[SerializeField, Min(1)]
+	protected int _numTurns;
+	public int NumTurns => _numTurns;
+
+	protected int _currentTurn = 0;
 
 	[SerializeField]
 	private bool _endsTurn;
 	public bool EndsTurn => _endsTurn;
 
-    [SerializeField]
-    private string _forecastDescription;
-    public string ForecastDescription => _forecastDescription;
-
-    [SerializeField, Tooltip("If past this effect, treat rule as complete if interrupted")]
-	private bool _isInterruptCheckpoint;
-	public bool IsInterruptCheckpoint => _isInterruptCheckpoint;
-
-
 	[SerializeField]
-	private EffectKind _effectKind;
-	public EffectKind Effect => _effectKind;
+	private bool _isCritical;
+	public bool IsCritical => _isCritical;
 
-	[Min(0), SerializeField]
-	public int _damage = 0;
 
-	[Min(1), SerializeField]
-	public int _minSchoolAttackHits = 1;
 
-	[Min(1), SerializeField]
-	public int _maxSchoolAttackHits = 1;
-
-	[SerializeField]
-	private Tile.TileKind _from;
-	[SerializeField]
-	private Tile.TileKind _to;
-	[SerializeField]
-	private int _numTiles;
-
-	public EffectData GenerateData()
+	internal virtual void StartEffect(Enemy owner)
 	{
-		return _effectKind switch
-		{
-			EffectKind.Do_Nothing => new WaitTurnData(),
-			EffectKind.Standard_Attack => new StandardAttackData(),
-			EffectKind.Transform_Tiles => new TransformTilesData(),
-
-			EffectKind.Schooling_Attack => new SchoolingAttackData(_minSchoolAttackHits, _maxSchoolAttackHits),
-
-			EffectKind.Count_Variant_Tiles => new EffectData(EffectKind.Count_Variant_Tiles),
-			EffectKind.Variant_Tile_Attack => new VariantTileAttackData(),
-			_ => null,
-		};
+		_currentTurn = 0;
 	}
 
-	internal void StartEffect(EffectData data)
+	internal virtual void StartTurn(Enemy owner)
 	{
-		switch (_effectKind)
-		{
-			case EffectKind.Do_Nothing:
-				((WaitTurnData)data)._turnsWaited++;
-				break;
-		}
+		_currentTurn++;
 	}
 
 	/// <summary>
-	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done by this rule and false <br/>
+	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done this turn by this rule and false <br/>
 	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
 	/// </summary>
-	/// <param name="data">State data required for some rules</param>
-	/// <returns></returns>
-	internal bool UpdateEffect(EffectData data)
-	{
-		switch (_effectKind)
-		{
-			case EffectKind.Standard_Attack:
-                
-                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedStandardDamage);
-                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedStandardDamage);
-                Player.INSTANCE.Damage((int) modifiedStandardDamage);
-
-				((StandardAttackData)data)._hasAttacked = true;
-				break;
-
-			case EffectKind.Transform_Tiles:
-				if (_numTiles > 0)
-				{
-					GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
-				}
-				else
-				{
-					GameBoard.INSTANCE.TransformAllTiles(oldKind: _from, newKind: _to);
-				}
-				((TransformTilesData)data)._hasTransformed = true;
-				break;
-
-			case EffectKind.Schooling_Attack:
-				SchoolingAttackData schoolData = (SchoolingAttackData)data;
-
-				// animations would play here
-
-				if (schoolData._numHits < schoolData._targetHits)
-				{
-					schoolData._numHits++;
-				}
-
-				if (schoolData._numHits < schoolData._targetHits)
-				{
-					break;
-				}
-
-				Player.INSTANCE._inventory.OnEnemyAttack(_damage * schoolData._targetHits, out float modifiedSchoolDamage);
-				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedSchoolDamage);
-				Player.INSTANCE.Damage((int) modifiedSchoolDamage);
-				schoolData._hasDamaged = true;
-				break;
-
-			case EffectKind.Count_Variant_Tiles:
-				BattleManager.INSTANCE.CurrentEnemy._blackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
-				break;
-
-			case EffectKind.Variant_Tile_Attack:
-
-				VariantTileAttackData variantData = (VariantTileAttackData)data;
-
-				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._blackboard[_to.ToString()], out float modifiedVariantDamage);
-				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedVariantDamage);
-				Player.INSTANCE.Damage((int) modifiedVariantDamage);
-
-				BattleManager.INSTANCE.CurrentEnemy._blackboard.Remove(_to.ToString());
-				variantData._hasAttacked = true;
-				break;
-
-
-		}
-
-		return IsComplete(data);
-	}
-
-	internal bool IsComplete(EffectData data)
-	{
-		return _effectKind switch
-		{
-			EffectKind.Do_Nothing => true,
-			EffectKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
-			EffectKind.Transform_Tiles => ((TransformTilesData)data)._hasTransformed,
-			EffectKind.Schooling_Attack => ((SchoolingAttackData)data)._hasDamaged,
-			EffectKind.Count_Variant_Tiles => true,
-			EffectKind.Variant_Tile_Attack => ((VariantTileAttackData)data)._hasAttacked,
-			_ => throw new NotImplementedException($"IsComplete() does not handle {_effectKind}"),
-		};
-	}
+	internal virtual bool UpdateEffect(Enemy owner) { return true; }
+	internal virtual bool IsTurnComplete(Enemy owner) { return true; }
+	internal virtual bool IsEffectComplete(Enemy owner) { return IsTurnComplete(owner); }
 }
 
-/// <summary>
-/// Any extra metadata we need to complete an AttackEffect
-/// </summary>
-public class EffectData
+public class StandardAttack : AttackEffect
 {
-	public readonly AttackEffect.EffectKind _effectKind;
+	public int _baseDamage;
 
-	public float _effectEndTime = -1.0f;
+	private bool _hasAttacked = false;
 
-	public EffectData(AttackEffect.EffectKind effectKind)
+	internal override void StartEffect(Enemy owner)
 	{
-		_effectKind = effectKind;
+		base.StartEffect(owner);
+
+		_hasAttacked = false;
+	}
+
+	internal override void StartTurn(Enemy owner)
+	{
+		base.StartTurn(owner);
+
+		_hasAttacked = false;
+	}
+
+	internal override bool UpdateEffect(Enemy owner)
+	{
+		base.UpdateEffect(owner);
+
+		Player.INSTANCE._inventory.OnEnemyAttack(_baseDamage, out float modifiedDamage);
+		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedDamage);
+		Player.INSTANCE.Damage((int) modifiedDamage);
+
+		_hasAttacked = true;
+
+		return true;
+	}
+
+	internal override bool IsTurnComplete(Enemy owner)
+	{
+		return _hasAttacked;
+	}
+
+	internal override bool IsEffectComplete(Enemy owner)
+	{
+		return _hasAttacked && _currentTurn >= _numTurns;
 	}
 }
-
-public class WaitTurnData : EffectData
-{
-	// TODO support multiple turns of waiting to avoid having to create multiple effects for a multi-turn wait
-	public int _turnsWaited = 0;
-
-	public WaitTurnData() : base(AttackEffect.EffectKind.Do_Nothing)
-	{
-	}
-
-	public override string ToString()
-	{
-		return "Turns Waited: " + _turnsWaited;
-	}
-}
-
-public class StandardAttackData : EffectData
-{
-	public bool _hasAttacked = false;
-
-	public StandardAttackData() : base(AttackEffect.EffectKind.Standard_Attack)
-	{
-	}
-
-	public override string ToString()
-	{
-		return "Has Attacked: " + _hasAttacked;
-	}
-}
-
-public class TransformTilesData : EffectData
-{
-	public bool _hasTransformed = false;
-
-	public TransformTilesData() : base(AttackEffect.EffectKind.Transform_Tiles)
-	{
-	}
-
-	public override string ToString()
-	{
-		return "Has Transformed: " + _hasTransformed;
-	}
-}
-
-public class SchoolingAttackData : EffectData
-{
-	public int _numHits = 0;
-	public int _targetHits = 0;
-
-	public bool _hasDamaged = false;
-
-	public SchoolingAttackData(int minHits, int maxHits) : base(AttackEffect.EffectKind.Schooling_Attack)
-	{
-		_targetHits = minHits + (int)((BattleManager.INSTANCE.CurrentEnemy.HealthPercent() / 100f) * (maxHits - minHits + 1));
-
-		// if minhits is 1 and maxHits is 20, we have [0, 0.05) = 1 hit, [0.05, 0.1) = 2 hits, etc
-		//  but at 1 exactly, it would equal 21 hits, so we clamp it.
-
-		if (_targetHits > maxHits)
-		{
-			_targetHits = maxHits;
-		}
-	}
-}
-
-public class VariantTileAttackData : EffectData
-{
-	public bool _hasAttacked = false;
-
-	public VariantTileAttackData() : base(AttackEffect.EffectKind.Variant_Tile_Attack)
-	{
-
-	}
-}
-

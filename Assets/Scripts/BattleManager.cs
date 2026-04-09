@@ -47,7 +47,6 @@ public class BattleManager : MonoBehaviour
     public Enemy CurrentEnemy => _enemy;
 
     public TMP_Text _forecastText;
-    internal EnemyTurnHandler _enemyTurnHandler;
 
     // Player Turn Data
 
@@ -121,9 +120,9 @@ public class BattleManager : MonoBehaviour
                     break;
 
                 case BattleState.Enemy_Turn:
-                    _enemyTurnHandler.Update();
+					_enemy.UpdateTurn();
 
-                    if (_enemyTurnHandler.IsTurnComplete())
+                    if (_enemy.IsTurnComplete)
                     {
                         SetBattleState(BattleState.Post_Enemy_Turn);
                     }
@@ -160,7 +159,6 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Enemy_Turn:
-                _enemyTurnHandler.EndTurn();
                 break;
 
 			case BattleState.Nil:
@@ -181,8 +179,6 @@ public class BattleManager : MonoBehaviour
             case BattleState.Nil:
                 _enemy = null;
 
-                _enemyTurnHandler = null;
-
                 GameBoard.INSTANCE.DeleteBoard();
 
 				_wordHistory.Clear();
@@ -197,16 +193,13 @@ public class BattleManager : MonoBehaviour
 				enemyLocalPos.x *= -1;
 				_enemy.transform.localPosition = enemyLocalPos;
 
-
-                _enemyTurnHandler = new EnemyTurnHandler(_enemy);
-
                 GameBoard.INSTANCE.GenerateBoard();
 
                 SetBattleState(BattleState.Pre_Player_Turn);
                 break;
 
 			case BattleState.Pre_Player_Turn:
-				_enemyTurnHandler.StartRound();
+				_enemy.StartRound();
 				SetBattleState(BattleState.Player_Turn);
 				break;
 
@@ -237,7 +230,7 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Enemy_Turn:
-                _enemyTurnHandler.StartTurn();
+				_enemy.StartTurn();
                 break;
 
             case BattleState.Post_Enemy_Turn:

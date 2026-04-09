@@ -47,6 +47,8 @@ public class Enemy : Entity
 	// create once, never re-assign
 	internal readonly Dictionary<string, float> _blackboard = new Dictionary<string, float>();
 
+
+
 	protected override void Awake()
 	{
 		base.Awake();
@@ -102,7 +104,7 @@ public class Enemy : Entity
 
 			else if (!CurrentInterrupt.CanRun(this))
 			{
-				CurrentRule.Cancel(this);
+				CurrentRule.CancelRule(this);
 				_currentInterruptIndex = -1;
 			}
 		}
@@ -116,7 +118,7 @@ public class Enemy : Entity
 
 			else if (!CurrentRule.CanRun(this))
 			{
-				CurrentRule.Cancel(this);
+				CurrentRule.CancelRule(this);
 				_currentRuleIndex = -1;
 			}
 		}
@@ -277,7 +279,6 @@ public class Enemy : Entity
 		(CurrentInterrupt ?? CurrentRule).StartRound(this);
 
 		UpdateForecast();
-
 	}
 
 	public void StartTurn()

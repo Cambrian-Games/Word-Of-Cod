@@ -19,6 +19,7 @@ public class Entity : MonoBehaviour
 	public int LastDamageTaken => _lastDamageTaken;
 
 
+
     protected virtual void Awake()
     {
 		_currentHealth = _maxHealth;

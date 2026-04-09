@@ -6,6 +6,8 @@ public class Player : Entity
 
 	public InventoryManager _inventory;
 
+
+
 	protected override void Awake()
 	{
 		base.Awake();
