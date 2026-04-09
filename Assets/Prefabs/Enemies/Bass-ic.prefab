@@ -48,36 +48,36 @@ MonoBehaviour:
   _displayName: Bass-ic
   _sprite: {fileID: -5126555826676708157, guid: 70b00a981e61b7e41914e0d6237fcca0, type: 3}
   _maxHealth: 50
+  _schedulePolicy: 0
   _rules:
-  - _conditions: []
-    _matchAllToRun: 0
-    _cancelConditions: []
-    _matchAllToCancel: 0
-    _uninterruptible: 0
+  - _name: Basic Attack
+    _weight: 1
+    _conditions: []
     _effects:
-    - _afterEffectDelay: 0
-      _endsTurn: 1
-      _forecastDescription: '[Do Nothing Placeholder]'
-      _isInterruptCheckpoint: 0
-      _effectKind: 0
-      _damage: 0
-      _from: 0
-      _to: 0
-      _numTiles: 0
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: '[Bassic Attack Placeholder]'
-      _isInterruptCheckpoint: 0
-      _effectKind: 1
-      _damage: 25
-      _from: 0
-      _to: 0
-      _numTiles: 0
+    - rid: 2220220962654388461
+    - rid: 2220220962654388462
   _interruptRules: []
-  _attackPriority: 0
-  _canRepeatLastAction: 1
-  _currentForecast: 
-  _defaultForecast: $NAME is waiting.
+  references:
+    version: 2
+    RefIds:
+    - rid: 2220220962654388461
+      type: {class: Wait, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Wait a Turn
+        _forecast: '$ROUNDS: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _timeToWait: 0
+    - rid: 2220220962654388462
+      type: {class: StandardAttack, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Do 25 Damage
+        _forecast: '$NOW: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _baseDamage: 25
 --- !u!1 &8884941515174256099
 GameObject:
   m_ObjectHideFlags: 0

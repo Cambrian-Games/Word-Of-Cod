@@ -420,7 +420,7 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x - 1, tileCoord.y];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
 				TransformTile(targetTile._coord, Tile.TileKind.Normal);
 			}
@@ -430,7 +430,7 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x + 1, tileCoord.y];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
 				TransformTile(targetTile._coord, Tile.TileKind.Normal);
 			}
@@ -440,7 +440,7 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x, tileCoord.y - 1];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
 				TransformTile(targetTile._coord, Tile.TileKind.Normal);
 			}
@@ -450,7 +450,7 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x, tileCoord.y + 1];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
 				TransformTile(targetTile._coord, Tile.TileKind.Normal);
 			}

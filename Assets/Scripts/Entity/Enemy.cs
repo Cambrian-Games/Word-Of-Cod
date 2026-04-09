@@ -306,7 +306,7 @@ public class Enemy : Entity
 
 	private void UpdateForecast()
 	{
-        _currentForecast = (CurrentInterrupt ?? CurrentRule).Forecast();
+        _currentForecast = (CurrentInterrupt ?? CurrentRule).FormattedForecast();
 
 		Debug.Assert(_currentForecast != null, "CurrentInterrupt or CurrentRule should be non-null.");
     }

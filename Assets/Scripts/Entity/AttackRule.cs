@@ -5,10 +5,7 @@ using UnityEngine;
 [Serializable]
 public class AttackRule
 {
-#if UNITY_EDITOR
-	// variable must be named exactly like this to display correctly in a list
-	public string name;
-#endif
+	public string _name;
 	public float _weight = 1.0f;
 	internal int _index;
 
@@ -124,12 +121,14 @@ public class AttackRule
 
 		// current effect is incomplete. This first check should be true in most cases but is a good safeguard.
 
-		if (!CurrentEffect.IsTurnComplete(owner))
+		bool effectTurnComplete = CurrentEffect.IsTurnComplete(owner);
+
+		if (!effectTurnComplete)
 		{
-			CurrentEffect.UpdateEffect(owner);
+			effectTurnComplete = CurrentEffect.UpdateEffect(owner);
 		}
 
-		if (CurrentEffect.IsTurnComplete(owner))
+		if (effectTurnComplete)
 		{
 			// If this is a multiturn effect and it has turns remaining, end turn and prevent advancing to next effect
 
@@ -171,15 +170,14 @@ public class AttackRule
 		return CurrentEffect.IsCritical;
 	}
 
-	internal string Forecast()
+	internal string FormattedForecast()
     {
-        if (CurrentEffect != null)
-            return CurrentEffect.ForecastDescription;
+		if (CurrentEffect != null)
+			return CurrentEffect.FormattedForecast()
+				.Replace("$RULE_NAME", _name);
 
         return "";
     }
-
-
 }
 
 [Serializable]
@@ -240,9 +238,13 @@ public class Condition
 	[Flags]
 	public enum FCANCEL
 	{
+		[InspectorName("Not a Cancellation Condition")]
 		IGNORE = 0,
+		[InspectorName("Start of Enemy Turn")]
 		START_OF_ENEMY_TURN = 1,
+		[InspectorName("Start of Round")]
 		START_OF_ROUND = 2,
+		[InspectorName("During Player Turn")]
 		DURING_PLAYER_TURN = 4,
 	}
 

@@ -1,20 +1,19 @@
 using System;
+using UnityEditor;
 using UnityEngine;
 
 [Serializable]
 public abstract class AttackEffect
 {
 #if UNITY_EDITOR
-	// variable must be named exactly like this to display correctly in a list
-	public string name;
+	public string _name;
 #endif
 
 	[SerializeField]
-	private string _forecastDescription;
-	public string ForecastDescription => _forecastDescription;
+	private string _forecast;
 
 	[SerializeField, Min(1)]
-	protected int _numTurns;
+	protected int _numTurns = 1;
 	public int NumTurns => _numTurns;
 
 	protected int _currentTurn = 0;
@@ -43,15 +42,87 @@ public abstract class AttackEffect
 	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done this turn by this rule and false <br/>
 	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
 	/// </summary>
-	internal virtual bool UpdateEffect(Enemy owner) { return true; }
-	internal virtual bool IsTurnComplete(Enemy owner) { return true; }
-	internal virtual bool IsEffectComplete(Enemy owner) { return IsTurnComplete(owner); }
+	internal virtual bool UpdateEffect(Enemy owner) => IsTurnComplete(owner);
+	internal virtual bool IsTurnComplete(Enemy owner) => true;
+	internal virtual bool IsEffectComplete(Enemy owner) => IsTurnComplete(owner) && OnLastTurn();
+
+	internal bool OnLastTurn() => _currentTurn >= _numTurns;
+
+	public string FormattedForecast()
+	{
+		string nowReplaced = _forecast.Replace("$NOW", "This Round");
+
+		bool inOneRound = _numTurns - _currentTurn == 1;
+
+		// there is probably a bug with the forecast math when an interrupt happens.
+
+		return nowReplaced.Replace("$ROUNDS", inOneRound ? "Next Round" : $"In {_numTurns - _currentTurn} Rounds");
+	}
+
+
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(AttackEffect), true)]
+	public class AttackEffectPropertyDrawer : PropertyDrawer
+	{
+		protected static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+		{
+			EditorGUI.BeginProperty(position, label, property);
+			position.height = EditorGUIUtility.singleLineHeight;
+			EffectGUI(position, label, property);
+		}
+
+		protected virtual Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_name"));
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_forecast"));
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_numTurns"));
+
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_endsTurn"));
+
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_isCritical"));
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+
+			return position;
+		}
+
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		{
+			return base.GetPropertyHeight(property, label) + EffectHeight();
+		}
+
+		protected virtual float EffectHeight()
+		{
+			return 3 * Y_OFFSET;
+		}
+	}
+#endif
 }
 
 [Serializable]
 public class StandardAttack : AttackEffect
 {
-	public int _baseDamage;
+	[SerializeField, Min(0)]
+	private int _baseDamage;
 
 	private bool _hasAttacked = false;
 
@@ -71,15 +142,13 @@ public class StandardAttack : AttackEffect
 
 	internal override bool UpdateEffect(Enemy owner)
 	{
-		base.UpdateEffect(owner);
-
 		Player.INSTANCE._inventory.OnEnemyAttack(_baseDamage, out float modifiedDamage);
 		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedDamage);
 		Player.INSTANCE.Damage((int)modifiedDamage);
 
 		_hasAttacked = true;
 
-		return true;
+		return base.UpdateEffect(owner);
 	}
 
 	internal override bool IsTurnComplete(Enemy owner)
@@ -87,8 +156,94 @@ public class StandardAttack : AttackEffect
 		return _hasAttacked;
 	}
 
-	internal override bool IsEffectComplete(Enemy owner)
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(StandardAttack), true)]
+	public class StandardAttackPropertyDrawer : AttackEffectPropertyDrawer
 	{
-		return _hasAttacked && _currentTurn >= _numTurns;
+
+		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			position = base.EffectGUI(position, label, property);
+
+			//EditorGUILayout.Separator();
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Standard Attack Data", EditorStyles.boldLabel);
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_baseDamage"));
+
+			return position;
+		}
+
+		protected override float EffectHeight()
+		{
+			return base.EffectHeight() + 2 * Y_OFFSET;
+		}
 	}
+#endif
+}
+
+[Serializable]
+public class Wait : AttackEffect
+{
+	[SerializeField, Min(0.0f)]
+	private float _timeToWait = 0.0f;
+
+	private float _timeWaited = 0.0f;
+
+	internal override void StartEffect(Enemy owner)
+	{
+		base.StartEffect(owner);
+
+		_timeWaited = 0.0f;
+	}
+
+	internal override void StartTurn(Enemy owner)
+	{
+		base.StartTurn(owner);
+
+		_timeWaited = 0.0f;
+	}
+
+	internal override bool UpdateEffect(Enemy owner)
+	{
+		_timeWaited += Time.deltaTime;
+
+		return base.UpdateEffect(owner);
+	}
+
+	internal override bool IsTurnComplete(Enemy owner)
+	{
+		return _timeWaited >= _timeToWait;
+	}
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(Wait), true)]
+	public class WaitPropertyDrawer : AttackEffectPropertyDrawer
+	{
+
+		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			position = base.EffectGUI(position, label, property);
+
+			//EditorGUILayout.Separator();
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Wait Data", EditorStyles.boldLabel);
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_timeToWait"));
+
+			return position;
+		}
+
+		protected override float EffectHeight()
+		{
+			return base.EffectHeight() + 2 * Y_OFFSET;
+		}
+	}
+#endif
 }
