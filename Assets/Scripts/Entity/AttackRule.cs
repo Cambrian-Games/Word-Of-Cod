@@ -9,7 +9,10 @@ public class AttackRule
 {
 	public string _name;
 	public float _weight = 1.0f;
-	internal int _index;
+
+	// not shown in inspector, only public to ensure it's written to yaml. Would be internal otherwise
+	[HideInInspector]
+	public int _index;
 
 	public List<Condition> _conditions;
 
@@ -95,11 +98,14 @@ public class AttackRule
 		_currentEffectIndex = -1; // no current effect
 		_stayInCurrentEffect = false;
 		_roundCount = 0;
+
+		_effects.ForEach(_effect => _effect.Reset(owner));
 	}
 
 	public void CancelRule(Enemy owner)
 	{
 		_currentEffectIndex = -1;
+		_effects.ForEach(_effect => _effect.Reset(owner));
 	}
 
 	internal void StartRound(Enemy owner)
@@ -165,6 +171,7 @@ public class AttackRule
 				return true;
 
 			CurrentEffect.StartEffect(owner);
+			CurrentEffect.StartTurn(owner);
 
 			return false;
 		}
@@ -176,12 +183,12 @@ public class AttackRule
 	{
 		// we want to end the rule if the player is dead, otherwise check if the final effect is complete
 
-		return Player.INSTANCE.CurrentHealth <= 0 || _effects[^1].IsEffectComplete(owner);
+		return Player.INSTANCE.CurrentHealth <= 0 || _effects.All(effect => effect.IsEffectComplete(owner));
 	}
 
 	internal bool InCriticalEffect()
 	{
-		return CurrentEffect.IsCritical;
+		return CurrentEffect?.IsCritical ?? false;
 	}
 
 	internal string FormattedForecast()

@@ -39,6 +39,11 @@ public abstract class AttackEffect
 		_currentTurn++;
 	}
 
+	internal virtual void Reset(Enemy owner)
+	{
+		_currentTurn = 0;
+	}
+
 	/// <summary>
 	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done this turn by this rule and false <br/>
 	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
@@ -63,7 +68,7 @@ public abstract class AttackEffect
 
 
 #if UNITY_EDITOR
-	[CustomPropertyDrawer(typeof(AttackEffect), true)]
+	[CustomPropertyDrawer(typeof(AttackEffect))]
 	public class AttackEffectPropertyDrawer : PropertyDrawer
 	{
 		protected static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
@@ -123,9 +128,9 @@ public abstract class AttackEffect
 public class StandardAttack : AttackEffect
 {
 	[SerializeField, Min(0)]
-	private int _baseDamage;
+	protected int _baseDamage;
 
-	private bool _hasAttacked = false;
+	protected bool _hasAttacked = false;
 
 	internal override void StartEffect(Enemy owner)
 	{
@@ -137,6 +142,13 @@ public class StandardAttack : AttackEffect
 	internal override void StartTurn(Enemy owner)
 	{
 		base.StartTurn(owner);
+
+		_hasAttacked = false;
+	}
+
+	internal override void Reset(Enemy owner)
+	{
+		base.Reset(owner);
 
 		_hasAttacked = false;
 	}
@@ -158,15 +170,13 @@ public class StandardAttack : AttackEffect
 	}
 
 #if UNITY_EDITOR
-	[CustomPropertyDrawer(typeof(StandardAttack), true)]
+	[CustomPropertyDrawer(typeof(StandardAttack))]
 	public class StandardAttackPropertyDrawer : AttackEffectPropertyDrawer
 	{
 
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
-
-			//EditorGUILayout.Separator();
 
 			// count variables from here
 
@@ -193,12 +203,14 @@ public class Wait : AttackEffect
 	private float _timeToWait = 0.0f;
 
 	private float _timeWaited = 0.0f;
+	private bool _hasWaited = false;
 
 	internal override void StartEffect(Enemy owner)
 	{
 		base.StartEffect(owner);
 
 		_timeWaited = 0.0f;
+		_hasWaited = false;
 	}
 
 	internal override void StartTurn(Enemy owner)
@@ -206,30 +218,40 @@ public class Wait : AttackEffect
 		base.StartTurn(owner);
 
 		_timeWaited = 0.0f;
+		_hasWaited = false;
+	}
+
+	internal override void Reset(Enemy owner)
+	{
+		base.Reset(owner);
+
+		_timeWaited = 0.0f;
+		_hasWaited = false;
 	}
 
 	internal override bool UpdateEffect(Enemy owner)
 	{
 		_timeWaited += Time.deltaTime;
 
+		if (_timeWaited >= _timeToWait)
+			_hasWaited = true;
+
 		return base.UpdateEffect(owner);
 	}
 
 	internal override bool IsTurnComplete(Enemy owner)
 	{
-		return _timeWaited >= _timeToWait;
+		return _hasWaited;
 	}
 
 #if UNITY_EDITOR
-	[CustomPropertyDrawer(typeof(Wait), true)]
+	[CustomPropertyDrawer(typeof(Wait))]
 	public class WaitPropertyDrawer : AttackEffectPropertyDrawer
 	{
 
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
-
-			//EditorGUILayout.Separator();
 
 			// count variables from here
 
@@ -278,6 +300,13 @@ public class TransformTiles : AttackEffect
 		_hasTransformedTiles = false;
 	}
 
+	internal override void Reset(Enemy owner)
+	{
+		base.Reset(owner);
+
+		_hasTransformedTiles = false;
+	}
+
 	internal override bool UpdateEffect(Enemy owner)
 	{
 		GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
@@ -293,15 +322,13 @@ public class TransformTiles : AttackEffect
 	}
 
 #if UNITY_EDITOR
-	[CustomPropertyDrawer(typeof(TransformTiles), true)]
+	[CustomPropertyDrawer(typeof(TransformTiles))]
 	public class TransformTilesPropertyDrawer : AttackEffectPropertyDrawer
 	{
 
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
-
-			//EditorGUILayout.Separator();
 
 			// count variables from here
 
@@ -327,6 +354,121 @@ public class TransformTiles : AttackEffect
 				position.x = tmpX;
 			}
 			
+			return position;
+		}
+
+		protected override float EffectHeight()
+		{
+			return base.EffectHeight() + 3 * Y_OFFSET;
+		}
+	}
+#endif
+}
+
+[Serializable]
+public class SchoolingAttack : StandardAttack
+{
+	[SerializeField, Min(0)]
+	private int _minHits = 1;
+
+	[SerializeField, Min(1)]
+	private int _maxHits = 1;
+
+	[SerializeField]
+	private int _targetHits = 0;
+
+	private int _numHits = 0;
+
+	internal override void StartEffect(Enemy owner)
+	{
+		base.StartEffect(owner);
+		
+		_numHits = 0;
+
+		// Min(b, a(1-u) + (b+1)u) -- plug this into desmos to see how it behaves. Use a = 1 and b = 20, and increment u by 0.05
+		// Min(b, a - au + bu + u)
+		// Min(b, a + u(b - a + 1)) minimizes multiplication
+
+
+		float a = _minHits;
+		float b = _maxHits;
+		float u = owner.HealthPercent();
+
+		_targetHits = Mathf.RoundToInt(Mathf.Min(b, a + u * (b - a + 1)));
+	}
+
+	internal override void StartTurn(Enemy owner)
+	{
+		base.StartTurn(owner);
+
+		_numHits = 0;
+
+		// Min(b, a(1-u) + (b+1)u) -- plug this into desmos to see how it behaves. Use a = 1 and b = 20, and increment u by 0.05
+		// Min(b, a - au + bu + u)
+		// Min(b, a + u(b - a + 1)) minimizes multiplication
+
+		float a = _minHits;
+		float b = _maxHits;
+		float u = owner.HealthPercent();
+
+		_targetHits = Mathf.RoundToInt(Mathf.Min(b, a + u * (b - a + 1)));
+	}
+
+	internal override void Reset(Enemy owner)
+	{
+		base.Reset(owner);
+
+		_hasAttacked = false;
+		_targetHits = 0;
+		_numHits = 0;
+	}
+
+	internal override bool UpdateEffect(Enemy owner)
+	{
+		if (_numHits < _targetHits)
+		{
+			_numHits++;
+		}
+
+		if (_numHits < _targetHits)
+			return false;
+
+		Player.INSTANCE._inventory.OnEnemyAttack(_baseDamage * _targetHits, out float modifiedDamage);
+		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedDamage);
+		Player.INSTANCE.Damage((int) modifiedDamage);
+
+		_hasAttacked = true;
+
+		return IsTurnComplete(owner);
+	}
+
+	internal override bool IsTurnComplete(Enemy owner)
+	{
+		return base.IsTurnComplete(owner);
+	}
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(SchoolingAttack))]
+	public class SchoolingAttackPropertyDrawer : StandardAttackPropertyDrawer
+	{
+		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			position = base.EffectGUI(position, label, property);
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Schooling Data", EditorStyles.boldLabel);
+
+			position.y += Y_OFFSET;
+			SerializedProperty minHitProperty = property.FindPropertyRelative("_minHits");
+			EditorGUI.PropertyField(position, minHitProperty);
+
+			position.y += Y_OFFSET;
+			SerializedProperty maxHitProperty = property.FindPropertyRelative("_maxHits");
+			EditorGUI.PropertyField(position, maxHitProperty);
+			maxHitProperty.intValue = Mathf.Max(minHitProperty.intValue, maxHitProperty.intValue);
+
 			return position;
 		}
 

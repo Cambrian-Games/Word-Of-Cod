@@ -52,6 +52,7 @@ MonoBehaviour:
   _rules:
   - _name: Basic Attack
     _weight: 1
+    _index: 0
     _conditions: []
     _effects:
     - rid: 2220220962654388461

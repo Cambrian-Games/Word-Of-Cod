@@ -80,8 +80,16 @@ public class GameBoard : MonoBehaviour
 
 		GenerateBoard();
 
-		TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Spiny, numSpinyTiles);
-		TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Sandy, numSandyTiles);
+		if (numSpinyTiles > 0)
+		{
+			TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Spiny, numSpinyTiles);
+		}
+
+		if (numSandyTiles > 0)
+		{
+			TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Sandy, numSandyTiles);
+		}
+		
 	}
 
 	private void UpdateResolveState()

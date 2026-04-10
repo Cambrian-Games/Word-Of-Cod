@@ -56,6 +56,6 @@ public class Entity : MonoBehaviour
 	protected virtual void OnTakeDamage(int damageTaken) { }
 	protected virtual void OnHeal(float amountHealed) { }
 
-	public float HealthPercent() => _currentHealth / _maxHealth;
+	public float HealthPercent() => _currentHealth / (float) _maxHealth;
 	public int HealthPercentReadable() => _currentHealth * 100 / _maxHealth;
 }

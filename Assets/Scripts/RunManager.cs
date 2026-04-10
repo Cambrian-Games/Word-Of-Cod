@@ -299,7 +299,7 @@ public class RunManager : MonoBehaviour
 				}
 				else
 				{
-					selectedEvent._poolIndex = pool.GetWeightedIndex(-1, _currentRun[^1]);
+					selectedEvent._poolIndex = pool.GetWeightedIndex(eventIndex, _currentRun[^1]);
 				}
 				break;
 		}

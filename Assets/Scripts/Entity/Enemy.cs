@@ -97,7 +97,7 @@ public class Enemy : Entity
 
 		// check if the current interrupt should continue to run
 
-		if (CurrentInterrupt != null)
+		if (CurrentInterrupt != null && !CurrentInterrupt.IsComplete(this))
 		{
 			if (CurrentInterrupt.InCriticalEffect())
 				return false;
@@ -111,7 +111,7 @@ public class Enemy : Entity
 
 		// check if the current rule should continue to run. CurrentRule and CurrentInterrupt should never both be non-null
 
-		if (CurrentRule != null)
+		if (CurrentRule != null && !CurrentRule.IsComplete(this))
 		{
 			if (CurrentRule.InCriticalEffect())
 				return false;
@@ -217,19 +217,19 @@ public class Enemy : Entity
 
 			int RandomFromAllAvailable()
 			{
-				List<AttackRule> candidates = _rules.Where(rule => rule.CanRun(this)).ToList();
+				List<AttackRule> attackCandidates = _rules.Where(rule => rule.CanRun(this)).ToList();
 
-				if (candidates.Count == 0)
+				if (attackCandidates.Count == 0)
 				{
-					Debug.Assert(candidates.Count > 0, "Can't select a rule! Please check configuration.");
+					Debug.Assert(attackCandidates.Count > 0, "Can't select a rule! Please check configuration.");
 					return 0;
 				}
 
-				float totalWeight = candidates.Sum(rule => rule._weight);
+				float totalWeight = attackCandidates.Sum(rule => rule._weight);
 
 				if (totalWeight == 0)
 				{
-					return interruptCandidates[Random.Range(0, interruptCandidates.Count)]._index;
+					return attackCandidates[Random.Range(0, attackCandidates.Count)]._index;
 				}
 				else
 				{
@@ -237,13 +237,13 @@ public class Enemy : Entity
 
 					int index = 0;
 
-					while (output > interruptCandidates[index]._weight)
+					while (output > attackCandidates[index]._weight)
 					{
-						output -= interruptCandidates[index]._weight;
+						output -= attackCandidates[index]._weight;
 						index++;
 					}
 
-					return interruptCandidates[index]._index;
+					return attackCandidates[index]._index;
 				}
 
 			}
