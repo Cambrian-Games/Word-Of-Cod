@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.Analytics.IAnalytic;
 
 [Serializable]
 public abstract class AttackEffect
@@ -243,6 +244,95 @@ public class Wait : AttackEffect
 		protected override float EffectHeight()
 		{
 			return base.EffectHeight() + 2 * Y_OFFSET;
+		}
+	}
+#endif
+}
+
+[Serializable]
+public class TransformTiles : AttackEffect
+{
+	[SerializeField, Min(0)]
+	[Tooltip("Leave as 0 to transform all matching tiles.")]
+	private int _numTiles = 0;
+
+	[SerializeField]
+	private Tile.TileKind _from = Tile.TileKind.Normal;
+
+	[SerializeField]
+	private Tile.TileKind _to = Tile.TileKind.Sandy;
+
+	private bool _hasTransformedTiles = false;
+
+	internal override void StartEffect(Enemy owner)
+	{
+		base.StartEffect(owner);
+
+		_hasTransformedTiles = false;
+	}
+
+	internal override void StartTurn(Enemy owner)
+	{
+		base.StartTurn(owner);
+
+		_hasTransformedTiles = false;
+	}
+
+	internal override bool UpdateEffect(Enemy owner)
+	{
+		GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
+
+		_hasTransformedTiles = true;
+
+		return base.UpdateEffect(owner);
+	}
+
+	internal override bool IsTurnComplete(Enemy owner)
+	{
+		return _hasTransformedTiles;
+	}
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(TransformTiles), true)]
+	public class TransformTilesPropertyDrawer : AttackEffectPropertyDrawer
+	{
+
+		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			position = base.EffectGUI(position, label, property);
+
+			//EditorGUILayout.Separator();
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Transform Tiles Data", EditorStyles.boldLabel);
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_numTiles"), new GUIContent("Change"));
+
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_from"));
+
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_to"));
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+			
+			return position;
+		}
+
+		protected override float EffectHeight()
+		{
+			return base.EffectHeight() + 3 * Y_OFFSET;
 		}
 	}
 #endif

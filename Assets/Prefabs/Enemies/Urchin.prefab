@@ -48,39 +48,48 @@ MonoBehaviour:
   _displayName: Urchin
   _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 50
+  _schedulePolicy: 0
   _rules:
-  - _conditions:
-    - _field: 6
-      _is: 5
-      _value: 2
-    _matchAllToRun: 0
-    _cancelConditions: []
-    _matchAllToCancel: 0
-    _uninterruptible: 0
+  - _name: Scatter Spines
+    _weight: 1
+    _conditions: []
     _effects:
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: '[Urchin Spiny Placeholder]'
-      _isInterruptCheckpoint: 0
-      _effectKind: 2
-      _damage: 25
-      _from: 0
-      _to: 1
-      _numTiles: 2
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: 
-      _isInterruptCheckpoint: 0
-      _effectKind: 1
-      _damage: 20
-      _from: 0
-      _to: 0
-      _numTiles: 0
+    - rid: 2220220962654388465
+    - rid: 2220220962654388467
+    - rid: 2220220962654388468
   _interruptRules: []
-  _attackPriority: 0
-  _canRepeatLastAction: 1
-  _currentForecast: 
-  _defaultForecast: $NAME is waiting.
+  references:
+    version: 2
+    RefIds:
+    - rid: 2220220962654388465
+      type: {class: Wait, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Wait a Turn
+        _forecast: '$ROUNDS: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _timeToWait: 0
+    - rid: 2220220962654388467
+      type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Create Two Spiny Tiles
+        _forecast: '$NOW: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 0
+        _isCritical: 0
+        _numTiles: 2
+        _from: 0
+        _to: 1
+    - rid: 2220220962654388468
+      type: {class: StandardAttack, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Do 20 Damage
+        _forecast: N/A
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _baseDamage: 20
 --- !u!1 &7660779599707903287
 GameObject:
   m_ObjectHideFlags: 0
