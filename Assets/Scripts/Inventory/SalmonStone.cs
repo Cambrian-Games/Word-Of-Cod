@@ -5,9 +5,9 @@ public class SalmonStone : ActiveRelic
     private bool _used = false;
     public Sprite _brokenIcon;
     
-    public bool getUsed() {return _used;}
+    public bool GetUsed() {return _used;}
 
-    public void setUsed(bool used)
+    public void SetUsed(bool used)
     {
         _used = used;
     }

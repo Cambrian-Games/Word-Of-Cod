@@ -27,10 +27,6 @@ public abstract class Item : MonoBehaviour
 		_id = i;
 	}
 
-	public void SetIcon(Sprite newIcon)
-	{
-		_icon = newIcon;
-	}
 	[SerializeField]
 	private string _displayName;
 	public string DisplayName => _displayName;
