@@ -31,6 +31,7 @@ public class RelicTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 		{
 			InventorySection.Passive_Relic => _inventoryManager._passiveRelics[_inventoryManager._passiveRelicInventory[_inventoryIndex]].Description,
 			InventorySection.Active_Relic => _inventoryManager._activeRelics[_inventoryManager._activeRelicInventory[_inventoryIndex]].Description,
+			InventorySection.Consumable_Item => _inventoryManager._consumables[_inventoryIndex].Description,
 			_ => throw new System.NotImplementedException(),
 		};
     }
@@ -46,6 +47,9 @@ public class RelicTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 		{
 			case InventorySection.Active_Relic:
 				_inventoryManager.OnActiveRelicClicked(_inventoryIndex);
+				break;
+			case InventorySection.Consumable_Item:
+				_inventoryManager.OnConsumableClicked(_inventoryIndex);
 				break;
 		}
 	}
