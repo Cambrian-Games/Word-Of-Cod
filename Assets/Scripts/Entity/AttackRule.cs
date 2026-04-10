@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 [Serializable]
@@ -14,10 +16,12 @@ public class AttackRule
 	[SerializeReference, SubclassSelector]
 	public List<AttackEffect> _effects;
 
-	private int _currentEffectindex;
+	private int _currentEffectIndex;
 	private bool _stayInCurrentEffect;
 
-	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
+	private int _roundCount = 0;
+
+	public AttackEffect CurrentEffect => _currentEffectIndex == -1 ? null : _effects[_currentEffectIndex];
 
 
 
@@ -34,6 +38,14 @@ public class AttackRule
 			if (!cond.Passes(owner))
 			{
 				if (cond._cancelKind == Condition.FCANCEL.IGNORE)
+					continue;
+
+				// if we're outside of the condition's applicable frame, ignore it
+
+				if (cond._firstCancelRound > _roundCount)
+					continue;
+
+				if (cond._lastCancelRound < _roundCount)
 					continue;
 
 				// conditions may have different situations where they can cancel an attack.
@@ -71,7 +83,7 @@ public class AttackRule
 		return true;
 	}
 
-	public bool HasStarted() => _currentEffectindex >= 0;
+	public bool HasStarted() => _currentEffectIndex >= 0;
 
 	public void StartRule(Enemy owner)
 	{
@@ -80,13 +92,14 @@ public class AttackRule
 			Debug.LogError("No effects found!");
 		}
 
-		_currentEffectindex = -1; // no current effect
+		_currentEffectIndex = -1; // no current effect
 		_stayInCurrentEffect = false;
+		_roundCount = 0;
 	}
 
 	public void CancelRule(Enemy owner)
 	{
-		_currentEffectindex = -1;
+		_currentEffectIndex = -1;
 	}
 
 	internal void StartRound(Enemy owner)
@@ -97,13 +110,14 @@ public class AttackRule
 		{
 			// update next effect here because it's required for the forecast
 
-			_currentEffectindex++;
+			_currentEffectIndex++;
 			CurrentEffect.StartEffect(owner);
 		}
 
 		_stayInCurrentEffect = false;
+		_roundCount++;
 
-		Debug.Assert(_currentEffectindex < _effects.Count);
+		Debug.Assert(_currentEffectIndex < _effects.Count);
 	}
 
 	internal void StartTurn(Enemy owner)
@@ -145,9 +159,9 @@ public class AttackRule
 
 			// try to go to next effect. If none exists, return true, otherwise start next effect.
 
-			_currentEffectindex++;
+			_currentEffectIndex++;
 
-			if (_currentEffectindex >= _effects.Count)
+			if (_currentEffectIndex >= _effects.Count)
 				return true;
 
 			CurrentEffect.StartEffect(owner);
@@ -205,17 +219,17 @@ public class Condition
 
 		// No Value Needed
 
-		[InspectorName("Combo Broken")]
+		[InspectorName("Combo Broken"), NoValue]
 		Combo_Break = 200,
 
 		// Parameter Required
 
-		[InspectorName("Variant Tiles On Board")]
+		[InspectorName("Variant Tiles On Board"), NeedsParameter]
 		Variant_Tiles_On_Board = 300,
 
 		// Misc lookup
 
-		[InspectorName("Blackboard Value")]
+		[InspectorName("Blackboard Value"), NeedsParameter]
 		Blackboard_Value = 400
 	}
 
@@ -238,7 +252,7 @@ public class Condition
 	[Flags]
 	public enum FCANCEL
 	{
-		[InspectorName("Not a Cancellation Condition")]
+		[InspectorName("Never")]
 		IGNORE = 0,
 		[InspectorName("Start of Enemy Turn")]
 		START_OF_ENEMY_TURN = 1,
@@ -258,6 +272,8 @@ public class Condition
 	private float _value;
 
 	public FCANCEL _cancelKind;
+	public int _firstCancelRound;
+	public int _lastCancelRound;
 
 
 
@@ -298,4 +314,115 @@ public class Condition
 			_ => throw new InvalidOperationException()
 		};
 	}
+
+	#region Enum Attributes
+	[AttributeUsage(AttributeTargets.Field)]
+	public class NeedsParameterAttribute : PropertyAttribute
+	{
+		public bool NeedsParameter { get; }
+
+		public NeedsParameterAttribute(bool needsParameter = true)
+		{
+			NeedsParameter = needsParameter;
+		}
+	}
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public class NoValueAttribute : PropertyAttribute
+	{
+		public NoValueAttribute()
+		{
+
+		}
+	}
+	#endregion
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(Condition))]
+	public class ConditionPropertyDrawer : PropertyDrawer
+	{
+		protected static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+		{
+			EditorGUI.BeginProperty(position, label, property);
+			position.height = EditorGUIUtility.singleLineHeight;
+
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_category"));
+
+			if (CategoryNeedsParameter(property))
+			{
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_parameter"));
+			}
+
+			if (CategoryNeedsValue(property))
+			{
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_comparator"));
+
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_value"));
+			}
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Cancellation Rules", EditorStyles.boldLabel);
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_cancelKind"), new GUIContent("Cancel if False"));
+
+			if (CancelKindNeedsRoundNumbers(property))
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_firstCancelRound"), new GUIContent("Between Rounds"));
+
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_lastCancelRound"), new GUIContent("  and"));
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+		}
+
+		private bool CategoryNeedsParameter(SerializedProperty property)
+		{
+			Type enumType = typeof(Condition.Category);
+			string name = Enum.GetName(enumType, property.FindPropertyRelative("_category").enumValueFlag);
+			NeedsParameterAttribute attr = enumType.GetField(name).GetCustomAttributes(false).OfType<NeedsParameterAttribute>().SingleOrDefault();
+
+			return attr != null && attr.NeedsParameter;
+		}
+
+		private bool CategoryNeedsValue(SerializedProperty property)
+		{
+			Type enumType = typeof(Condition.Category);
+			string name = Enum.GetName(enumType, property.FindPropertyRelative("_category").enumValueFlag);
+			NoValueAttribute attr = enumType.GetField(name).GetCustomAttributes(false).OfType<NoValueAttribute>().SingleOrDefault();
+
+			return attr == null;
+		}
+
+		private bool CancelKindNeedsRoundNumbers(SerializedProperty property)
+		{
+			return property.FindPropertyRelative("_cancelKind").enumValueFlag != 0;
+		}
+
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		{
+			return base.GetPropertyHeight(property, label) +
+				((CategoryNeedsParameter(property) ? 1 : 0) +
+				(CategoryNeedsValue(property) ? 2 : 0) +
+				2 + 
+				(CancelKindNeedsRoundNumbers(property) ? 1 : 0)
+				)
+				 * Y_OFFSET;
+		}
+	}
+
+#endif
 }
