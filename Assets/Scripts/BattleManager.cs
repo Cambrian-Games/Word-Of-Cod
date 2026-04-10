@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Services.Analytics;
 using UnityEngine;
 
 public class BattleManager : MonoBehaviour
@@ -441,12 +442,18 @@ public class BattleManager : MonoBehaviour
 
             Player.INSTANCE._inventory.OnWordSubmit(_wordToSubmit);
 			_wordHistory.Add(word);
-
+            
+            RunManager.INSTANCE.AddWordToStats(_wordToSubmit);
+            
             SetBattleState(BattleState.Post_Player_Turn);
             return true;
         }
         else
         {
+            //Analytics for Failed Word Here0
+            WordFailedEvent wordFailedEvent = new WordFailedEvent { _failedWord = text };
+            AnalyticsService.Instance.RecordEvent(wordFailedEvent);
+            Debug.Log("FailedWordEventSent");
             return false;
         }
     }
