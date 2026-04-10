@@ -10,6 +10,7 @@ public class InventoryManager : MonoBehaviour
 {
     public List<Relic> _passiveRelics;
 	public List<Item> _activeRelics;
+	public List<Item> _consumables;
 
     private Dictionary<RelicEffect.EventTiming, HashSet<Relic>> _sortedPassiveRelics;
 
@@ -18,6 +19,7 @@ public class InventoryManager : MonoBehaviour
 
     public GameObject _passiveRelicGrid;
     public GameObject _activeRelicGrid;
+    public GameObject _consumableGrid;
 
     private int _prevNumPassive = 1;
     private int _prevNumActive = 1;
@@ -202,6 +204,10 @@ public class InventoryManager : MonoBehaviour
 	internal void OnActiveRelicClicked(int inventoryIndex)
 	{
 		_activeRelics[_activeRelicInventory[inventoryIndex]].OnSelect();
+	}
+	internal void OnConsumableClicked(int inventoryIndex)
+	{
+		_consumables[inventoryIndex].OnSelect();
 	}
 
 	internal void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
