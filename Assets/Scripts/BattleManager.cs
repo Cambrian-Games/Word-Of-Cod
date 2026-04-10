@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -99,14 +100,7 @@ public class BattleManager : MonoBehaviour
     private void UpdateBattleState()
     {
 #if UNITY_EDITOR
-        bool holdingShift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        bool holdingSpace = Input.GetKey(KeyCode.Space);
-
-        if (holdingShift && holdingSpace && _enemy)
-        {
-            Destroy(_enemy.gameObject);
-            SetBattleState(BattleState.Win);
-        }
+		CheckDebugBattleCommands();
 #endif
 
         while (true)
@@ -141,7 +135,29 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    internal void SetBattleState(BattleState newState)
+#if UNITY_EDITOR
+	private void CheckDebugBattleCommands()
+	{
+		bool holdingShift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+		if (holdingShift && Input.GetKey(KeyCode.Space) && _enemy)
+		{
+			Destroy(_enemy.gameObject);
+			SetBattleState(BattleState.Win);
+		}
+
+		if (holdingShift && Input.GetKey(KeyCode.H) && Player.INSTANCE)
+		{
+			// TODO update this after the merge with the enemy rework
+
+			Player.INSTANCE.CurrentHealth = Player.INSTANCE.MaxHealth;
+		}
+
+		// ideally we want a teleport to next fight option, maybe holding T? Would need to be in run manager
+	}
+#endif
+
+	internal void SetBattleState(BattleState newState)
     {
         if (_battleState == newState)
             return;
