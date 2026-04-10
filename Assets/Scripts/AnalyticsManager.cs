@@ -27,6 +27,7 @@ public class AnalyticsManager : MonoBehaviour
     public void AnalyticsOptOut()
     {
         _analyticsEnabled = false;
+        
     }
     
 }
@@ -71,8 +72,7 @@ public class WinEvent : Unity.Services.Analytics.Event
     public float _medianLength { set { SetParameter("medianLength" , value);}}
     public string _relicList { set { SetParameter("relicList" , value);}}
     public int _numWords { set { SetParameter("numWords" , value);}}
-
-
+    
 }
 
 public class LoseEvent : Unity.Services.Analytics.Event

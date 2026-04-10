@@ -88,6 +88,13 @@ public class RunManager : MonoBehaviour
 				});
 				Debug.Log("start Data Collection");
 			}
+			else
+			{
+				EndUserConsent.SetConsentState(new ConsentState
+				{
+					AnalyticsIntent = ConsentStatus.Denied
+				});
+			}
 		}
 
 		_sortedWordDamages = new List<int>();
@@ -340,7 +347,7 @@ public class RunManager : MonoBehaviour
 		_hasSelectedNextEvent = true;
 	}
 
-	public void AddWordToStats (Word word)
+	public void AddWordToStats(Word word)
 	{
 		//if first word, simply set all
 		if (_sortedWordDamages.Count == 0)
@@ -411,6 +418,7 @@ public class RunManager : MonoBehaviour
 		AnalyticsService.Instance.Flush();
 		Debug.Log("WinEventSent");
 	}
+	
 	private void SendLoseEvent()
 	{
 		CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength, out float medianLength);
@@ -433,7 +441,6 @@ public class RunManager : MonoBehaviour
 		AnalyticsService.Instance.Flush();
 		Debug.Log("LoseEventSent");
 	}
-
 
 	public RunEvent Event(int index) => _runFormat[index];
 	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
