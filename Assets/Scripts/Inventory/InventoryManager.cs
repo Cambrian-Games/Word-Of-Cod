@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -17,8 +19,9 @@ public class InventoryManager : MonoBehaviour
     public GameObject _passiveRelicGrid;
     public GameObject _activeRelicGrid;
 
-    private int _prevNumRelics = 1;
-
+    private int _prevNumPassive = 1;
+    private int _prevNumActive = 1;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -69,6 +72,7 @@ public class InventoryManager : MonoBehaviour
 		}
 
 		_activeRelicInventory.Add(Random.Range(0, _activeRelics.Count));
+		//_activeRelicInventory.Add(1);
 
 		_activeRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
 			_activeRelics[_activeRelicInventory[0]].Icon;
@@ -80,10 +84,10 @@ public class InventoryManager : MonoBehaviour
 	void Update()
     {
         //if number of relics has changed:
-        if (_passiveRelicInventory.Count > _prevNumRelics)
+        if (_passiveRelicInventory.Count > _prevNumPassive)
         {
             //for each new relic:
-            for (int i = _prevNumRelics; i < _passiveRelicInventory.Count; i++)
+            for (int i = _prevNumPassive; i < _passiveRelicInventory.Count; i++)
             {
                 //set its icon...
                 _passiveRelicGrid.transform.GetChild(i).gameObject.GetComponent<Image>().sprite =
@@ -93,8 +97,22 @@ public class InventoryManager : MonoBehaviour
             }
             
         }
-
-        _prevNumRelics = _passiveRelicInventory.Count;
+        //todo set up active relic change
+        if (_activeRelicInventory.Count > _prevNumActive)
+        {
+	        //for each new relic:
+	        for (int i = _prevNumActive; i < _activeRelicInventory.Count; i++)
+	        {
+		        //set its icon...
+		        _activeRelicGrid.transform.GetChild(i).gameObject.GetComponent<Image>().sprite =
+			        _activeRelics[_activeRelicInventory[i]].Icon;
+		        //and enable the element in the grid
+		        _activeRelicGrid.transform.GetChild(i).gameObject.SetActive(true);
+	        }
+            
+        }
+        _prevNumPassive = _passiveRelicInventory.Count;
+        _prevNumActive = _activeRelicInventory.Count;
     }
 
     public void OnWordSubmit(Word word)
@@ -199,6 +217,25 @@ public class InventoryManager : MonoBehaviour
 		foreach (int activeRelicID in _activeRelicInventory)
 		{
 			_activeRelics[activeRelicID].OnTileClicked(tile);
+		}
+	}
+
+	internal void OnPlayerTakeDamage()
+	{
+		if (_activeRelicInventory.Contains(1))
+		{
+			SalmonStone stone = _activeRelics[1].gameObject.GetComponent<SalmonStone>();
+			if (!stone.GetUsed())
+			{
+				if (Player.INSTANCE.CurrentHealth <= 0)
+				{
+					Player.INSTANCE.CurrentHealth = (Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
+					stone.SetUsed(true);
+					int index = _activeRelicInventory.IndexOf(1);
+					_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite =
+						stone._brokenIcon;
+				}
+			}
 		}
 	}
 }

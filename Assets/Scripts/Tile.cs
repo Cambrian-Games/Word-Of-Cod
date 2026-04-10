@@ -112,6 +112,7 @@ public class Tile : MonoBehaviour
 			case TileKind.Spiny:
 				// potential player death is checked immediately after OnSubmit
 				Player.INSTANCE.CurrentHealth -= _spinyDamage;
+				Player.INSTANCE._inventory.OnPlayerTakeDamage();
 				break;
 		}
 	}

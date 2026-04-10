@@ -346,8 +346,9 @@ public class BattleManager : MonoBehaviour
         {
             case PostPlayerTurnState.Display_Word:
                 _directions.Clear();
+                //int healthBefore = Player.INSTANCE.CurrentHealth;
 				_wordToSubmit.Tiles.ForEach(tile => tile.OnSubmit());
-
+                
                 if (Player.INSTANCE.CurrentHealth <= 0)
                 {
                     // interrupt state change to lose the game. Should probably be its own step instead.
