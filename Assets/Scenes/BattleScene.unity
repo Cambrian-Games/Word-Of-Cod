@@ -1991,7 +1991,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RelicTooltip
   _section: 2
-  _inventoryIndex: 10
+  _inventoryIndex: 3
   _tooltipText: {fileID: 2056634671}
 --- !u!114 &431114618
 MonoBehaviour:
@@ -2390,7 +2390,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RelicTooltip
   _section: 2
-  _inventoryIndex: 5
+  _inventoryIndex: 1
   _tooltipText: {fileID: 2056634671}
 --- !u!114 &489965359
 MonoBehaviour:
@@ -3978,7 +3978,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RelicTooltip
   _section: 2
-  _inventoryIndex: 10
+  _inventoryIndex: 2
   _tooltipText: {fileID: 2056634671}
 --- !u!114 &886692429
 MonoBehaviour:
@@ -5587,7 +5587,8 @@ MonoBehaviour:
   _activeRelics:
   - {fileID: 2106946517}
   - {fileID: 20624007}
-  _consumables: []
+  _consumables:
+  - {fileID: 2105384666}
   _passiveRelicInventory: 
   _activeRelicInventory: 
   _passiveRelicGrid: {fileID: 1294123192}
@@ -8096,11 +8097,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BagOfWorms
   _maxCount: 10
-  _currentCount: 0
+  _currentCount: 2
   _isConsumable: 1
   _icon: {fileID: 6083897114130078571, guid: bb10dc1fe80bad0dab9782864ad3e277, type: 3}
   _displayName: Delicious Bag of Worm Segments
   _description: Heals 50
+  _countText: {fileID: 423461747}
 --- !u!4 &2106946516 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1818886919343343717, guid: 4258387c65989d24eabb078ed59b522d, type: 3}
