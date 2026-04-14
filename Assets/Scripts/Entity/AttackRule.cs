@@ -197,7 +197,7 @@ public class AttackRule
 
 	public bool IsComplete(Enemy owner)
 	{
-		// we want to end the rule if the player is dead, otherwise check if the final effect is complete
+		// we want to end the rule if the player is dead, otherwise check if every effect is complete
 
 		return Player.INSTANCE.CurrentHealth <= 0 || _effects.All(effect => effect.IsEffectComplete(owner));
 	}
@@ -225,7 +225,7 @@ public class Condition
 		// No Parameter
 
 		[InspectorName("Enemy Health (Percentage)")]
-		Enemy_Health_Percent,
+		Enemy_Health_Percent = 0,
 		[InspectorName("Player Health (Percentage)")]
 		Player_Health_Percent,
 		[InspectorName("Round Number")]
@@ -319,7 +319,7 @@ public class Condition
 			Category.Combo_Length => throw new NotImplementedException(),
 			Category.Damage_Taken => owner.LastDamageTaken,
 			Category.Variant_Tiles_On_Board => GameBoard.INSTANCE.CountTiles((Tile.TileKind) Enum.Parse(typeof(Tile.TileKind), _parameter)),
-			Category.Blackboard_Value => (int) owner._blackboard.GetValueOrDefault(_parameter, 0),
+			Category.Blackboard_Value => owner._blackboard.GetValueOrDefault(_parameter, 0),
 			_ => throw new InvalidOperationException()
 		};
 

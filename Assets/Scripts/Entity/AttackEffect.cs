@@ -16,7 +16,7 @@ public abstract class AttackEffect
 	protected int _numTurns = 1;
 	public int NumTurns => _numTurns;
 
-	protected int _currentTurn = 0;
+	private int _currentTurn = 0;
 
 	[SerializeField]
 	private bool _endsTurn;
@@ -57,7 +57,8 @@ public abstract class AttackEffect
 	internal virtual bool IsTurnComplete(Enemy owner) => true;
 	internal virtual bool IsEffectComplete(Enemy owner)
 	{
-		if (_isEffectComplete) return true;
+		if (_isEffectComplete)
+			return true;
 
 		_isEffectComplete = IsTurnComplete(owner) && OnLastTurn();
 		return _isEffectComplete;
@@ -276,6 +277,7 @@ public class Wait : AttackEffect
 
 			position.y += Y_OFFSET;
 			EditorGUI.LabelField(position, "Wait Data", EditorStyles.boldLabel);
+
 			position.y += Y_OFFSET;
 			EditorGUI.PropertyField(position, property.FindPropertyRelative("_timeToWait"));
 
@@ -409,15 +411,13 @@ public class SchoolingAttack : StandardAttack
 		
 		_numHits = 0;
 
-		// Min(b, a(1-u) + (b+1)u) -- plug this into desmos to see how it behaves. Use a = 1 and b = 20, and increment u by 0.05
-		// Min(b, a - au + bu + u)
-		// Min(b, a + u(b - a + 1)) minimizes multiplication
-
 		float a = _minHits;
 		float b = _maxHits;
 		float u = owner.HealthPercent();
 
-		_targetHits = Mathf.RoundToInt(Mathf.Min(b, a + u * (b - a + 1)));
+		_targetHits = Mathf.RoundToInt(
+						Mathf.Min(b, 
+							Mathf.Lerp(a, b + 1, u))); // b + 1 is necessary, plug into desmos with a = 1, b = 20, and u in increments of 0.05
 	}
 
 	internal override void StartTurn(Enemy owner)
@@ -426,15 +426,13 @@ public class SchoolingAttack : StandardAttack
 
 		_numHits = 0;
 
-		// Min(b, a(1-u) + (b+1)u) -- plug this into desmos to see how it behaves. Use a = 1 and b = 20, and increment u by 0.05
-		// Min(b, a - au + bu + u)
-		// Min(b, a + u(b - a + 1)) minimizes multiplication
-
 		float a = _minHits;
 		float b = _maxHits;
 		float u = owner.HealthPercent();
 
-		_targetHits = Mathf.RoundToInt(Mathf.Min(b, a + u * (b - a + 1)));
+		_targetHits = Mathf.RoundToInt(
+						Mathf.Min(b,
+							Mathf.Lerp(a, b + 1, u)));
 	}
 
 	internal override void Reset(Enemy owner)
@@ -756,6 +754,7 @@ public class SandSuckAttack : VariableTurnAttack
 			position = base.EffectGUI(position, label, property);
 
 			// this is bad practice but there aren't any good alternatives that don't require adding a bunch of Validate() functions.
+			property.FindPropertyRelative("_minTurns").intValue = 1;
 			property.FindPropertyRelative("_maxTurns").intValue = 2;
 
 			// count variables from here

@@ -14,6 +14,7 @@ public class BattleManager : MonoBehaviour
         Post_Player_Turn,   // Resolve attack and check if fight has been won or lost
         Enemy_Turn,         // Enemy state machine runs to completion. Player death may occur during this and will have to be handled correctly
         Post_Enemy_Turn,    // TBD
+
         Settle_Board,       // Board settles into place
 
         Win,
@@ -200,16 +201,17 @@ public class BattleManager : MonoBehaviour
 
 			case BattleState.Pre_Player_Turn:
 				_enemy.StartRound();
+
+				Debug.Log("Forecast: " + _enemy.FormattedForecast());
+				//change forecast text
+				_forecastText.text = _enemy.FormattedForecast();
+
 				SetBattleState(BattleState.Player_Turn);
 				break;
 
 			case BattleState.Player_Turn:
 				TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
                 
-                Debug.Log("Forecast: " + _enemy.FormattedForecast());
-                //change forecast text
-                _forecastText.text = _enemy.FormattedForecast();
-
 				_previousWord = _wordToSubmit;
 				_wordToSubmit = null;
 

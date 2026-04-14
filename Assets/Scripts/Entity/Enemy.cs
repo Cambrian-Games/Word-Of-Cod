@@ -196,7 +196,7 @@ public class Enemy : Entity
 
 			// if we've found a new interrupt
 
-			if (newInterruptIndex != -1)
+			//if (newInterruptIndex != -1)
 			{
 				Debug.Assert(_interruptRules[newInterruptIndex].CanRun(this));
 
@@ -231,7 +231,7 @@ public class Enemy : Entity
 					return nextRuleIndex;
 
 				Debug.Assert(_rules[_lastRuleIndex].CanRun(this), "Can't select a rule! Please check configuration.");
-				return _lastRuleIndex;
+				return Mathf.Max(0, _lastRuleIndex);
 			}
 
 			int NextAvailable()
