@@ -41,7 +41,13 @@ public class AttackRule
 			if (!cond.Passes(owner))
 			{
 				if (cond._cancelKind == Condition.FCANCEL.IGNORE)
+				{
+					// only count when the attack is up for selection 
+					if (_roundCount == 0)
+						return false;
+
 					continue;
+				}
 
 				// if we're outside of the condition's applicable frame, ignore it
 
