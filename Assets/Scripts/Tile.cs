@@ -110,9 +110,8 @@ public class Tile : MonoBehaviour
 		switch (_tileKind)
 		{
 			case TileKind.Spiny:
-				// potential player death is checked immediately after OnSubmit
-				Player.INSTANCE.CurrentHealth -= _spinyDamage;
-				Player.INSTANCE._inventory.OnPlayerTakeDamage();
+				// potential player death is checked immediately after OnSubmit. If Salmon Stone is misbehaving, check here
+				Player.INSTANCE.Damage(_spinyDamage);
 				break;
 		}
 	}

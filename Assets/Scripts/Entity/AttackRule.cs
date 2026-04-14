@@ -1,38 +1,36 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
-
-public enum AttackPriority
-{
-	Loop,
-	[InspectorName("Select First Available")]
-	First_Available,
-	[InspectorName("Select Random From All Available")]
-	Random_From_All_Available
-}
 
 [Serializable]
 public class AttackRule
 {
-	public List<AttackCondition> _conditions;
-	public bool _matchAllToRun; // true = all
-
-	public List<AttackCondition> _cancelConditions;
-	public bool _matchAllToCancel;
-
-	public bool _uninterruptible;
-
+	public string _name;
 	public float _weight = 1.0f;
 
-	public List<AttackEffect> _effects;
+	// not shown in inspector, only public to ensure it's written to yaml. Would be internal otherwise
+	[HideInInspector]
+	public int _index;
 
-	EffectData _effectData;
+	[SerializeField]
+	private List<Condition> _conditions;
 
-	int _currentEffectindex;
-	public AttackEffect CurrentEffect => _currentEffectindex == -1 ? null : _effects[_currentEffectindex];
+	[SerializeReference, SubclassSelector]
+	private List<AttackEffect> _effects;
 
-	internal int _roundsSinceLastUsed;
+#if UNITY_EDITOR
+	public List<AttackEffect> Effects => _effects;
+#endif
+
+	private int _currentEffectIndex;
+	private bool _stayInCurrentEffect;
+
+	private int _roundCount = 0;
+
+	public AttackEffect CurrentEffect => _currentEffectIndex == -1 ? null : _effects[_currentEffectIndex];
+
 
 
 	public bool CanRun(Enemy owner)
@@ -43,174 +41,219 @@ public class AttackRule
 		if (_conditions.Count == 0)
 			return true;
 
-		if (ShouldCancel(owner))
-			return false;
+		foreach (Condition cond in _conditions)
+		{
+			if (!cond.Passes(owner))
+			{
+				if (cond._cancelKind == Condition.FCANCEL.IGNORE)
+				{
+					// only count when the attack is up for selection 
+					if (_roundCount == 0)
+						return false;
 
-		return _matchAllToRun ? _conditions.All(cond => cond.IsConditionSatisfied(owner)) : _conditions.Any(cond => cond.IsConditionSatisfied(owner));
+					continue;
+				}
+
+				// if we're outside of the condition's applicable frame, ignore it
+
+				if (cond._firstCancelRound > _roundCount)
+					continue;
+
+				if (cond._lastCancelRound < _roundCount)
+					continue;
+
+				// conditions may have different situations where they can cancel an attack.
+				//  if a condition fails, we check the battle state and see whether the
+				//  condition would cancel an attack at that point
+
+				BattleManager.BattleState battleState = BattleManager.INSTANCE.CurrentState;
+
+				switch (battleState)
+				{
+					case BattleManager.BattleState.Pre_Player_Turn:
+						if ((cond._cancelKind & Condition.FCANCEL.START_OF_ROUND) != 0)
+						{
+							return false;
+						}
+						continue;
+
+					case BattleManager.BattleState.Player_Turn:
+						if ((cond._cancelKind & Condition.FCANCEL.DURING_PLAYER_TURN) != 0)
+						{
+							return false;
+						}
+						continue;
+
+					case BattleManager.BattleState.Enemy_Turn:
+						if ((cond._cancelKind & Condition.FCANCEL.START_OF_ENEMY_TURN) != 0)
+						{
+							return false;
+						}
+						continue;
+				}
+			}
+		
+			// TODO long-term, interrupt rules need to remember the previous state of the game
+			//  and only trigger when something flips from false to true and not while it stays true.
+			//  Possibly requires a subclass of AttackRule that overrides CanRun() and has some more data?
+		}
+
+		return true;
 	}
 
-	public bool ShouldCancel(Enemy owner)
-	{
-		if (_uninterruptible)
-			return false;
-
-		if (_cancelConditions.Count == 0)
-			return false;
-
-		return _matchAllToCancel ? _cancelConditions.All(cond => cond.IsConditionSatisfied(owner)) : _cancelConditions.Any(cond => cond.IsConditionSatisfied(owner));
-	}
-
-	public void StartRule()
+	public void StartRule(Enemy owner)
 	{
 		if (_effects.Count == 0)
 		{
 			Debug.LogError("No effects found!");
-			return;
 		}
 
-		_currentEffectindex = -1; // no current effect
+		_currentEffectIndex = -1; // no current effect
+		_stayInCurrentEffect = false;
+		_roundCount = 0;
+
+		_effects.ForEach(_effect => _effect.Reset(owner));
 	}
 
-	internal void StartRound()
+	public void CancelRule(Enemy owner)
 	{
-		// update next effect here because it's required for the forecast
+		_currentEffectIndex = -1;
+		_stayInCurrentEffect = false;
+		_roundCount = 0;
 
-		_currentEffectindex++;
-		Debug.Assert(_currentEffectindex < _effects.Count);
-		_effectData = CurrentEffect.GenerateData();
+		_effects.ForEach(_effect => _effect.Reset(owner));
 	}
 
-	internal void StartTurn()
+	internal void StartRound(Enemy owner)
 	{
-		// TBD, may not do anything aside from animations.
-	}
+		bool advanceToNextEffect = !(CurrentEffect != null && _stayInCurrentEffect);
 
-	public bool UpdateTurn()
-	{
-		if (_effectData == null)
+		if (advanceToNextEffect)
 		{
-			Debug.LogError("No effect data, can't update rule.");
+			// update next effect here because it's required for the forecast
+
+			_currentEffectIndex++;
+			CurrentEffect.StartEffect(owner);
+		}
+
+		_stayInCurrentEffect = false;
+		_roundCount++;
+
+		Debug.Assert(_currentEffectIndex < _effects.Count);
+	}
+
+	internal void StartTurn(Enemy owner)
+	{
+		CurrentEffect.StartTurn(owner);
+	}
+
+	public bool UpdateTurn(Enemy owner)
+	{
+		if (CurrentEffect == null)
+		{
+			Debug.LogError("No effect exists.");
 			return true;
 		}
 
-		// current effect is incomplete
+		// current effect is incomplete. In general, effectTurnComplete should be false here, but it's a good safeguard.
 
-		if (_effectData._effectEndTime <= 0.0f)
+		bool effectTurnComplete = CurrentEffect.IsTurnComplete(owner);
+
+		if (!effectTurnComplete)
 		{
-			bool isEffectComplete = CurrentEffect.UpdateEffect(_effectData);
-
-			if (isEffectComplete)
-			{
-				// if the final effect is complete, exit
-
-				if (_currentEffectindex + 1 >= _effects.Count)
-					return true;
-				
-				// if the turn is over, exit
-
-				if (CurrentEffect.EndsTurn)
-					return true;
-
-				_effectData._effectEndTime = Time.time;
-			}
+			effectTurnComplete = CurrentEffect.UpdateEffect(owner);
 		}
 
-		// if current effect is complete but turn is not over, move to next effect
-
-		if (_effectData._effectEndTime > 0 &&
-			(_effectData._effectEndTime + CurrentEffect.AfterEffectDelay) <= Time.time)
+		if (effectTurnComplete)
 		{
-			_currentEffectindex++;
-			_effectData = CurrentEffect.GenerateData();
+			// If this is a multiturn effect and it has turns remaining, end turn and prevent advancing to next effect
+
+			if (!CurrentEffect.IsEffectComplete(owner))
+			{
+				_stayInCurrentEffect = true;
+				return true;
+			}
+				
+			// This explicitly ends the turn
+
+			if (CurrentEffect.EndsTurn)
+				return true;
+
+			// try to go to next effect. If none exists, return true, otherwise start next effect.
+
+			_currentEffectIndex++;
+
+			if (_currentEffectIndex >= _effects.Count)
+				return true;
+
+			CurrentEffect.StartEffect(owner);
+			CurrentEffect.StartTurn(owner);
+
+			return false;
 		}
 
 		return false;
 	}
 
-	internal void EndTurn()
+	public bool IsComplete(Enemy owner)
 	{
-		_effectData = null;
+		// we want to end the rule if the player is dead, otherwise check if every effect is complete
+
+		return Player.INSTANCE.CurrentHealth <= 0 || _effects.All(effect => effect.IsEffectComplete(owner));
 	}
 
-	public void EndRule()
+	internal bool InCriticalEffect()
 	{
-		// TBD, might be animations
+		return CurrentEffect?.IsCritical ?? false;
 	}
 
-	public bool Complete()
-	{
-		// we want to end the rule if the player is dead
-
-		return Player.INSTANCE.CurrentHealth <= 0 || _currentEffectindex >= _effects.Count - 1;
-	}
-
-	internal bool PastInterruptCheckpoint()
-	{
-		int checkpointIndex = _effects.FindIndex(effect => effect.IsInterruptCheckpoint);
-		if (checkpointIndex == -1)
-			return false;
-
-		// if we've already completed the checkpoint effect, this rule is safe to mark as complete if interrupted
-
-		return _currentEffectindex > checkpointIndex;
-	}
-
-	internal void Cancel()
-	{
-		// mostly TBD
-
-		_currentEffectindex = -1;
-		_effectData = null;
-	}
-
-    internal string GetForecast()
+	internal string FormattedForecast()
     {
-        if (CurrentEffect != null)
-            return CurrentEffect.ForecastDescription;
+		if (CurrentEffect != null)
+			return CurrentEffect.FormattedForecast()
+				.Replace("$RULE_NAME", _name);
 
         return "";
     }
 }
 
 [Serializable]
-public class AttackCondition
+public class Condition
 {
-	public enum ConditionField
+	public enum Category
 	{
-		[InspectorName("Enemy Health")]
-		Enemy_Health,
+		// No Parameter
+
 		[InspectorName("Enemy Health (Percentage)")]
-		Enemy_Health_Percent,
-		[InspectorName("Player Health")]
-		Player_Health,
+		Enemy_Health_Percent = 0,
 		[InspectorName("Player Health (Percentage)")]
 		Player_Health_Percent,
-		[InspectorName("First Turn")]
-		First_Turn,
-		[InspectorName("Not First Turn")]
-		Not_First_Turn,
-		[InspectorName("Turns Since Last Action")]
-		Turns_Since_Last_Action,
-		[InspectorName("Last Attack")]
-		Last_Action_Index,
-		[InspectorName("Length of Last Word")]
+		[InspectorName("Round Number")]
+		Round_Number,
+
+		// Usually Interrupt/Cancel Conditions
+
+		[InspectorName("Damage Taken")]
+		Damage_Taken = 100,
+		[InspectorName("Length of Last Word Submitted")]
 		Last_Word_Length,
 		[InspectorName("Combo Length")]
 		Combo_Length,
-		[InspectorName("Combo Broken")]
-		Combo_Break,
-		[InspectorName(null), Obsolete]
-		Enemy_Killed,
 
-		//damage taken / percentage, can only be a cancel condition
-		[InspectorName("Damage Taken")]
-		Damage_Taken,
+		// No Value Needed
 
-		[InspectorName("Vacuumed Sandy Tiles")]
-		Vacuumed_Sandy_Tiles,
+		[InspectorName("Combo Broken"), NoValue]
+		Combo_Break = 200,
 
-		[InspectorName("Sandy Tiles on Board")]
-		Sandy_Tile_Count,
+		// Parameter Required
+
+		[InspectorName("Variant Tiles On Board"), NeedsParameter]
+		Variant_Tiles_On_Board = 300,
+
+		// Misc lookup
+
+		[InspectorName("Blackboard Value"), NeedsParameter]
+		Blackboard_Value = 400
 	}
 
 	public enum Comparator
@@ -229,44 +272,63 @@ public class AttackCondition
 		Greater_Than_Or_Equal,
 	}
 
+	[Flags]
+	public enum FCANCEL
+	{
+		[InspectorName("Never")]
+		IGNORE = 0,
+		[InspectorName("Start of Enemy Turn")]
+		START_OF_ENEMY_TURN = 1,
+		[InspectorName("Start of Round")]
+		START_OF_ROUND = 2,
+		[InspectorName("During Player Turn")]
+		DURING_PLAYER_TURN = 4,
+	}
+
+
+
 	[SerializeField]
-	private ConditionField _field;
+	private Category _category;
 	[SerializeField]
-	private Comparator _is;
+	private string _parameter;
+	[SerializeField]
+	private Comparator _comparator;
 	[SerializeField]
 	private float _value;
 
-	public bool IsConditionSatisfied(Enemy owner)
+	public FCANCEL _cancelKind;
+	public int _firstCancelRound;
+	public int _lastCancelRound;
+
+
+
+	public bool Passes(Enemy owner)
 	{
-		switch (_field)
+		switch (_category)
 		{
-			case ConditionField.Combo_Break:
-				throw new NotImplementedException();
-			case ConditionField.Enemy_Killed:
-				throw new NotImplementedException();
-			case ConditionField.First_Turn:
-				throw new NotImplementedException();
-			case ConditionField.Not_First_Turn:
+			case Category.Combo_Break:
 				throw new NotImplementedException();
 		}
 
-		int input = _field switch
+		float input = _category switch
 		{
-			ConditionField.Enemy_Health => owner.CurrentHealth,
-			ConditionField.Enemy_Health_Percent => owner.HealthPercent(),
-			ConditionField.Player_Health => Player.INSTANCE.CurrentHealth,
-			ConditionField.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
-			ConditionField.Turns_Since_Last_Action => owner._roundsSinceLastAction,
-			ConditionField.Last_Action_Index => owner.LastRuleIndex,
-			ConditionField.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord?.Text.Length ?? 0,
-			ConditionField.Combo_Length => throw new NotImplementedException(),
-			ConditionField.Damage_Taken => owner.LastDamageTaken,
-			ConditionField.Sandy_Tile_Count => GameBoard.INSTANCE.CountTiles(Tile.TileKind.Sandy),
-			ConditionField.Vacuumed_Sandy_Tiles => (int) owner._attackBlackboard.GetValueOrDefault(Tile.TileKind.Sandy.ToString(), 0),
-			_ => throw new NotImplementedException()
+			Category.Enemy_Health_Percent => owner.HealthPercent(),
+			Category.Player_Health_Percent => Player.INSTANCE.HealthPercent(),
+			Category.Round_Number => throw new NotImplementedException(),
+			Category.Last_Word_Length => BattleManager.INSTANCE.MostRecentWord?.Text.Length ?? 0,
+			Category.Combo_Length => throw new NotImplementedException(),
+			Category.Damage_Taken => owner.LastDamageTaken,
+			Category.Variant_Tiles_On_Board => GameBoard.INSTANCE.CountTiles((Tile.TileKind) Enum.Parse(typeof(Tile.TileKind), _parameter)),
+			Category.Blackboard_Value => owner._blackboard.GetValueOrDefault(_parameter, 0),
+			_ => throw new InvalidOperationException()
 		};
 
-		return _is switch
+		bool categoryIsPercent = _category == Category.Enemy_Health_Percent || _category == Category.Player_Health_Percent;
+		bool comparatorIsEqual = _comparator == Comparator.Equal;
+
+		Debug.Assert(!(categoryIsPercent && comparatorIsEqual), "Trying to compare equality for two decimal numbers is not recommended.");
+
+		return _comparator switch
 		{
 			Comparator.Equal => input == _value,
 			Comparator.Not_Equal => input != _value,
@@ -277,267 +339,122 @@ public class AttackCondition
 			_ => throw new InvalidOperationException()
 		};
 	}
-}
 
-[Serializable]
-public class AttackEffect
-{
-	public enum EffectKind
+
+
+	#region Enum Attributes
+	[AttributeUsage(AttributeTargets.Field)]
+	public class NeedsParameterAttribute : PropertyAttribute
 	{
-		[InspectorName("Do Nothing")]
-		Do_Nothing,
-		[InspectorName("Standard Attack")]
-		Standard_Attack,
-		[InspectorName("Transform Tiles")]
-		Transform_Tiles,
-		[InspectorName("Schooling Attack")]
-		Schooling_Attack,
+		public bool NeedsParameter { get; }
 
-		[InspectorName("Count Variant Tiles")]
-		Count_Variant_Tiles,
-		[InspectorName("Attack Per Variant Tile")]
-		Variant_Tile_Attack,
-	}
-
-	[SerializeField]
-	private float _afterEffectDelay;
-	public float AfterEffectDelay => _afterEffectDelay;
-
-	[SerializeField]
-	private bool _endsTurn;
-	public bool EndsTurn => _endsTurn;
-
-    [SerializeField]
-    private string _forecastDescription;
-    public string ForecastDescription => _forecastDescription;
-
-    [SerializeField, Tooltip("If past this effect, treat rule as complete if interrupted")]
-	private bool _isInterruptCheckpoint;
-	public bool IsInterruptCheckpoint => _isInterruptCheckpoint;
-
-
-	[SerializeField]
-	private EffectKind _effectKind;
-	public EffectKind Effect => _effectKind;
-
-	[Min(0), SerializeField]
-	public int _damage = 0;
-
-	[Min(1), SerializeField]
-	public int _minSchoolAttackHits = 1;
-
-	[Min(1), SerializeField]
-	public int _maxSchoolAttackHits = 1;
-
-	[SerializeField]
-	private Tile.TileKind _from;
-	[SerializeField]
-	private Tile.TileKind _to;
-	[SerializeField]
-	private int _numTiles;
-
-	public EffectData GenerateData()
-	{
-		return _effectKind switch
+		public NeedsParameterAttribute(bool needsParameter = true)
 		{
-			EffectKind.Do_Nothing => new WaitTurnData(),
-			EffectKind.Standard_Attack => new StandardAttackData(),
-			EffectKind.Transform_Tiles => new TransformTilesData(),
-
-			EffectKind.Schooling_Attack => new SchoolingAttackData(_minSchoolAttackHits, _maxSchoolAttackHits),
-
-			EffectKind.Count_Variant_Tiles => new EffectData(EffectKind.Count_Variant_Tiles),
-			EffectKind.Variant_Tile_Attack => new VariantTileAttackData(),
-			_ => null,
-		};
-	}
-
-	internal void StartEffect(EffectData data)
-	{
-		switch (_effectKind)
-		{
-			case EffectKind.Do_Nothing:
-				((WaitTurnData)data)._turnsWaited++;
-				break;
+			NeedsParameter = needsParameter;
 		}
 	}
 
-	/// <summary>
-	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done by this rule and false <br/>
-	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
-	/// </summary>
-	/// <param name="data">State data required for some rules</param>
-	/// <returns></returns>
-	internal bool UpdateEffect(EffectData data)
+
+
+	[AttributeUsage(AttributeTargets.Field)]
+	public class NoValueAttribute : PropertyAttribute
 	{
-		switch (_effectKind)
+		public NoValueAttribute()
 		{
-			case EffectKind.Standard_Attack:
-                
-                Player.INSTANCE._inventory.OnEnemyAttack(_damage, out float modifiedStandardDamage);
-                GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedStandardDamage);
-                Player.INSTANCE.CurrentHealth -= (int) modifiedStandardDamage;
-				Player.INSTANCE._inventory.OnPlayerTakeDamage();
-				((StandardAttackData)data)._hasAttacked = true;
-				break;
-
-			case EffectKind.Transform_Tiles:
-				if (_numTiles > 0)
-				{
-					GameBoard.INSTANCE.TransformRandomTiles(oldKind: _from, newKind: _to, num: _numTiles);
-				}
-				else
-				{
-					GameBoard.INSTANCE.TransformAllTiles(oldKind: _from, newKind: _to);
-				}
-				((TransformTilesData)data)._hasTransformed = true;
-				break;
-
-			case EffectKind.Schooling_Attack:
-				SchoolingAttackData schoolData = (SchoolingAttackData)data;
-
-				// animations would play here
-
-				if (schoolData._numHits < schoolData._targetHits)
-				{
-					schoolData._numHits++;
-				}
-
-				if (schoolData._numHits < schoolData._targetHits)
-				{
-					break;
-				}
-
-				Player.INSTANCE._inventory.OnEnemyAttack(_damage * schoolData._targetHits, out float modifiedSchoolDamage);
-				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedSchoolDamage);
-				Player.INSTANCE.CurrentHealth -= (int) modifiedSchoolDamage;
-				Player.INSTANCE._inventory.OnPlayerTakeDamage();
-				schoolData._hasDamaged = true;
-				break;
-
-			case EffectKind.Count_Variant_Tiles:
-				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()] = GameBoard.INSTANCE.CountTiles(_to);
-				break;
-
-			case EffectKind.Variant_Tile_Attack:
-
-				VariantTileAttackData variantData = (VariantTileAttackData)data;
-
-				Player.INSTANCE._inventory.OnEnemyAttack(_damage * BattleManager.INSTANCE.CurrentEnemy._attackBlackboard[_to.ToString()], out float modifiedVariantDamage);
-				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedVariantDamage);
-				Player.INSTANCE.CurrentHealth -= (int) modifiedVariantDamage;
-				Player.INSTANCE._inventory.OnPlayerTakeDamage();
-				BattleManager.INSTANCE.CurrentEnemy._attackBlackboard.Remove(_to.ToString());
-				variantData._hasAttacked = true;
-				break;
-
 
 		}
-
-		return IsComplete(data);
 	}
+	#endregion
 
-	internal bool IsComplete(EffectData data)
+
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(Condition))]
+	public class ConditionPropertyDrawer : PropertyDrawer
 	{
-		return _effectKind switch
+		protected static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+
+
+
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
-			EffectKind.Do_Nothing => true,
-			EffectKind.Standard_Attack => ((StandardAttackData)data)._hasAttacked,
-			EffectKind.Transform_Tiles => ((TransformTilesData)data)._hasTransformed,
-			EffectKind.Schooling_Attack => ((SchoolingAttackData)data)._hasDamaged,
-			EffectKind.Count_Variant_Tiles => true,
-			EffectKind.Variant_Tile_Attack => ((VariantTileAttackData)data)._hasAttacked,
-			_ => throw new NotImplementedException($"IsComplete() does not handle {_effectKind}"),
-		};
-	}
-}
+			EditorGUI.BeginProperty(position, label, property);
+			position.height = EditorGUIUtility.singleLineHeight;
 
-/// <summary>
-/// Any extra metadata we need to complete an AttackEffect
-/// </summary>
-public class EffectData
-{
-	public readonly AttackEffect.EffectKind _effectKind;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_category"));
 
-	public float _effectEndTime = -1.0f;
+			if (CategoryNeedsParameter(property))
+			{
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_parameter"));
+			}
 
-	public EffectData(AttackEffect.EffectKind effectKind)
-	{
-		_effectKind = effectKind;
-	}
-}
+			if (CategoryNeedsValue(property))
+			{
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_comparator"));
 
-public class WaitTurnData : EffectData
-{
-	// TODO support multiple turns of waiting to avoid having to create multiple effects for a multi-turn wait
-	public int _turnsWaited = 0;
+				position.y += Y_OFFSET;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_value"));
+			}
 
-	public WaitTurnData() : base(AttackEffect.EffectKind.Do_Nothing)
-	{
-	}
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Cancellation Rules", EditorStyles.boldLabel);
 
-	public override string ToString()
-	{
-		return "Turns Waited: " + _turnsWaited;
-	}
-}
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_cancelKind"), new GUIContent("Cancel if False"));
 
-public class StandardAttackData : EffectData
-{
-	public bool _hasAttacked = false;
+			if (CancelKindNeedsRoundNumbers(property))
+			{
+				position.y += Y_OFFSET;
 
-	public StandardAttackData() : base(AttackEffect.EffectKind.Standard_Attack)
-	{
-	}
+				float tmpWidth = position.width;
+				float tmpX = position.x;
 
-	public override string ToString()
-	{
-		return "Has Attacked: " + _hasAttacked;
-	}
-}
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_firstCancelRound"), new GUIContent("Between Rounds"));
 
-public class TransformTilesData : EffectData
-{
-	public bool _hasTransformed = false;
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_lastCancelRound"), new GUIContent("  and"));
 
-	public TransformTilesData() : base(AttackEffect.EffectKind.Transform_Tiles)
-	{
-	}
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+		}
 
-	public override string ToString()
-	{
-		return "Has Transformed: " + _hasTransformed;
-	}
-}
-
-public class SchoolingAttackData : EffectData
-{
-	public int _numHits = 0;
-	public int _targetHits = 0;
-
-	public bool _hasDamaged = false;
-
-	public SchoolingAttackData(int minHits, int maxHits) : base(AttackEffect.EffectKind.Schooling_Attack)
-	{
-		_targetHits = minHits + (int)((BattleManager.INSTANCE.CurrentEnemy.HealthPercent() / 100f) * (maxHits - minHits + 1));
-
-		// if minhits is 1 and maxHits is 20, we have [0, 0.05) = 1 hit, [0.05, 0.1) = 2 hits, etc
-		//  but at 1 exactly, it would equal 21 hits, so we clamp it.
-
-		if (_targetHits > maxHits)
+		private bool CategoryNeedsParameter(SerializedProperty property)
 		{
-			_targetHits = maxHits;
+			Type enumType = typeof(Condition.Category);
+			string name = Enum.GetName(enumType, property.FindPropertyRelative("_category").enumValueFlag);
+			NeedsParameterAttribute attr = enumType.GetField(name).GetCustomAttributes(false).OfType<NeedsParameterAttribute>().SingleOrDefault();
+
+			return attr != null && attr.NeedsParameter;
+		}
+
+		private bool CategoryNeedsValue(SerializedProperty property)
+		{
+			Type enumType = typeof(Condition.Category);
+			string name = Enum.GetName(enumType, property.FindPropertyRelative("_category").enumValueFlag);
+			NoValueAttribute attr = enumType.GetField(name).GetCustomAttributes(false).OfType<NoValueAttribute>().SingleOrDefault();
+
+			return attr == null;
+		}
+
+		private bool CancelKindNeedsRoundNumbers(SerializedProperty property)
+		{
+			return property.FindPropertyRelative("_cancelKind").enumValueFlag != 0;
+		}
+
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		{
+			return base.GetPropertyHeight(property, label) +
+				((CategoryNeedsParameter(property) ? 1 : 0) +
+				(CategoryNeedsValue(property) ? 2 : 0) +
+				2 + 
+				(CancelKindNeedsRoundNumbers(property) ? 1 : 0)
+				)
+				 * Y_OFFSET;
 		}
 	}
+#endif
 }
-
-public class VariantTileAttackData : EffectData
-{
-	public bool _hasAttacked = false;
-
-	public VariantTileAttackData() : base(AttackEffect.EffectKind.Variant_Tile_Attack)
-	{
-
-	}
-}
-

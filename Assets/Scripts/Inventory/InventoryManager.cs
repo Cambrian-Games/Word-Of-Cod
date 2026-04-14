@@ -229,7 +229,7 @@ public class InventoryManager : MonoBehaviour
 			{
 				if (Player.INSTANCE.CurrentHealth <= 0)
 				{
-					Player.INSTANCE.CurrentHealth = (Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
+					Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
 					stone.SetUsed(true);
 					int index = _activeRelicInventory.IndexOf(1);
 					_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite =

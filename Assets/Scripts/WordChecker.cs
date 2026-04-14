@@ -1,14 +1,19 @@
+#if UNITY_EDITOR
+//#define DICTIONARY_TESTING // comment out to turn off this logging
+#endif
+
 using odin.serialize.OdinSerializer;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+
 
 public class WordChecker : MonoBehaviour
 {
     //the dictionary
     public SerializedDict _allWords;
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR && DICTIONARY_TESTING
 	private bool _hasRunTest = false;
 #endif
 
@@ -39,17 +44,18 @@ public class WordChecker : MonoBehaviour
 
 	}
 
+#if UNITY_EDITOR && DICTIONARY_TESTING
     //checks if the word is in the dict, if yes returns true, if no return false
     public bool CheckWord(string word, out FPART pOS)
     {
         //returns true if the word is in the dictionary, and puts the parts of speech in pOS
         //otherwise returns false
-        Debug.Log("Checking: " + word);
-		Debug.Log("");
 
 		if (!_allWords || _allWords._dict == null)
 		{
 			pOS = FPART.NONE;
+
+			Debug.Log($"Word list not found. Treating {word} as a word.");
 			return true;
 		}
 
@@ -58,11 +64,16 @@ public class WordChecker : MonoBehaviour
 			pOS = FPART.NONE;
 			string wordTest = word.ToLower();
 			// hard coding this for now
+
+			Debug.Log($"Word {word} has length 1");
 			return wordTest[0] == 'a' || wordTest[0] == 'i' || wordTest[0] == 'o';
 		}
 
-        return _allWords._dict.TryGetValue(word.ToLower(), out pOS);
+		bool result = _allWords._dict.TryGetValue(word.ToLower(), out pOS);
+		Debug.Log($"{word} is {(result ? "" : " not ")} a word");
+		return result;
 	}
+#endif
 
     internal bool TryGetWord(string text, List<Tile> tilesUsed, out Word word)
     {
@@ -103,7 +114,7 @@ public class WordChecker : MonoBehaviour
     // Update is called once per frame
     void Update()
 	{
-#if UNITY_EDITOR
+#if UNITY_EDITOR && DICTIONARY_TESTING
 		//runs once to test dict, after start, so every script inits first. No lateStart sadly
 		if (!_hasRunTest)
 		{

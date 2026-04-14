@@ -80,8 +80,16 @@ public class GameBoard : MonoBehaviour
 
 		GenerateBoard();
 
-		TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Spiny, numSpinyTiles);
-		TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Sandy, numSandyTiles);
+		if (numSpinyTiles > 0)
+		{
+			TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Spiny, numSpinyTiles);
+		}
+
+		if (numSandyTiles > 0)
+		{
+			TransformRandomTiles(Tile.TileKind.Normal, Tile.TileKind.Sandy, numSandyTiles);
+		}
+		
 	}
 
 	private void UpdateResolveState()
@@ -371,23 +379,22 @@ public class GameBoard : MonoBehaviour
 	{
 		int converted = 0;
 
-		// TODO make this a bit more intelligent. Maybe grab all eligible tiles before selecting
-		int maxAttempts = num * 2;
-		int numAttempts = 0;
+		List<Tile> allTilesOfOldKind = _playableBoard.OfType<Tile>().Where(tile => tile.Kind == oldKind).ToList();
 
-		Vector2Int dims = _config.Layout.Dims();
-
-		while (converted < num && numAttempts < maxAttempts)
+		if (num >= allTilesOfOldKind.Count || num == 0)
 		{
-			int randCol = UnityEngine.Random.Range(0, dims.x);
-			int randRow = UnityEngine.Random.Range(0, dims.y);
+			TransformAllTiles(oldKind, newKind);
+			return;
+		}
 
-			if (_playableBoard[randCol, randRow] && _playableBoard[randCol, randRow].Kind == oldKind)
-			{
-                TransformTile(new Vector2Int(randCol, randRow), newKind);
-				converted++;
-			}
-			numAttempts++;
+		while (converted < num)
+		{
+			int tileIndex = UnityEngine.Random.Range(0, allTilesOfOldKind.Count);
+
+			TransformTile(allTilesOfOldKind[tileIndex], newKind);
+			allTilesOfOldKind.RemoveAt(tileIndex);
+
+			converted++;
 		}
 	}
 
@@ -397,9 +404,14 @@ public class GameBoard : MonoBehaviour
 		{
 			if (tile && tile.Kind == oldKind)
 			{
-				TransformTile(tile._coord, newKind);
+				TransformTile(tile, newKind);
 			}
 		}
+	}
+
+	internal void TransformTile(Tile tile, Tile.TileKind newKind)
+	{
+		TransformTile(tile._coord, newKind);
 	}
 
 	internal void TransformTile(Vector2Int coord, Tile.TileKind newKind)
@@ -420,9 +432,9 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x - 1, tileCoord.y];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
-				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+				TransformTile(targetTile, Tile.TileKind.Normal);
 			}
         }
 
@@ -430,9 +442,9 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x + 1, tileCoord.y];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
-				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+				TransformTile(targetTile, Tile.TileKind.Normal);
 			}
 		}
 
@@ -440,9 +452,9 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x, tileCoord.y - 1];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
-				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+				TransformTile(targetTile, Tile.TileKind.Normal);
 			}
 		}
 
@@ -450,9 +462,9 @@ public class GameBoard : MonoBehaviour
         {
 			Tile targetTile = _playableBoard[tileCoord.x, tileCoord.y + 1];
 
-			if (targetTile.Kind == Tile.TileKind.Sandy)
+			if (targetTile && targetTile.Kind == Tile.TileKind.Sandy)
 			{
-				TransformTile(targetTile._coord, Tile.TileKind.Normal);
+				TransformTile(targetTile, Tile.TileKind.Normal);
 			}
 		}
     }
