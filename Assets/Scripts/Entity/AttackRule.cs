@@ -308,7 +308,7 @@ public class Condition
 		bool categoryIsPercent = _category == Category.Enemy_Health_Percent || _category == Category.Player_Health_Percent;
 		bool comparatorIsEqual = _comparator == Comparator.Equal;
 
-		Debug.Assert(categoryIsPercent != comparatorIsEqual, "Trying to compare equality for two decimal numbers is not recommended.");
+		Debug.Assert(!(categoryIsPercent && comparatorIsEqual), "Trying to compare equality for two decimal numbers is not recommended.");
 
 		return _comparator switch
 		{

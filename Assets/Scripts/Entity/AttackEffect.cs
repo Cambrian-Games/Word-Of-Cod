@@ -1,7 +1,8 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using static UnityEngine.Analytics.IAnalytic;
 
 [Serializable]
 public abstract class AttackEffect
@@ -11,7 +12,7 @@ public abstract class AttackEffect
 #endif
 
 	[SerializeField]
-	private string _forecast;
+	protected string _forecast;
 
 	[SerializeField, Min(1)]
 	protected int _numTurns = 1;
@@ -46,7 +47,7 @@ public abstract class AttackEffect
 
 	/// <summary>
 	/// Ticks once per frame via EnemyTurnHandler. Returns true if there is no more work to be done this turn by this rule and false <br/>
-	/// if more work is required (i.e. animations). Not intended to be called again once it has returned true. 
+	/// if more work is required (i.e. animations). Not intended to be called again during a turn once it has returned true. 
 	/// </summary>
 	internal virtual bool UpdateEffect(Enemy owner) => IsTurnComplete(owner);
 	internal virtual bool IsTurnComplete(Enemy owner) => true;
@@ -54,7 +55,7 @@ public abstract class AttackEffect
 
 	internal bool OnLastTurn() => _currentTurn >= _numTurns;
 
-	public string FormattedForecast()
+	public virtual string FormattedForecast()
 	{
 		string nowReplaced = _forecast.Replace("$NOW", "This Round");
 
@@ -173,7 +174,6 @@ public class StandardAttack : AttackEffect
 	[CustomPropertyDrawer(typeof(StandardAttack))]
 	public class StandardAttackPropertyDrawer : AttackEffectPropertyDrawer
 	{
-
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
@@ -379,6 +379,8 @@ public class SchoolingAttack : StandardAttack
 
 	private int _numHits = 0;
 
+
+
 	internal override void StartEffect(Enemy owner)
 	{
 		base.StartEffect(owner);
@@ -479,3 +481,272 @@ public class SchoolingAttack : StandardAttack
 	}
 #endif
 }
+
+
+[Serializable]
+public abstract class VariableTurnAttack : AttackEffect
+{
+#if UNITY_EDITOR
+	[SerializeField, Min(1)]
+	protected int _minTurns = 1;
+
+	[SerializeField, Min(1)]
+	protected int _maxTurns = 1;
+#endif
+
+	protected int _repetitions = 0;
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(VariableTurnAttack))]
+	public class VariableTurnAttackPropertyDrawer : AttackEffectPropertyDrawer
+	{
+		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_name"));
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_forecast"));
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Minimum and Maximum Turns This Effect Can Take ", EditorStyles.boldLabel);
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "(Not Used In-Game)", EditorStyles.boldLabel);
+
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				GUI.enabled = false;
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_minTurns"));
+
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_maxTurns"));
+				GUI.enabled = true;
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_numTurns"), new GUIContent("Repeat Count"));
+
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_endsTurn"));
+
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_isCritical"));
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+
+			return position;
+		}
+
+		protected override float EffectHeight()
+		{
+			return 6 * Y_OFFSET;
+		}
+	}
+#endif
+}
+
+[Serializable]
+public class SandSuckAttack : VariableTurnAttack
+{
+	private enum SandGatherState
+	{
+		Needs_To_Gather,
+		Has_Attempted_Gather,
+		Needs_To_Attack,
+		Has_Attacked
+	}
+
+	[SerializeField, Min(1)]
+	private int _damagePerTile;
+
+	[SerializeField]
+	private string _secondTurnForecast;
+
+	// used for shuffling forecasts around when there are multiple
+	private string _forecastTmp;
+
+	private int _tilesGathered = 0;
+	private SandGatherState _state = SandGatherState.Needs_To_Gather;
+
+
+
+	internal override void StartEffect(Enemy owner)
+	{
+		base.StartEffect(owner);
+
+		_repetitions = 0;
+
+		_tilesGathered = 0;
+		_state = SandGatherState.Needs_To_Gather;
+	}
+
+	internal override void StartTurn(Enemy owner)
+	{
+		base.StartTurn(owner);
+
+		switch (_state)
+		{
+			case SandGatherState.Needs_To_Gather:
+			case SandGatherState.Has_Attacked:
+
+				// starting fresh or after an attack, we need to gather
+
+				_tilesGathered = 0;
+				_repetitions++;
+
+				_state = SandGatherState.Needs_To_Gather;
+				break;
+
+			case SandGatherState.Has_Attempted_Gather:
+				if (_tilesGathered == 0)
+				{
+					// failed to collect sand last turn, needs to gather. Repetition increments
+					_repetitions++;
+
+					_state = SandGatherState.Needs_To_Gather;
+				}
+				else
+				{
+					// sand has been collected, need to attack
+					_state = SandGatherState.Needs_To_Attack;
+				}
+				break;
+		}
+	}
+
+	internal override void Reset(Enemy owner)
+	{
+		base.Reset(owner);
+
+		_repetitions = 0;
+
+		_tilesGathered = 0;
+		_state = SandGatherState.Needs_To_Gather;
+	}
+
+	internal override bool UpdateEffect(Enemy owner)
+	{
+		switch (_state)
+		{
+			case SandGatherState.Needs_To_Gather:
+				_tilesGathered = GameBoard.INSTANCE.CountTiles(Tile.TileKind.Sandy);
+				GameBoard.INSTANCE.TransformAllTiles(Tile.TileKind.Sandy, Tile.TileKind.Normal);
+
+				_state = SandGatherState.Has_Attempted_Gather;
+				break;
+
+			case SandGatherState.Needs_To_Attack:
+
+				Debug.Assert(_tilesGathered > 0);
+
+				Player.INSTANCE._inventory.OnEnemyAttack(_damagePerTile * _tilesGathered, out float modifiedDamage);
+				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedDamage);
+				Player.INSTANCE.Damage((int)modifiedDamage);
+
+				_tilesGathered = 0;
+
+				_state = SandGatherState.Has_Attacked;
+				break;
+		}
+
+		return true;
+	}
+
+	// all sub-effects are single-frame right now
+	internal override bool IsTurnComplete(Enemy owner) => _state == SandGatherState.Has_Attempted_Gather || _state == SandGatherState.Has_Attacked;
+
+	// if the last loop has terminated
+	internal override bool IsEffectComplete(Enemy owner)
+	{
+		// not on final repetition
+
+		if (_repetitions < _numTurns)
+			return false;
+
+		// attack has happened on final repetition
+
+		if (_state == SandGatherState.Has_Attacked)
+			return true;
+
+		// if we have failed to gather sand on the final repetition, effect is over.
+
+		return _state == SandGatherState.Has_Attempted_Gather && _tilesGathered == 0;
+	}
+
+	public override string FormattedForecast()
+	{
+		if (_state == SandGatherState.Needs_To_Gather || _state == SandGatherState.Has_Attacked)
+		{
+			if (_forecast == _secondTurnForecast)
+			{
+				// the first forecast is in _forecastTmp, so we move it and empty the temporary variable
+
+				_forecast = _forecastTmp;
+				_forecastTmp = null;
+			}
+		}
+		else if (_state == SandGatherState.Needs_To_Attack ||
+				_state == SandGatherState.Has_Attempted_Gather && _tilesGathered > 0)
+		{
+			if (_forecast != _secondTurnForecast)
+			{
+				_forecastTmp = _forecast;
+				_forecast = _secondTurnForecast;
+			}
+		}
+
+		return base.FormattedForecast();
+	}
+
+
+#if UNITY_EDITOR
+	[CustomPropertyDrawer(typeof(SandSuckAttack))]
+	public class SandSuckAttackPropertyDrawer : VariableTurnAttackPropertyDrawer
+	{
+		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
+		{
+			position = base.EffectGUI(position, label, property);
+
+			// this is bad practice but there aren't any good alternatives that don't require adding a bunch of Validate() functions.
+			property.FindPropertyRelative("_maxTurns").intValue = 2;
+
+			// count variables from here
+
+			position.y += Y_OFFSET;
+			EditorGUI.LabelField(position, "Sand Suck Attack Data", EditorStyles.boldLabel);
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_secondTurnForecast"), new GUIContent("Turn 2 Forecast"));
+
+			position.y += Y_OFFSET;
+			EditorGUI.PropertyField(position, property.FindPropertyRelative("_damagePerTile"));
+
+			return position;
+		}
+
+		protected override float EffectHeight()
+		{
+			return base.EffectHeight() + 3 * Y_OFFSET;
+		}
+	}
+#endif
+}
+
