@@ -14,10 +14,15 @@ public class AttackRule
 	[HideInInspector]
 	public int _index;
 
-	public List<Condition> _conditions;
+	[SerializeField]
+	private List<Condition> _conditions;
 
 	[SerializeReference, SubclassSelector]
-	public List<AttackEffect> _effects;
+	private List<AttackEffect> _effects;
+
+#if UNITY_EDITOR
+	public List<AttackEffect> Effects => _effects;
+#endif
 
 	private int _currentEffectIndex;
 	private bool _stayInCurrentEffect;
@@ -87,12 +92,14 @@ public class AttackRule
 						continue;
 				}
 			}
+		
+			// TODO long-term, interrupt rules need to remember the previous state of the game
+			//  and only trigger when something flips from false to true and not while it stays true.
+			//  Possibly requires a subclass of AttackRule that overrides CanRun() and has some more data?
 		}
 
 		return true;
 	}
-
-	public bool HasStarted() => _currentEffectIndex >= 0;
 
 	public void StartRule(Enemy owner)
 	{
@@ -111,6 +118,9 @@ public class AttackRule
 	public void CancelRule(Enemy owner)
 	{
 		_currentEffectIndex = -1;
+		_stayInCurrentEffect = false;
+		_roundCount = 0;
+
 		_effects.ForEach(_effect => _effect.Reset(owner));
 	}
 
@@ -145,7 +155,7 @@ public class AttackRule
 			return true;
 		}
 
-		// current effect is incomplete. This first check should be true in most cases but is a good safeguard.
+		// current effect is incomplete. In general, effectTurnComplete should be false here, but it's a good safeguard.
 
 		bool effectTurnComplete = CurrentEffect.IsTurnComplete(owner);
 
@@ -275,6 +285,8 @@ public class Condition
 		DURING_PLAYER_TURN = 4,
 	}
 
+
+
 	[SerializeField]
 	private Category _category;
 	[SerializeField]
@@ -328,6 +340,8 @@ public class Condition
 		};
 	}
 
+
+
 	#region Enum Attributes
 	[AttributeUsage(AttributeTargets.Field)]
 	public class NeedsParameterAttribute : PropertyAttribute
@@ -340,6 +354,8 @@ public class Condition
 		}
 	}
 
+
+
 	[AttributeUsage(AttributeTargets.Field)]
 	public class NoValueAttribute : PropertyAttribute
 	{
@@ -350,11 +366,15 @@ public class Condition
 	}
 	#endregion
 
+
+
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(Condition))]
 	public class ConditionPropertyDrawer : PropertyDrawer
 	{
 		protected static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+
+
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -436,6 +456,5 @@ public class Condition
 				 * Y_OFFSET;
 		}
 	}
-
 #endif
 }

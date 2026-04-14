@@ -231,7 +231,14 @@ public class BattleManager : MonoBehaviour
 
             case BattleState.Enemy_Turn:
 				_enemy.StartTurn();
-                break;
+
+				if (_forecastText.text != _enemy.FormattedForecast())
+				{
+					Debug.Log("Forecast Change! " + _enemy.FormattedForecast());
+					//change forecast text
+					_forecastText.text = _enemy.FormattedForecast();
+				}
+				break;
 
             case BattleState.Post_Enemy_Turn:
                 if (Player.INSTANCE.CurrentHealth <= 0)

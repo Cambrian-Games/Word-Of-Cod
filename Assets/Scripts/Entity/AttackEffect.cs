@@ -1,6 +1,4 @@
-using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -28,21 +26,27 @@ public abstract class AttackEffect
 	private bool _isCritical;
 	public bool IsCritical => _isCritical;
 
+	// IsEffectComplete() is called a LOT, so we cache it once it becomes true.
+	protected bool _isEffectComplete = false;
+
 
 
 	internal virtual void StartEffect(Enemy owner)
 	{
 		_currentTurn = 0;
+		_isEffectComplete = false;
 	}
 
 	internal virtual void StartTurn(Enemy owner)
 	{
 		_currentTurn++;
+		_isEffectComplete = false;
 	}
 
 	internal virtual void Reset(Enemy owner)
 	{
 		_currentTurn = 0;
+		_isEffectComplete = false;
 	}
 
 	/// <summary>
@@ -51,7 +55,13 @@ public abstract class AttackEffect
 	/// </summary>
 	internal virtual bool UpdateEffect(Enemy owner) => IsTurnComplete(owner);
 	internal virtual bool IsTurnComplete(Enemy owner) => true;
-	internal virtual bool IsEffectComplete(Enemy owner) => IsTurnComplete(owner) && OnLastTurn();
+	internal virtual bool IsEffectComplete(Enemy owner)
+	{
+		if (_isEffectComplete) return true;
+
+		_isEffectComplete = IsTurnComplete(owner) && OnLastTurn();
+		return _isEffectComplete;
+	}
 
 	internal bool OnLastTurn() => _currentTurn >= _numTurns;
 
@@ -73,6 +83,8 @@ public abstract class AttackEffect
 	public class AttackEffectPropertyDrawer : PropertyDrawer
 	{
 		protected static readonly float Y_OFFSET = EditorGUIUtility.standardVerticalSpacing + EditorGUIUtility.singleLineHeight;
+
+
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -133,6 +145,8 @@ public class StandardAttack : AttackEffect
 
 	protected bool _hasAttacked = false;
 
+
+
 	internal override void StartEffect(Enemy owner)
 	{
 		base.StartEffect(owner);
@@ -170,6 +184,8 @@ public class StandardAttack : AttackEffect
 		return _hasAttacked;
 	}
 
+
+
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(StandardAttack))]
 	public class StandardAttackPropertyDrawer : AttackEffectPropertyDrawer
@@ -204,6 +220,8 @@ public class Wait : AttackEffect
 
 	private float _timeWaited = 0.0f;
 	private bool _hasWaited = false;
+
+
 
 	internal override void StartEffect(Enemy owner)
 	{
@@ -244,11 +262,12 @@ public class Wait : AttackEffect
 		return _hasWaited;
 	}
 
+
+
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(Wait))]
 	public class WaitPropertyDrawer : AttackEffectPropertyDrawer
 	{
-
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
@@ -286,6 +305,8 @@ public class TransformTiles : AttackEffect
 
 	private bool _hasTransformedTiles = false;
 
+
+
 	internal override void StartEffect(Enemy owner)
 	{
 		base.StartEffect(owner);
@@ -321,11 +342,12 @@ public class TransformTiles : AttackEffect
 		return _hasTransformedTiles;
 	}
 
+
+
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(TransformTiles))]
 	public class TransformTilesPropertyDrawer : AttackEffectPropertyDrawer
 	{
-
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
@@ -391,7 +413,6 @@ public class SchoolingAttack : StandardAttack
 		// Min(b, a - au + bu + u)
 		// Min(b, a + u(b - a + 1)) minimizes multiplication
 
-
 		float a = _minHits;
 		float b = _maxHits;
 		float u = owner.HealthPercent();
@@ -444,10 +465,7 @@ public class SchoolingAttack : StandardAttack
 		return IsTurnComplete(owner);
 	}
 
-	internal override bool IsTurnComplete(Enemy owner)
-	{
-		return base.IsTurnComplete(owner);
-	}
+
 
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(SchoolingAttack))]
@@ -495,6 +513,8 @@ public abstract class VariableTurnAttack : AttackEffect
 #endif
 
 	protected int _repetitions = 0;
+
+
 
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(VariableTurnAttack))]
@@ -573,6 +593,8 @@ public class SandSuckAttack : VariableTurnAttack
 		Needs_To_Attack,
 		Has_Attacked
 	}
+
+
 
 	[SerializeField, Min(1)]
 	private int _damagePerTile;
@@ -676,6 +698,9 @@ public class SandSuckAttack : VariableTurnAttack
 	// if the last loop has terminated
 	internal override bool IsEffectComplete(Enemy owner)
 	{
+		if (_isEffectComplete)
+			return true;
+
 		// not on final repetition
 
 		if (_repetitions < _numTurns)
@@ -684,11 +709,15 @@ public class SandSuckAttack : VariableTurnAttack
 		// attack has happened on final repetition
 
 		if (_state == SandGatherState.Has_Attacked)
-			return true;
+		{
+			_isEffectComplete = true;
+			return _isEffectComplete;
+		}
 
 		// if we have failed to gather sand on the final repetition, effect is over.
 
-		return _state == SandGatherState.Has_Attempted_Gather && _tilesGathered == 0;
+		_isEffectComplete = _state == SandGatherState.Has_Attempted_Gather && _tilesGathered == 0;
+		return _isEffectComplete;
 	}
 
 	public override string FormattedForecast()
@@ -715,6 +744,7 @@ public class SandSuckAttack : VariableTurnAttack
 
 		return base.FormattedForecast();
 	}
+
 
 
 #if UNITY_EDITOR
@@ -749,4 +779,3 @@ public class SandSuckAttack : VariableTurnAttack
 	}
 #endif
 }
-

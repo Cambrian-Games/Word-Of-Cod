@@ -14,6 +14,8 @@ public enum AttackSchedulePolicy
 	Random_From_All_Available
 }
 
+
+
 public class Enemy : Entity
 {
 	// config
@@ -34,6 +36,8 @@ public class Enemy : Entity
 
 	internal int _currentRuleIndex = -1;
 	internal int _currentInterruptIndex = -1;
+
+	// used for attack selection
 	private int _lastRuleIndex = -1;
 
 	public AttackRule CurrentRule => _currentRuleIndex == -1 ? null : _rules[_currentRuleIndex];
@@ -43,6 +47,8 @@ public class Enemy : Entity
 	public bool IsTurnComplete => _isTurnComplete;
 
 	private string _currentForecast;
+
+	private bool _hasSelectedAttack = false;
 
 	// create once, never re-assign
 	internal readonly Dictionary<string, float> _blackboard = new Dictionary<string, float>();
@@ -63,6 +69,17 @@ public class Enemy : Entity
 				hasNullRules = true;
 				_rules.RemoveAt(i);
 			}
+			else
+			{
+				for (int j = _rules[i].Effects.Count - 1; j >= 0; j--)
+				{
+					if (_rules[i].Effects[j] == null)
+					{
+						Debug.LogError($"{_displayName}: {_rules[i]._name}'s effect {j} is null!");
+						_rules[i].Effects.RemoveAt(j);
+					}
+				}
+			}
 		}
 
 		for (int i = _interruptRules.Count - 1; i >= 0; i--)
@@ -71,6 +88,17 @@ public class Enemy : Entity
 			{
 				hasNullRules = true;
 				_interruptRules.RemoveAt(i);
+			}
+			else
+			{
+				for (int j = _interruptRules[i].Effects.Count - 1; j >= 0; j--)
+				{
+					if (_interruptRules[i].Effects[j] == null)
+					{
+						Debug.LogError($"{_displayName}: {_interruptRules[i]._name}'s effect {j} is null!");
+						_interruptRules[i].Effects.RemoveAt(j);
+					}
+				}
 			}
 		}
 
@@ -83,6 +111,7 @@ public class Enemy : Entity
 		for (int ruleIndex = 0; ruleIndex < _rules.Count; ruleIndex++)
 		{
 			_rules[ruleIndex]._index = ruleIndex;
+			// if we decide we want effect-specific validation we can add it here
 		}
 
 		for (int ruleIndex = 0; ruleIndex < _interruptRules.Count; ruleIndex++)
@@ -93,39 +122,52 @@ public class Enemy : Entity
 
 	public bool SelectRule()
 	{
-		Debug.Assert((CurrentRule != null) != (CurrentInterrupt != null), "One of CurrentRule and CurrentInterrupt should always be null");
-
-		// check if the current interrupt should continue to run
-
-		if (CurrentInterrupt != null && !CurrentInterrupt.IsComplete(this))
+		if (_hasSelectedAttack)
 		{
-			if (CurrentInterrupt.InCriticalEffect())
-				return false;
-
-			else if (!CurrentInterrupt.CanRun(this))
-			{
-				CurrentRule.CancelRule(this);
-				_currentInterruptIndex = -1;
-			}
+			Debug.Assert((CurrentRule != null) != (CurrentInterrupt != null), "One of CurrentRule and CurrentInterrupt should always be null");
 		}
 
-		// check if the current rule should continue to run. CurrentRule and CurrentInterrupt should never both be non-null
+		_hasSelectedAttack = true;
 
-		if (CurrentRule != null && !CurrentRule.IsComplete(this))
+		// check if the current rule should continue to run. At least one of CurrentRule and CurrentInterrupt exists here
+		//  if it is not the first time an attack is selected.
+
+		AttackRule activeRule = CurrentInterrupt ?? CurrentRule;
+
+		if (activeRule != null && !activeRule.IsComplete(this))
 		{
-			if (CurrentRule.InCriticalEffect())
+			// cannot leave a critical effect
+
+			if (activeRule.InCriticalEffect())
 				return false;
 
-			else if (!CurrentRule.CanRun(this))
+			if (!activeRule.CanRun(this))
 			{
-				CurrentRule.CancelRule(this);
+				activeRule.CancelRule(this);
+
+				// one of these was already -1 when entering this section, and we are cancelling the other one
+
+				_currentInterruptIndex = -1;
 				_currentRuleIndex = -1;
 			}
 		}
 
-		// check for an interrupt
+		// check for an applicable interrupt. This CanRun() check may be funky for interrupts and may require
+		//  extra fields in AttackRule::Condition.
 
-		List<AttackRule> interruptCandidates = _interruptRules.Where(interrupt => interrupt.CanRun(this)).ToList();
+		List<AttackRule> interruptCandidates = new List<AttackRule>();
+
+		foreach (AttackRule interrupt in _interruptRules)
+		{
+			// no self-interrupting. Make a duplicate if you want this
+			if (interrupt != null && (interrupt == CurrentInterrupt))
+				continue;
+
+			if (!interrupt.CanRun(this))
+				continue;
+
+			interruptCandidates.Add(interrupt);
+		}
 
 		if (interruptCandidates.Count > 0)
 		{
@@ -152,6 +194,8 @@ public class Enemy : Entity
 				newInterruptIndex = interruptCandidates[index]._index;
 			}
 
+			// if we've found a new interrupt
+
 			if (newInterruptIndex != -1)
 			{
 				Debug.Assert(_interruptRules[newInterruptIndex].CanRun(this));
@@ -169,10 +213,14 @@ public class Enemy : Entity
 			}
 		}
 
-		// no applicable interrupt was found, and we have an in-progress rule
+		// no applicable new interrupt was found, and we have an in-progress rule (normal or interrupt), stay in it
 
-		if (CurrentRule != null && !CurrentRule.IsComplete(this))
+		activeRule = CurrentInterrupt ?? CurrentRule;
+
+		if (activeRule != null && !activeRule.IsComplete(this))
 			return false;
+
+		// no active rule or interrupt, select a new attack
 
 		#region Local Selection Functions
 			int RepeatUntilNextAvailable()
@@ -188,13 +236,14 @@ public class Enemy : Entity
 
 			int NextAvailable()
 			{
-				int nextRuleIndex = (_lastRuleIndex + 1) % _rules.Count;
+				int numRules = _rules.Count;
+				int nextRuleIndex = (_lastRuleIndex + 1) % numRules;
 
 				// loop through every rule starting with the next in line, checking whether it can run.
 				// The loop will terminate the first time it can run a rule, or if nextRuleIndex == _lastRuleIndex (after checking if it can run)
 
 				while (!_rules[nextRuleIndex].CanRun(this) && nextRuleIndex != _lastRuleIndex)
-					nextRuleIndex = nextRuleIndex + 1 % _rules.Count;
+					nextRuleIndex = nextRuleIndex + 1 % numRules;
 
 				Debug.Assert(_rules[nextRuleIndex].CanRun(this), "Can't select a rule! Please check configuration.");
 				return nextRuleIndex;
@@ -202,8 +251,8 @@ public class Enemy : Entity
 
 			int FirstAvailable()
 			{
-				int nextRuleIndex = 0;
 				int numRules = _rules.Count;
+				int nextRuleIndex = 0;
 
 				// loop through every rule starting at 0, checking whether it can run.
 				// The loop will terminate after checking every rule or when it can find a valid rule.
@@ -221,7 +270,7 @@ public class Enemy : Entity
 
 				if (attackCandidates.Count == 0)
 				{
-					Debug.Assert(attackCandidates.Count > 0, "Can't select a rule! Please check configuration.");
+					Debug.Assert(false, "Can't select a rule! Please check configuration.");
 					return 0;
 				}
 
@@ -310,6 +359,8 @@ public class Enemy : Entity
 
 		Debug.Assert(_currentForecast != null, "CurrentInterrupt or CurrentRule should be non-null.");
     }
+	
+	// this should be cached and should be called by a UI file, not the Battle Manager. Fine for now.
     internal string FormattedForecast()
     {
         return _currentForecast.Replace("$NAME", this._displayName);
