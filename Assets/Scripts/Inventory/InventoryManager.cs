@@ -205,6 +205,7 @@ public class InventoryManager : MonoBehaviour
 	{
 		_activeRelics[_activeRelicInventory[inventoryIndex]].OnSelect();
 	}
+	
 	internal void OnConsumableClicked(int inventoryIndex)
 	{
 		_consumables[inventoryIndex].OnSelect();

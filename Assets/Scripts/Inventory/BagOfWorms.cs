@@ -4,6 +4,7 @@ using TMPro;
 public class BagOfWorms : Item
 {
     public TMP_Text _countText;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
