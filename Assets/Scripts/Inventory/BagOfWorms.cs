@@ -27,7 +27,7 @@ public class BagOfWorms : Item
         {
             _currentCount--;
             _countText.text = _currentCount.ToString();
-            Player.INSTANCE.CurrentHealth += 50;
+            Player.INSTANCE.Heal(50);
         }
     }
 
