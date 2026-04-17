@@ -103,9 +103,10 @@ MonoBehaviour:
         _numTurns: 1
         _endsTurn: 1
         _isCritical: 0
-        _baseDamage: 5
+        _baseDamage: 10
         _minHits: 1
-        _maxHits: 20
+        _maxHits: 10
+        _damageScale: 6.25
         _targetHits: 0
 --- !u!212 &418575595738273908
 SpriteRenderer:
