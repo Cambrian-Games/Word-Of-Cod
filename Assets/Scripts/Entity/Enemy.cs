@@ -230,7 +230,7 @@ public class Enemy : Entity
 				if (_rules[nextRuleIndex].CanRun(this))
 					return nextRuleIndex;
 
-				Debug.Assert(_rules[_lastRuleIndex].CanRun(this), "Can't select a rule! Please check configuration.");
+				Debug.Assert(_rules[Mathf.Max(0, _lastRuleIndex)].CanRun(this), "Can't select a rule! Please check configuration.");
 				return Mathf.Max(0, _lastRuleIndex);
 			}
 
