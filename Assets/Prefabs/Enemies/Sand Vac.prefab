@@ -48,7 +48,7 @@ MonoBehaviour:
   _displayName: School of Fish
   _sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 300
-  _schedulePolicy: 0
+  _schedulePolicy: 3
   _rules:
   - _name: Sand Lash
     _weight: 0
@@ -57,7 +57,7 @@ MonoBehaviour:
     - _category: 0
       _parameter: 
       _comparator: 3
-      _value: 50
+      _value: 0.5
       _cancelKind: 0
       _firstCancelRound: 0
       _lastCancelRound: 0
@@ -72,7 +72,7 @@ MonoBehaviour:
     - _category: 0
       _parameter: 
       _comparator: 4
-      _value: 50
+      _value: 0.5
       _cancelKind: 0
       _firstCancelRound: 0
       _lastCancelRound: 0
@@ -87,7 +87,7 @@ MonoBehaviour:
     - _category: 0
       _parameter: 
       _comparator: 3
-      _value: 50
+      _value: 0.5
       _cancelKind: 0
       _firstCancelRound: 0
       _lastCancelRound: 0
@@ -101,7 +101,7 @@ MonoBehaviour:
     - _category: 0
       _parameter: 
       _comparator: 4
-      _value: 50
+      _value: 0.5
       _cancelKind: 0
       _firstCancelRound: 0
       _lastCancelRound: 0
