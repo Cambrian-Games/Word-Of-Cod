@@ -45,7 +45,7 @@ public class Entity : MonoBehaviour
 		_lastDamageTaken = 0;
 
 		float amountHealed = Mathf.Min(heal, _maxHealth - _currentHealth);
-		_currentHealth = Mathf.Min(_maxHealth, _maxHealth + heal);
+		_currentHealth = Mathf.Min(_maxHealth, _currentHealth + heal);
 
 		if (amountHealed > 0)
 		{

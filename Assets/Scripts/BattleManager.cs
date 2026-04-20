@@ -456,10 +456,14 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            //Analytics for Failed Word Here0
-            WordFailedEvent wordFailedEvent = new WordFailedEvent { _failedWord = text };
-            AnalyticsService.Instance.RecordEvent(wordFailedEvent);
-            Debug.Log("FailedWordEventSent");
+            //Analytics for Failed Word Here
+			if (text.Length > 0)
+			{
+				WordFailedEvent wordFailedEvent = new WordFailedEvent { _failedWord = text };
+				AnalyticsService.Instance.RecordEvent(wordFailedEvent);
+				Debug.Log("FailedWordEventSent");
+			}
+
             return false;
         }
     }
