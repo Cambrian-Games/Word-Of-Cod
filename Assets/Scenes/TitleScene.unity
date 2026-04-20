@@ -903,7 +903,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa1531bd7bda4764499435a397b8c67c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  _targetScene: {fileID: 102900000, guid: c4c6eac7fb5a0d64384d798a3394c3bf, type: 3}
+  _targetScene: BattleScene
 --- !u!114 &1198056280
 MonoBehaviour:
   m_ObjectHideFlags: 0
