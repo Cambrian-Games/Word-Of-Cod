@@ -172,8 +172,8 @@ public class StandardAttack : AttackEffect
 	internal override bool UpdateEffect(Enemy owner)
 	{
 		Player.INSTANCE._inventory.OnEnemyAttack(_baseDamage, out float modifiedDamage);
-		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedDamage);
-		Player.INSTANCE.Damage((int)modifiedDamage);
+		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup(Mathf.RoundToInt(modifiedDamage));
+		Player.INSTANCE.Damage(Mathf.RoundToInt(modifiedDamage));
 
 		_hasAttacked = true;
 
@@ -398,6 +398,11 @@ public class SchoolingAttack : StandardAttack
 	[SerializeField, Min(1)]
 	private int _maxHits = 1;
 
+	[SerializeField, Min(0), 
+		Tooltip("HP Percent is multiplied by this when determining damage per sub-hit. " +
+				"For example, Round(6.25 * 100%) * 10 hits = 60 damage.")]
+	private float _damageScale = 0.5f;
+
 	[SerializeField]
 	private int _targetHits = 0;
 
@@ -454,9 +459,17 @@ public class SchoolingAttack : StandardAttack
 		if (_numHits < _targetHits)
 			return false;
 
-		Player.INSTANCE._inventory.OnEnemyAttack(_baseDamage * _targetHits, out float modifiedDamage);
-		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int) modifiedDamage);
-		Player.INSTANCE.Damage((int) modifiedDamage);
+		// value specified in design doc was Current HP / 20 * 2.5. Max HP was 200, I showed
+		// Matt a graph of what the damage output looked like for if current HP was instead 100 (as in 100%).
+		// Damage output was way too high, so I proposed halving it again, so (100 * (currentHP / maxHP) / 2) / 20 * 2.5.
+		// This creates a base multiplier of 100 / 40 * 2.5 or 6.25, which is the value currently stored in the editor.
+
+		int damagePerHit = Mathf.RoundToInt(owner.HealthPercent() * _damageScale);
+		int damage = Mathf.Max(_baseDamage, _numHits * damagePerHit);
+
+		Player.INSTANCE._inventory.OnEnemyAttack(damage, out float modifiedDamage);
+		GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup(Mathf.RoundToInt(modifiedDamage));
+		Player.INSTANCE.Damage(Mathf.RoundToInt(modifiedDamage));
 
 		_hasAttacked = true;
 
@@ -466,9 +479,13 @@ public class SchoolingAttack : StandardAttack
 
 
 #if UNITY_EDITOR
+	// this intentionally inherits from AttackEffectPropertyDrawer, not StandardAttackPropertyDrawer
 	[CustomPropertyDrawer(typeof(SchoolingAttack))]
-	public class SchoolingAttackPropertyDrawer : StandardAttackPropertyDrawer
+	public class SchoolingAttackPropertyDrawer : AttackEffectPropertyDrawer
 	{
+		private static bool SHOW_DAMAGE_SIM = false;
+		private static float HEALTH_SIM = 1.0f;
+
 		protected override Rect EffectGUI(Rect position, GUIContent label, SerializedProperty property)
 		{
 			position = base.EffectGUI(position, label, property);
@@ -479,20 +496,81 @@ public class SchoolingAttack : StandardAttack
 			EditorGUI.LabelField(position, "Schooling Data", EditorStyles.boldLabel);
 
 			position.y += Y_OFFSET;
-			SerializedProperty minHitProperty = property.FindPropertyRelative("_minHits");
-			EditorGUI.PropertyField(position, minHitProperty);
+			EditorGUI.LabelField(position, "Hover over Damage Scale to read tooltip");
+
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				position.width /= 2;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_damageScale"), new GUIContent("Damage Scale"));
+
+				position.x += position.width;
+				EditorGUI.PropertyField(position, property.FindPropertyRelative("_baseDamage"), new GUIContent("Minimum Damage"));
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
+
+			{
+				position.y += Y_OFFSET;
+
+				float tmpWidth = position.width;
+				float tmpX = position.x;
+
+				position.width /= 2;
+				SerializedProperty minHitProperty = property.FindPropertyRelative("_minHits");
+				EditorGUI.PropertyField(position, minHitProperty);
+
+				position.x += position.width;
+				SerializedProperty maxHitProperty = property.FindPropertyRelative("_maxHits");
+				EditorGUI.PropertyField(position, maxHitProperty);
+				maxHitProperty.intValue = Mathf.Max(minHitProperty.intValue, maxHitProperty.intValue);
+
+				position.width = tmpWidth;
+				position.x = tmpX;
+			}
 
 			position.y += Y_OFFSET;
-			SerializedProperty maxHitProperty = property.FindPropertyRelative("_maxHits");
-			EditorGUI.PropertyField(position, maxHitProperty);
-			maxHitProperty.intValue = Mathf.Max(minHitProperty.intValue, maxHitProperty.intValue);
+			SHOW_DAMAGE_SIM = EditorGUI.Toggle(position, "Show Damage Sim", SHOW_DAMAGE_SIM);
+
+			if (SHOW_DAMAGE_SIM)
+			{
+				EditorGUI.indentLevel++;
+
+				position.y += Y_OFFSET;
+				HEALTH_SIM = EditorGUI.Slider(position, "Health", HEALTH_SIM, 0.0f, 1.0f);
+
+				{
+					position.y += Y_OFFSET;
+
+					float a = property.FindPropertyRelative("_minHits").intValue;
+					float b = property.FindPropertyRelative("_maxHits").intValue;
+					int numHits =
+						Mathf.RoundToInt(
+							Mathf.Min(b,
+								Mathf.Lerp(a, b + 1, HEALTH_SIM)));
+
+					int minDamage = property.FindPropertyRelative("_baseDamage").intValue;
+					float damageScale = property.FindPropertyRelative("_damageScale").floatValue;
+
+					GUI.enabled = false;
+					EditorGUI.IntField(position, "Total Damage", Mathf.Max(minDamage, numHits * Mathf.RoundToInt(HEALTH_SIM * damageScale)));
+					GUI.enabled = true;
+				}
+				
+
+				EditorGUI.indentLevel--;
+			}
 
 			return position;
 		}
 
 		protected override float EffectHeight()
 		{
-			return base.EffectHeight() + 3 * Y_OFFSET;
+			return base.EffectHeight() + (5 + (SHOW_DAMAGE_SIM ? 2 : 0)) * Y_OFFSET;
 		}
 	}
 #endif
@@ -678,8 +756,8 @@ public class SandSuckAttack : VariableTurnAttack
 				Debug.Assert(_tilesGathered > 0);
 
 				Player.INSTANCE._inventory.OnEnemyAttack(_damagePerTile * _tilesGathered, out float modifiedDamage);
-				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup((int)modifiedDamage);
-				Player.INSTANCE.Damage((int)modifiedDamage);
+				GameObject.Find("Player Damage Popup").GetComponent<DamagePopupScript>().Popup(Mathf.RoundToInt(modifiedDamage));
+				Player.INSTANCE.Damage(Mathf.RoundToInt(modifiedDamage));
 
 				_tilesGathered = 0;
 
