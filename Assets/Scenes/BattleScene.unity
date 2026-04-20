@@ -645,6 +645,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2105384665}
+  - {fileID: 1453999870}
   m_Father: {fileID: 1342681911}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &235681633
@@ -2350,12 +2351,12 @@ GameObject:
   - component: {fileID: 489965359}
   - component: {fileID: 489965358}
   m_Layer: 5
-  m_Name: Grid Element (5)
+  m_Name: Grid Element (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &489965357
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2372,10 +2373,10 @@ RectTransform:
   - {fileID: 61884919}
   m_Father: {fileID: 840065089}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 12.5, y: -46.5}
-  m_SizeDelta: {x: 25, y: 25}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &489965358
 MonoBehaviour:
@@ -2412,7 +2413,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1089779338242571621, guid: b0fddc64a60ef3d92b2ca4160ef76659, type: 3}
+  m_Sprite: {fileID: 4655453815507530927, guid: a70d6e9e193b6544993ba77c65e41797, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5589,6 +5590,7 @@ MonoBehaviour:
   - {fileID: 20624007}
   _consumables:
   - {fileID: 2105384666}
+  - {fileID: 1453999871}
   _passiveRelicInventory: 
   _activeRelicInventory: 
   _passiveRelicGrid: {fileID: 1294123192}
@@ -5823,6 +5825,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1358918173}
   m_CullTransparentMesh: 1
+--- !u!1 &1453999869
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1453999870}
+  - component: {fileID: 1453999871}
+  m_Layer: 0
+  m_Name: LetterTile
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1453999870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1453999869}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 20.797907, y: 10.763517, z: 0}
+  m_LocalScale: {x: 0.14285713, y: 0.14285713, z: 0.14285713}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 145669134}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1453999871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1453999869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c6e346025113ff41b4d881f57e1ddb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LetterTile
+  _maxCount: 10
+  _currentCount: 2
+  _isConsumable: 1
+  _icon: {fileID: 4655453815507530927, guid: a70d6e9e193b6544993ba77c65e41797, type: 3}
+  _displayName: Letter Tile
+  _description: Replace a Tile
+  _countText: {fileID: 61884920}
 --- !u!1 &1533694622
 GameObject:
   m_ObjectHideFlags: 0
