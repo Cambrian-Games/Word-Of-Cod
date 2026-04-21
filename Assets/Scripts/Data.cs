@@ -34,7 +34,7 @@ public class Word
 	private int _numTilesUsed;
 	public int NumTilesUsed => _numTilesUsed;
 
-	private List<int> _passiveRelicsTriggered;
+	private List<int> _passiveRelicsTriggered = new List<int>();
 	public List<int> PassiveRelicsTriggered => _passiveRelicsTriggered;
 
     private float _modifiedDamage = 0;
@@ -65,7 +65,7 @@ public class Word
 
 	internal void LogPassiveRelicsUsed(RelicEffect.Result result)
 	{
-		_passiveRelicsTriggered = new List<int>(result._passiveRelicIDs);
+		_passiveRelicsTriggered.AddRange(result._passiveRelicIDs);
 	}
 }
 
