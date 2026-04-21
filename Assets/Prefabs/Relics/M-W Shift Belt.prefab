@@ -47,6 +47,6 @@ MonoBehaviour:
   _maxCount: 1
   _currentCount: 1
   _isConsumable: 0
-  _icon: {fileID: 1457491203435894738, guid: 889d58401ca6e031aaffeb392c9e3b2e, type: 3}
+  _icon: {fileID: 7256466799113633062, guid: 734f494590a88d7459dd2fa89796812f, type: 3}
   _displayName: M-W Shift Belt
   _description: Once Per Turn, Change a M into a W or a W into an M

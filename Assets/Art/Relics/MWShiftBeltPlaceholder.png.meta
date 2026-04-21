@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3bacbbd4d594ae0488abc6aa6be4cd1b
+guid: 734f494590a88d7459dd2fa89796812f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4806644651361154286
-    second: Placeholder_SeaUrchin_512px_0
+      213: 7256466799113633062
+    second: MWShiftBeltPlaceholder_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -47,11 +47,11 @@ TextureImporter:
   lightmap: 0
   compressionQuality: 50
   spriteMode: 2
-  spriteExtrude: 0
+  spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 128
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -72,8 +72,8 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 512
-    resizeAlgorithm: 1
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Placeholder_SeaUrchin_512px_0
+      name: MWShiftBeltPlaceholder_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 22
+        y: 0
         width: 512
-        height: 468
+        height: 512
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 21b4612082e5b4db0800000000000000
-      internalID: -4806644651361154286
+      spriteID: 62d759d7b1624b460800000000000000
+      internalID: 7256466799113633062
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Placeholder_SeaUrchin_512px_0: -4806644651361154286
+      MWShiftBeltPlaceholder_0: 7256466799113633062
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

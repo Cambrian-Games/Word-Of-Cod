@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5787091183016334509}
   - component: {fileID: 3799837967197732049}
-  - component: {fileID: 418575595738273908}
   m_Layer: 0
   m_Name: Sand Vac
   m_TagString: Untagged
@@ -28,9 +27,10 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7461703493580691559}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3799837967197732049
@@ -47,97 +47,240 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   _displayName: School of Fish
   _sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _maxHealth: 200
+  _maxHealth: 300
+  _schedulePolicy: 3
   _rules:
-  - _conditions:
-    - _field: 14
-      _is: 3
-      _value: 0
-    _matchAllToRun: 0
-    _cancelConditions: []
-    _matchAllToCancel: 0
-    _uninterruptible: 0
+  - _name: Sand Lash
     _weight: 0
+    _index: 0
+    _conditions:
+    - _category: 0
+      _parameter: 
+      _comparator: 3
+      _value: 0.5
+      _cancelKind: 0
+      _firstCancelRound: 0
+      _lastCancelRound: 0
     _effects:
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: 
-      _isInterruptCheckpoint: 0
-      _effectKind: 4
-      _damage: 0
-      _minSchoolAttackHits: 0
-      _maxSchoolAttackHits: 0
-      _from: 0
-      _to: 2
-      _numTiles: 0
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: 
-      _isInterruptCheckpoint: 0
-      _effectKind: 2
-      _damage: 0
-      _minSchoolAttackHits: 0
-      _maxSchoolAttackHits: 0
-      _from: 2
-      _to: 0
-      _numTiles: 0
-  - _conditions:
-    - _field: 13
-      _is: 3
-      _value: 0
-    _matchAllToRun: 0
-    _cancelConditions:
-    - _field: 12
-      _is: 5
-      _value: 10
-    _matchAllToCancel: 0
-    _uninterruptible: 0
+    - rid: 7225786354854789307
+    - rid: 7225786354854789306
+    - rid: 7225786354854789308
+  - _name: Sand Lash+
     _weight: 0
+    _index: 1
+    _conditions:
+    - _category: 0
+      _parameter: 
+      _comparator: 4
+      _value: 0.5
+      _cancelKind: 0
+      _firstCancelRound: 0
+      _lastCancelRound: 0
     _effects:
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: 
-      _isInterruptCheckpoint: 0
-      _effectKind: 5
-      _damage: 10
-      _minSchoolAttackHits: 0
-      _maxSchoolAttackHits: 0
-      _from: 2
-      _to: 2
-      _numTiles: 0
-  - _conditions:
-    - _field: 13
-      _is: 0
-      _value: 0
-    _matchAllToRun: 0
-    _cancelConditions: []
-    _matchAllToCancel: 0
-    _uninterruptible: 0
+    - rid: 7225786354854789309
+    - rid: 7225786354854789310
+    - rid: 7225786354854789312
+  - _name: Sand Wave
     _weight: 0
+    _index: 2
+    _conditions:
+    - _category: 0
+      _parameter: 
+      _comparator: 3
+      _value: 0.5
+      _cancelKind: 0
+      _firstCancelRound: 0
+      _lastCancelRound: 0
     _effects:
-    - _afterEffectDelay: 0
-      _endsTurn: 0
-      _forecastDescription: 
-      _isInterruptCheckpoint: 0
-      _effectKind: 2
-      _damage: 0
-      _minSchoolAttackHits: 0
-      _maxSchoolAttackHits: 0
-      _from: 0
-      _to: 2
-      _numTiles: 5
+    - rid: 7225786354854789313
+    - rid: 7225786354854789314
+  - _name: Sand Wave+
+    _weight: 0
+    _index: 3
+    _conditions:
+    - _category: 0
+      _parameter: 
+      _comparator: 4
+      _value: 0.5
+      _cancelKind: 0
+      _firstCancelRound: 0
+      _lastCancelRound: 0
+    _effects:
+    - rid: 7225786354854789315
+    - rid: 7225786354854789316
+  - _name: Compressed Sand Shot
+    _weight: 0
+    _index: 4
+    _conditions:
+    - _category: 300
+      _parameter: Sandy
+      _comparator: 3
+      _value: 0
+      _cancelKind: 0
+      _firstCancelRound: 0
+      _lastCancelRound: 0
+    - _category: 100
+      _parameter: Sandy
+      _comparator: 2
+      _value: 6
+      _cancelKind: 1
+      _firstCancelRound: 2
+      _lastCancelRound: 2
+    _effects:
+    - rid: 7225786354854789317
   _interruptRules: []
-  _attackPriority: 1
-  _canRepeatLastAction: 1
-  _currentForecast: 
-  _defaultForecast: $NAME is waiting.
---- !u!212 &418575595738273908
+  references:
+    version: 2
+    RefIds:
+    - rid: 7225786354854789306
+      type: {class: StandardAttack, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Attack
+        _forecast: '$NOW: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 0
+        _isCritical: 0
+        _baseDamage: 25
+    - rid: 7225786354854789307
+      type: {class: Wait, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Wait
+        _forecast: '$ROUNDS: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _timeToWait: 0
+    - rid: 7225786354854789308
+      type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Sand
+        _forecast: 
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _numTiles: 2
+        _from: 0
+        _to: 2
+    - rid: 7225786354854789309
+      type: {class: Wait, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Wait
+        _forecast: '$ROUNDS: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _timeToWait: 0
+    - rid: 7225786354854789310
+      type: {class: StandardAttack, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Attack
+        _forecast: '$NOW: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 0
+        _isCritical: 0
+        _baseDamage: 25
+    - rid: 7225786354854789312
+      type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Sand
+        _forecast: 
+        _numTurns: 1
+        _endsTurn: 0
+        _isCritical: 0
+        _numTiles: 3
+        _from: 0
+        _to: 2
+    - rid: 7225786354854789313
+      type: {class: Wait, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Wait
+        _forecast: '$ROUNDS: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _timeToWait: 0
+    - rid: 7225786354854789314
+      type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Sand
+        _forecast: '$NOW: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _numTiles: 3
+        _from: 0
+        _to: 2
+    - rid: 7225786354854789315
+      type: {class: Wait, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Wait
+        _forecast: '$ROUNDS: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _timeToWait: 0
+    - rid: 7225786354854789316
+      type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Sand
+        _forecast: '$NOW: $RULE_NAME'
+        _numTurns: 1
+        _endsTurn: 1
+        _isCritical: 0
+        _numTiles: 5
+        _from: 0
+        _to: 2
+    - rid: 7225786354854789317
+      type: {class: SandSuckAttack, ns: , asm: Assembly-CSharp}
+      data:
+        _name: Sand Suck
+        _forecast: '$NOW: Gather Sand'
+        _numTurns: 1
+        _endsTurn: 0
+        _isCritical: 0
+        _minTurns: 1
+        _maxTurns: 2
+        _damagePerTile: 30
+        _secondTurnForecast: '$NOW: $RULE_NAME'
+--- !u!1 &6874084406487549995
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7461703493580691559}
+  - component: {fileID: 6378826732130898294}
+  m_Layer: 0
+  m_Name: Sprite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7461703493580691559
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6874084406487549995}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.3, y: -0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5787091183016334509}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &6378826732130898294
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 569321106157185922}
+  m_GameObject: {fileID: 6874084406487549995}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -178,12 +321,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: 4bce0de3e4e6f414d95152d8a9ce0e21, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 4, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

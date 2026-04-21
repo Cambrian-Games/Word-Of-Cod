@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3bacbbd4d594ae0488abc6aa6be4cd1b
+guid: 4bce0de3e4e6f414d95152d8a9ce0e21
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4806644651361154286
-    second: Placeholder_SeaUrchin_512px_0
+      213: 9117364453338195046
+    second: Placeholder_StarfishSandVac_512px_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 0
   spriteMeshType: 1
   alignment: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Placeholder_SeaUrchin_512px_0
+      name: Placeholder_StarfishSandVac_512px_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 22
+        y: 54
         width: 512
-        height: 468
+        height: 148
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 21b4612082e5b4db0800000000000000
-      internalID: -4806644651361154286
+      spriteID: 6642ff81aa2678e70800000000000000
+      internalID: 9117364453338195046
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Placeholder_SeaUrchin_512px_0: -4806644651361154286
+      Placeholder_StarfishSandVac_512px_0: 9117364453338195046
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

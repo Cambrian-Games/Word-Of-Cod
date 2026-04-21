@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Entity : MonoBehaviour
@@ -12,43 +13,49 @@ public class Entity : MonoBehaviour
 
 	// state
     private int _currentHealth;
+	public int CurrentHealth => _currentHealth;
 
-	private int _lastDamageTaken = 0;
+	protected int _lastDamageTaken = 0;
 	public int LastDamageTaken => _lastDamageTaken;
 
-	// do we want some sort of OnDamage() function?
-	public int CurrentHealth {
-		get => _currentHealth;
-		set
-		{
-			_currentHealth = Mathf.Clamp(value, 0, _maxHealth);
 
-			if (value < 0)
-			{
-				_lastDamageTaken = value;
-			}
-		} 
-	}
-
-	public int HealthPercent() => CurrentHealth * 100 / _maxHealth;
 
     protected virtual void Awake()
     {
 		_currentHealth = _maxHealth;
     }
 
-	public virtual void UpdateTurn()
+	public virtual void Damage(int damage)
 	{
+		Debug.Assert(damage >= 0);
 
+		_lastDamageTaken = Mathf.Min(damage, _currentHealth);
+		_currentHealth = Mathf.Max(0, _currentHealth - damage);
+
+		if (_lastDamageTaken > 0)
+		{
+			OnTakeDamage(_lastDamageTaken);
+		}
 	}
 
-	public virtual void StartTurn()
+	public virtual void Heal(int heal)
 	{
+		Debug.Assert(heal >= 0);
 
+		_lastDamageTaken = 0;
+
+		float amountHealed = Mathf.Min(heal, _maxHealth - _currentHealth);
+		_currentHealth = Mathf.Min(_maxHealth, _maxHealth + heal);
+
+		if (amountHealed > 0)
+		{
+			OnHeal(amountHealed);
+		}
 	}
 
-	public virtual void EndTurn()
-	{
+	protected virtual void OnTakeDamage(int damageTaken) { }
+	protected virtual void OnHeal(float amountHealed) { }
 
-	}
+	public float HealthPercent() => _currentHealth / (float) _maxHealth;
+	public int HealthPercentReadable() => _currentHealth * 100 / _maxHealth;
 }

@@ -35,7 +35,11 @@ public abstract class Item : MonoBehaviour
 	private string _description;
 	public string Description => _description;
 
-	public abstract void OnSelect();
-	public abstract void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState);
-	public abstract void OnTileClicked(Tile tile);
+	public virtual void OnSelect() { }
+	public virtual void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState) { }
+	public virtual void OnTileClicked(Tile tile) { }
+	public virtual void EndUse()
+	{
+		Player.INSTANCE._inventory.EndConsumableUse(this);
+	}
 }

@@ -6,11 +6,13 @@ public class Player : Entity
 
 	public InventoryManager _inventory;
 
+
+
 	protected override void Awake()
 	{
-		// set up singleton
-
 		base.Awake();
+
+		// set up singleton
 
 		if (INSTANCE != null && INSTANCE != this)
 		{
@@ -20,5 +22,10 @@ public class Player : Entity
 		}
 
 		INSTANCE = this;
+	}
+
+	protected override void OnTakeDamage(int damageTaken)
+	{
+		_inventory.OnPlayerTakeDamage();
 	}
 }

@@ -11,11 +11,13 @@ public class BattleManager : MonoBehaviour
         Nil = -1,
         Load = 0,
 
-        Settle_Board,       // Board settles into place
+		Pre_Player_Turn,	// Start of Round, used for ticking effects and updating forecasts
         Player_Turn,        // Player can take actions, use consumable items, etc
         Post_Player_Turn,   // Resolve attack and check if fight has been won or lost
         Enemy_Turn,         // Enemy state machine runs to completion. Player death may occur during this and will have to be handled correctly
         Post_Enemy_Turn,    // TBD
+
+        Settle_Board,       // Board settles into place
 
         Win,
         Lose
@@ -48,7 +50,6 @@ public class BattleManager : MonoBehaviour
     public Enemy CurrentEnemy => _enemy;
 
     public TMP_Text _forecastText;
-    internal EnemyTurnHandler _enemyTurnHandler;
 
     // Player Turn Data
 
@@ -115,9 +116,9 @@ public class BattleManager : MonoBehaviour
                     break;
 
                 case BattleState.Enemy_Turn:
-                    _enemyTurnHandler.Update();
+					_enemy.UpdateTurn();
 
-                    if (_enemyTurnHandler.IsTurnComplete())
+                    if (_enemy.IsTurnComplete)
                     {
                         SetBattleState(BattleState.Post_Enemy_Turn);
                     }
@@ -126,7 +127,7 @@ public class BattleManager : MonoBehaviour
                 case BattleState.Settle_Board:
                     if (GameBoard.INSTANCE.IsSettled())
                     {
-                        SetBattleState(BattleState.Player_Turn);
+						SetBattleState(BattleState.Pre_Player_Turn);
                     }
                     break;
             }
@@ -149,9 +150,7 @@ public class BattleManager : MonoBehaviour
 
 		if (holdingShift && Input.GetKey(KeyCode.H) && Player.INSTANCE)
 		{
-			// TODO update this after the merge with the enemy rework
-
-			Player.INSTANCE.CurrentHealth = Player.INSTANCE.MaxHealth;
+			Player.INSTANCE.Heal(Player.INSTANCE.MaxHealth);
 		}
 
 		// ideally we want a teleport to next fight option, maybe holding T? Would need to be in run manager
@@ -176,7 +175,6 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Enemy_Turn:
-                _enemyTurnHandler.EndTurn();
                 break;
 
 			case BattleState.Nil:
@@ -197,8 +195,6 @@ public class BattleManager : MonoBehaviour
             case BattleState.Nil:
                 _enemy = null;
 
-                _enemyTurnHandler = null;
-
                 GameBoard.INSTANCE.DeleteBoard();
 
 				_wordHistory.Clear();
@@ -213,21 +209,24 @@ public class BattleManager : MonoBehaviour
 				enemyLocalPos.x *= -1;
 				_enemy.transform.localPosition = enemyLocalPos;
 
-
-                _enemyTurnHandler = new EnemyTurnHandler(_enemy);
-
                 GameBoard.INSTANCE.GenerateBoard();
 
-                SetBattleState(BattleState.Player_Turn);
+                SetBattleState(BattleState.Pre_Player_Turn);
                 break;
 
-            case BattleState.Player_Turn:
-				TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
-                _enemyTurnHandler.StartRound();
-                Debug.Log("Forecast: " + _enemy.FormattedForecast());
-                //change forecast text
-                _forecastText.text = _enemy.FormattedForecast();
+			case BattleState.Pre_Player_Turn:
+				_enemy.StartRound();
 
+				Debug.Log("Forecast: " + _enemy.FormattedForecast());
+				//change forecast text
+				_forecastText.text = _enemy.FormattedForecast();
+
+				SetBattleState(BattleState.Player_Turn);
+				break;
+
+			case BattleState.Player_Turn:
+				TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
+                
 				_previousWord = _wordToSubmit;
 				_wordToSubmit = null;
 
@@ -248,8 +247,15 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Enemy_Turn:
-                _enemyTurnHandler.StartTurn();
-                break;
+				_enemy.StartTurn();
+
+				if (_forecastText.text != _enemy.FormattedForecast())
+				{
+					Debug.Log("Forecast Change! " + _enemy.FormattedForecast());
+					//change forecast text
+					_forecastText.text = _enemy.FormattedForecast();
+				}
+				break;
 
             case BattleState.Post_Enemy_Turn:
                 if (Player.INSTANCE.CurrentHealth <= 0)
@@ -327,7 +333,7 @@ public class BattleManager : MonoBehaviour
                     {
                         Debug.Log($"{_enemy.CurrentHealth} - {_wordToSubmit.EffectiveDamage}");
 						_enemyDamagePopup.GetComponent<DamagePopupScript>().Popup(_wordToSubmit.EffectiveDamage);
-                        _enemy.CurrentHealth -= _wordToSubmit.EffectiveDamage;
+                        _enemy.Damage(_wordToSubmit.EffectiveDamage);
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
                     break;

@@ -7,4 +7,11 @@ public abstract class ActiveRelic : Item
 		_isConsumable = false;
 		_maxCount = 1;
 	}
+
+	public override void EndUse()
+	{
+		// does not call Item::EndUse()
+
+		Player.INSTANCE._inventory.EndActiveRelicUse(this);
+	}
 }
