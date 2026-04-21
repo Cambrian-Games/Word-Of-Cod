@@ -6,6 +6,8 @@ public class MWSwitch : ActiveRelic
 	private bool _inUse;
 	private bool _canUse;
 
+
+
 	public override void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
 	{
 		_canUse = newState == BattleManager.BattleState.Player_Turn;
@@ -38,15 +40,21 @@ public class MWSwitch : ActiveRelic
 
 		if (!isM && !isW)
 		{
-			_inUse = false;
-			// this does not result in selecting the new tile, might want to fix?
-			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
-
+			EndUse();
 			return;
 		}
 
 		GameBoard.INSTANCE.ChangeTileLetter(tile, isM ? 'W' : 'M');
 		_canUse = false;
+
+		EndUse();
+	}
+
+	public override void EndUse()
+	{
+		_inUse = false;
 		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
+
+		base.EndUse();
 	}
 }
