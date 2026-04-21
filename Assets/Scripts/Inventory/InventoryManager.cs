@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -23,6 +22,9 @@ public class InventoryManager : MonoBehaviour
 
     private int _prevNumPassive = 1;
     private int _prevNumActive = 1;
+
+	private Item _consumableInUse;
+	private Item _activeRelicInUse;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -115,6 +117,22 @@ public class InventoryManager : MonoBehaviour
         }
         _prevNumPassive = _passiveRelicInventory.Count;
         _prevNumActive = _activeRelicInventory.Count;
+
+		if (TileSelector.INSTANCE.Mode == TileSelector.SelectionMode.Item_Use)
+		{
+			if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown((int) MouseButton.Right))
+			{
+				if (_activeRelicInUse)
+				{
+					_activeRelicInUse.EndUse();
+				}
+
+				if (_consumableInUse)
+				{
+					_consumableInUse.EndUse();
+				}
+			}
+		}
     }
 
     public void OnWordSubmit(Word word)
@@ -201,14 +219,24 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+	// we need a way to deselect a relic or consumable
+
 	internal void OnActiveRelicClicked(int inventoryIndex)
 	{
-		_activeRelics[_activeRelicInventory[inventoryIndex]].OnSelect();
+		if (!_activeRelicInUse && !_consumableInUse)
+		{
+			_activeRelicInUse = _activeRelics[_activeRelicInventory[inventoryIndex]];
+			_activeRelicInUse.OnSelect();
+		}
 	}
 	
 	internal void OnConsumableClicked(int inventoryIndex)
 	{
-		_consumables[inventoryIndex].OnSelect();
+		if (!_activeRelicInUse && !_consumableInUse)
+		{
+			_consumableInUse = _consumables[inventoryIndex];
+			_consumableInUse.OnSelect();
+		}
 	}
 
 	internal void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
@@ -216,6 +244,11 @@ public class InventoryManager : MonoBehaviour
 		foreach (int activeRelicID in _activeRelicInventory)
 		{
 			_activeRelics[activeRelicID].OnBattleStateChanged(oldState, newState);
+		}
+
+		foreach (Item consumable in _consumables)
+		{
+			consumable.OnBattleStateChanged(oldState, newState);
 		}
 	}
 
@@ -225,6 +258,11 @@ public class InventoryManager : MonoBehaviour
 		{
 			_activeRelics[activeRelicID].OnTileClicked(tile);
 		}
+
+		foreach (Item consumable in _consumables)
+		{
+			consumable.OnTileClicked(tile);
+		}
 	}
 
 	internal void OnPlayerTakeDamage()
@@ -232,17 +270,29 @@ public class InventoryManager : MonoBehaviour
 		if (_activeRelicInventory.Contains(1))
 		{
 			SalmonStone stone = _activeRelics[1].gameObject.GetComponent<SalmonStone>();
-			if (!stone.GetUsed())
+			if (!stone._used == false)
 			{
 				if (Player.INSTANCE.CurrentHealth <= 0)
 				{
 					Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
-					stone.SetUsed(true);
+					stone._used = true;
 					int index = _activeRelicInventory.IndexOf(1);
 					_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite =
 						stone._brokenIcon;
 				}
 			}
 		}
+	}
+
+	internal void EndActiveRelicUse(ActiveRelic relic)
+	{
+		Debug.Assert(_activeRelicInUse == relic);
+		_activeRelicInUse = null;
+	}
+
+	internal void EndConsumableUse(Item item)
+	{
+		Debug.Assert(_consumableInUse == item);
+		_consumableInUse = null;
 	}
 }
