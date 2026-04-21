@@ -9,22 +9,11 @@ public class WordHistoryBox : MonoBehaviour
 
     public GameObject _prefabParent;
     private List<GameObject> _wordHistoryObjects = new List<GameObject>();
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void AddWordToHistory(Word word)
     {
         //create word prefab
+        //setting defaults because in testing it defaulted to weird things
         GameObject wordEntry = Instantiate(_wordHistoryPrefab, new Vector3(0f, 0f, 0f), Quaternion.identity, _prefabParent.transform);
         wordEntry.transform.localScale = new Vector3(1f, 1f, 1f);
         //set word and part of speech
