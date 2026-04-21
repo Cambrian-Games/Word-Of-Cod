@@ -65,6 +65,8 @@ public class BattleManager : MonoBehaviour
 	//  We also don't store full-run word history but that can be added later if needed, and we can extract best/worst word stuff from that
 	internal List<Word> _wordHistory = new List<Word>();
 
+    public WordHistoryBox _wordHistoryBox;
+    
     public Transform _tileDestination;
     List<Vector3> _directions = new List<Vector3>();
     private float _timeToDestination = 0.5f;
@@ -183,6 +185,8 @@ public class BattleManager : MonoBehaviour
 					_wordHistory = new List<Word>();
 				}
 				_wordHistory.Clear();
+                _wordHistoryBox.ClearHistoryBox();
+
 				break;
         }
 
@@ -198,6 +202,7 @@ public class BattleManager : MonoBehaviour
                 GameBoard.INSTANCE.DeleteBoard();
 
 				_wordHistory.Clear();
+                _wordHistoryBox.ClearHistoryBox();
                 break;
 
             case BattleState.Load:
@@ -448,7 +453,7 @@ public class BattleManager : MonoBehaviour
 
             Player.INSTANCE._inventory.OnWordSubmit(_wordToSubmit);
 			_wordHistory.Add(word);
-            
+            _wordHistoryBox.AddWordToHistory(word);
             RunManager.INSTANCE.AddWordToStats(_wordToSubmit);
             
             SetBattleState(BattleState.Post_Player_Turn);
