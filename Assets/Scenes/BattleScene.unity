@@ -5705,7 +5705,6 @@ GameObject:
   - component: {fileID: 1161891040}
   - component: {fileID: 1161891039}
   - component: {fileID: 1161891043}
-  - component: {fileID: 1161891042}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -5796,20 +5795,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161891037}
   m_CullTransparentMesh: 1
---- !u!114 &1161891042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1161891037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bc2380bf4ea0fd7da07d9cb17aae5cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InstantiateWordDisplay
-  _location: {fileID: 1161891037}
-  _prefab: {fileID: 6775194119241059653, guid: b3e0541b7340be7aa8e079fdf46598ad, type: 3}
 --- !u!114 &1161891043
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -436,19 +436,15 @@ public class RelicEffect
                     break;
                 }
 
-                int currentChain = 0;
+                int currentChain = 1;
                 char lastChar = '\0';
 
                 // does stack overflow have a cleaner implementation of this?
                 // It's O(n) so we won't have a faster one but cleaner might be possible
 
                 for (int i = 0; i < text.Length; i++)
-                {// see if SO knows a faster way?
-                    if (currentChain == 0)
-                    {
-                        currentChain = 1;
-                    }
-                    else
+                {	// see if SO knows a faster way?
+					if (lastChar != '\0')
                     {
                         if (text[i] >= lastChar)
                         {
@@ -461,7 +457,8 @@ public class RelicEffect
                         }
                         else
                         {
-                            currentChain = 0;
+							// reset, this is now the first letter in the chain
+                            currentChain = 1;
                         }
                     }
 
@@ -487,30 +484,27 @@ public class RelicEffect
                     break;
                 }
 
-                int currentChainRev = 0;
+                int currentChainRev = 1;
                 char lastCharRev = '\0';
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    if (currentChainRev == 0)
-                    {
-                        currentChainRev = 1;
-                    }
-                    else
-                    {
-                        if (text[i] <= lastCharRev)
-                        {
-                            currentChainRev++;
+					if (lastCharRev != '\0')
+					{
+						if (text[i] <= lastCharRev)
+						{
+							currentChainRev++;
 
-                            if (currentChainRev > numPasses)
-                            {
-                                numPasses = currentChainRev;
-                            }
-                        }
-                        else
-                        {
-                            currentChain = 0;
-                        }
+							if (currentChainRev > numPasses)
+							{
+								numPasses = currentChainRev;
+							}
+						}
+						else
+						{
+							// reset, this is now the first letter in the chain
+							currentChain = 1;
+						} 
                     }
 
                     lastChar = text[i];

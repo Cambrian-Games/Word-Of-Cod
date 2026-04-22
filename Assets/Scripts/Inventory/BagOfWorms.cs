@@ -28,7 +28,7 @@ public class BagOfWorms : Item
 
 	public override void OnSelect()
     {
-        if (_currentCount > 0 && _canUse)
+        if (_currentCount > 0 && _canUse && Player.INSTANCE.HealthPercent() < 1.0f)
         {
             _currentCount--;
             _countText.text = _currentCount.ToString();

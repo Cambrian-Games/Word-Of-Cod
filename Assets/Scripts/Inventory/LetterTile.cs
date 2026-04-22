@@ -56,6 +56,7 @@ public class LetterTile : Item
 			GameBoard.INSTANCE.ChangeTileLetter(_selectedTile, char.ToUpper(input[0]));
 
 			_currentCount--;
+			_countText.text = _currentCount.ToString();
 
 			EndUse();
 		}
