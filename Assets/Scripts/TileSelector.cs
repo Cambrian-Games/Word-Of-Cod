@@ -366,13 +366,11 @@ public class TileSelector : MonoBehaviour
         if (BattleManager.INSTANCE.TrySubmitWord(_word, _selectedTiles))
         {
             Debug.Log("- Tiles Used: " + string.Join(", ", coordList));
-            Debug.Log("");
         }
         else
         {
             Debug.Log($"{_word} is not a word.");
             Debug.Log("- Deselecting " + string.Join(", ", coordList));
-            Debug.Log("");
         }
 
 		DeselectAllTiles();

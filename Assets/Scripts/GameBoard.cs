@@ -130,8 +130,8 @@ public class GameBoard : MonoBehaviour
 		FallTiles(immediate: true);
 		FinishResolve();
 
-		Debug.Log("Generated Board:");
-		Debug.Log(_currState);
+		//Debug.Log("Generated Board:");
+		//Debug.Log(_currState);
 	}
 
 	[ContextMenu("Delete Board")]
@@ -316,10 +316,10 @@ public class GameBoard : MonoBehaviour
 		_currState = _nextState;
 		_nextState = null;
 
-		Debug.Log("");
-		Debug.Log("Current State:");
-		Debug.Log(_currState);
-		Debug.Log("");
+		//Debug.Log("");
+		//Debug.Log("Current State:");
+		//Debug.Log(_currState);
+		//Debug.Log("");
 	}
 
 	private Vector2 FallDirection()
