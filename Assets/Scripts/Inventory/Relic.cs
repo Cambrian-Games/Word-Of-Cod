@@ -106,6 +106,7 @@ public class RelicEffect
 
         Rev_Alphabetical_Chain,         // finds the longest chain of reverse-alphabetical letters
         Fully_Rev_Alphabetized_Word,    // true if word is fully reverse-alphabetized
+        S_Plural,                   // true if the word ends in S or ES, and removing those results in a valid word
     }
 
     public enum ValueToModify
@@ -527,7 +528,27 @@ public class RelicEffect
                 int longestChainRev = CountWordSubmitConditionPasses(word, RelicCondition.Rev_Alphabetical_Chain);
                 numPasses = longestChainRev == text.Length ? longestChainRev : 0;
                 break;
-
+            case RelicCondition.S_Plural:
+                if (text.Length >= 2)
+                {
+                    if (text.Length >=3 && text.EndsWith("ES"))
+                    {
+                        if (WordChecker.INSTANCE._allWords._dict.TryGetValue(text.Substring(0,text.Length -2).ToLower(), out FPART pos))
+                        {
+                            numPasses = 1;
+                            break;
+                        }
+                    }
+                    if (text.EndsWith("S"))
+                    {
+                        if (WordChecker.INSTANCE._allWords._dict.TryGetValue(text.Substring(0, text.Length - 1).ToLower(),
+                                out FPART pos))
+                        {
+                            numPasses = 1;
+                        }
+                    }
+                }
+                break;
             default:
                 Debug.LogError($"Unsupported Condition {condition}");
                 break;
