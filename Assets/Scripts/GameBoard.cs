@@ -124,8 +124,6 @@ public class GameBoard : MonoBehaviour
 		_playableBoard = new Tile[_config.Layout._length, _config.Layout._height];
 		_stagingBoard = new Tile[_config.Layout._length, _config.Layout._height];
 
-		_nextState = _currState.CloneSettled(_config.SettleKind, out _currDelta);
-
 		SpawnNewTiles();
 		FallTiles(immediate: true);
 		FinishResolve();
