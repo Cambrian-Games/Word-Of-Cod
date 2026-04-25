@@ -21,11 +21,13 @@ public class InventoryManager : MonoBehaviour
     public GameObject _activeRelicGrid;
     public GameObject _consumableGrid;
 
-    private int _prevNumPassive = 1;
-    private int _prevNumActive = 1;
+    private int _prevNumPassive = 0;
+    private int _prevNumActive = 0;
 
 	private Item _consumableInUse;
 	private Item _activeRelicInUse;
+
+	public int _startingRelics;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -33,6 +35,11 @@ public class InventoryManager : MonoBehaviour
 		InitPassiveRelics();
 		InitActiveRelics();
 
+		for (int i = 0; i < _startingRelics; i++)
+		{
+			GrantRelic();
+		}
+		
 		GameObject.Find("Tooltip Text").GetComponent<TMP_Text>().text = "";
 	}
 
@@ -61,11 +68,11 @@ public class InventoryManager : MonoBehaviour
 			}
 		}
 
-		_passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
-
-		//sets the starting relic icon
-		_passiveRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
-			_passiveRelics[_passiveRelicInventory[0]].Icon;
+		//_passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
+//
+		////sets the starting relic icon
+		//_passiveRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
+		//	_passiveRelics[_passiveRelicInventory[0]].Icon;
 	}
 	private void InitActiveRelics()
 	{
@@ -76,13 +83,13 @@ public class InventoryManager : MonoBehaviour
 			_activeRelics[i].SetID(i);
 		}
 
-		_activeRelicInventory.Add(Random.Range(0, _activeRelics.Count));
-		//_activeRelicInventory.Add(1);
-
-		_activeRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
-			_activeRelics[_activeRelicInventory[0]].Icon;
-
-		_activeRelicGrid.transform.GetChild(0).gameObject.SetActive(true);
+		//_activeRelicInventory.Add(Random.Range(0, _activeRelics.Count));
+		////_activeRelicInventory.Add(1);
+//
+		//_activeRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
+		//	_activeRelics[_activeRelicInventory[0]].Icon;
+//
+		//_activeRelicGrid.transform.GetChild(0).gameObject.SetActive(true);
 	}
 
 	// Update is called once per frame
@@ -292,5 +299,56 @@ public class InventoryManager : MonoBehaviour
 	{
 		Debug.Assert(_consumableInUse == item);
 		_consumableInUse = null;
+	}
+
+	public void GrantRelic()
+	{
+		int totalRelics = _activeRelics.Count + _passiveRelics.Count;
+		bool granted = false;
+		
+		//if all relics owned
+		if (_activeRelicInventory.Count + _passiveRelicInventory.Count == totalRelics)
+		{
+			return;
+		}
+		
+		while (!granted)
+		{
+			//choose a random relic
+			int relicToGrant = (int)Mathf.Floor(Random.Range(0.0f, 1.0f) * totalRelics);
+			Debug.Log("Relic to Give:" + relicToGrant);
+			
+			//check to see if its within the passive list
+			if (relicToGrant < _passiveRelics.Count)
+			{
+				//check to avoid duplicates
+				if (_passiveRelicInventory.Contains(relicToGrant))
+				{
+					continue;
+				}
+				
+				//add relic
+				_passiveRelicInventory.Add(relicToGrant);
+				Debug.Log("PassiveAdded");
+				granted = true;
+			}
+			//otherwise it's in the active list
+			else
+			{
+				//offset the number by the passive relic list count
+				relicToGrant -= _passiveRelics.Count;
+				
+				//prevent duplicates
+				if (_activeRelicInventory.Contains(relicToGrant))
+				{
+					continue;
+				}
+				
+				//add relic
+				_activeRelicInventory.Add(relicToGrant);
+				granted = true;
+			}
+			
+		}
 	}
 }
