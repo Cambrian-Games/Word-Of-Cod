@@ -74,6 +74,10 @@ public class LetterTile : Item
 			_state = UseState.In_Use;
 			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
 		}
+		else if (_state == UseState.Unususable)
+		{
+			EndUse();
+		}
 	}
 
 	public override void OnTileClicked(Tile tile)
