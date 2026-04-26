@@ -143,11 +143,11 @@ public class CharacterWeights : ScriptableObject
 
 			// if the char is not a vowel, subtract it from the char counts and get a vowel
 
-			charCounts[newChars[charIter]]--;
+			charCounts[newChars[charIter] - 'A']--;
 
 			newChars[charIter] = RandomVowel(ref charCounts);
 
-			charCounts[newChars[charIter]]++;
+			charCounts[newChars[charIter] - 'A']++;
 
 			vowelCount++;
 			vowelRate = vowelCount / (float)newChars.Length;
