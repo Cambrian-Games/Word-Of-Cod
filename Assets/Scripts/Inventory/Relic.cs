@@ -203,7 +203,7 @@ public class RelicEffect
 
         for (int i = 0; i < numPasses; i++)
         {
-            if (UnityEngine.Random.Range(0, 1) > _chanceToTrigger)
+            if (UnityEngine.Random.Range(0.0f, 1.0f) > _chanceToTrigger)
             {
                 continue;
             }
