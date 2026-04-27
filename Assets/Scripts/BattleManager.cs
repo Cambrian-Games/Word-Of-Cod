@@ -14,10 +14,10 @@ public class BattleManager : MonoBehaviour
 		Pre_Player_Turn,	// Start of Round, used for ticking effects and updating forecasts
         Player_Turn,        // Player can take actions, use consumable items, etc
         Post_Player_Turn,   // Resolve attack and check if fight has been won or lost
-        Enemy_Turn,         // Enemy state machine runs to completion. Player death may occur during this and will have to be handled correctly
-        Post_Enemy_Turn,    // TBD
-
         Settle_Board,       // Board settles into place
+        Enemy_Turn,         // Enemy state machine runs to completion. Player death may occur during this and will have to be handled correctly
+        Post_Enemy_Turn,    // Clear forecast, handle any cleanup tasks
+
 
         Win,
         Lose
@@ -115,21 +115,21 @@ public class BattleManager : MonoBehaviour
             {
                 case BattleState.Post_Player_Turn:
                     UpdatePPT();
-                    break;
+					break;
 
-                case BattleState.Enemy_Turn:
+				case BattleState.Settle_Board:
+					if (GameBoard.INSTANCE.IsSettled())
+					{
+						SetBattleState(BattleState.Enemy_Turn);
+					}
+					break;
+
+				case BattleState.Enemy_Turn:
 					_enemy.UpdateTurn();
 
                     if (_enemy.IsTurnComplete)
                     {
                         SetBattleState(BattleState.Post_Enemy_Turn);
-                    }
-                    break;
-
-                case BattleState.Settle_Board:
-                    if (GameBoard.INSTANCE.IsSettled())
-                    {
-						SetBattleState(BattleState.Pre_Player_Turn);
                     }
                     break;
             }
@@ -164,6 +164,8 @@ public class BattleManager : MonoBehaviour
         if (_battleState == newState)
             return;
 
+		// leave old state
+
         switch (_battleState)
         {
             // if we leave this state for ANY reason, we want to turn off input.
@@ -177,6 +179,7 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Enemy_Turn:
+				_forecastText.text = "";
                 break;
 
 			case BattleState.Nil:
@@ -251,7 +254,11 @@ public class BattleManager : MonoBehaviour
 				}
 				break;
 
-            case BattleState.Enemy_Turn:
+			case BattleState.Settle_Board:
+				GameBoard.INSTANCE.LockStateMachine(false);
+				break;
+
+			case BattleState.Enemy_Turn:
 				_enemy.StartTurn();
 
 				if (_forecastText.text != _enemy.FormattedForecast())
@@ -269,12 +276,8 @@ public class BattleManager : MonoBehaviour
                 }
                 else
                 {
-                    SetBattleState(BattleState.Settle_Board);
+                    SetBattleState(BattleState.Pre_Player_Turn);
                 }
-                break;
-
-            case BattleState.Settle_Board:
-                GameBoard.INSTANCE.LockStateMachine(false);
                 break;
 
             case BattleState.Lose:
@@ -434,7 +437,7 @@ public class BattleManager : MonoBehaviour
                 }
                 else
                 {
-                    SetBattleState(BattleState.Enemy_Turn);
+                    SetBattleState(BattleState.Settle_Board);
                 }
 
                 break;
