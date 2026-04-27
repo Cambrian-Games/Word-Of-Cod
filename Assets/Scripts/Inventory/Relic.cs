@@ -533,7 +533,7 @@ public class RelicEffect
                 {
                     if (text.Length >=3 && text.EndsWith("ES"))
                     {
-                        if (WordChecker.INSTANCE._allWords._dict.TryGetValue(text.Substring(0,text.Length -2).ToLower(), out FPART pos))
+                        if (WordChecker.INSTANCE._allWords._dict.TryGetValue(text.Substring(0, text.Length - 2).ToLower(), out FPART pos))
                         {
                             numPasses = 1;
                             break;
