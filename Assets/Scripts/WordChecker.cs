@@ -78,7 +78,6 @@ public class WordChecker : MonoBehaviour
     internal bool TryGetWord(string text, List<Tile> tilesUsed, out Word word)
     {
         Debug.Log("Checking: " + text);
-        Debug.Log("");
 
         word = null;
 
