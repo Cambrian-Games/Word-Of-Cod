@@ -6319,6 +6319,7 @@ MonoBehaviour:
   - {fileID: 7595469887087623229, guid: ae5e66dc0aa224d46b9fe9ac02a7fea2, type: 3}
   - {fileID: 7595469887087623229, guid: f2cbbd203b45c8d489656d6f62fa2165, type: 3}
   - {fileID: 7595469887087623229, guid: 3955e81aa2864de43a829743b753012b, type: 3}
+  - {fileID: 7595469887087623229, guid: 6ba0c2dedecf6f6089b0f2a61ed7c554, type: 3}
   _activeRelics:
   - {fileID: 2106946517}
   - {fileID: 20624007}
