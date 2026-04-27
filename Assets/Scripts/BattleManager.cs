@@ -278,6 +278,8 @@ public class BattleManager : MonoBehaviour
                 {
                     SetBattleState(BattleState.Pre_Player_Turn);
                 }
+
+                Player.INSTANCE._bubbleShield = 0f;
                 break;
 
             case BattleState.Lose:

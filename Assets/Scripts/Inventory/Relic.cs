@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UnityEngine;
 
@@ -130,6 +131,9 @@ public class RelicEffect
         Self_Damage_Resist_Bonus,
 
         Self_Heal,
+        
+        //Bubble Shield DR
+        Bubble,
     }
 
     [SerializeField]
@@ -197,6 +201,8 @@ public class RelicEffect
             numPasses = Math.Min(numPasses, _numTimesToApply);
         }
 
+        
+        
         Result res = new Result();
 
         // this is a bit sketchy. Do we want multiple rolls to apply the thing once, or should it apply multiple times?
@@ -209,12 +215,22 @@ public class RelicEffect
                 continue;
             }
 
-            float newValue = res._values.GetValueOrDefault(_valueToModify) + _value;
+            float newValue;
+            if (_valueToModify == ValueToModify.Bubble && _value == -1.0f)
+            {
+                newValue = word.Text.Length * 2.0f;
+            }
+            else
+            {
+                newValue = res._values.GetValueOrDefault(_valueToModify) + _value;
+            }
 
             if (newValue != 0)
             {
+
                 res._values[_valueToModify] = newValue;
             }
+        
             else
             {
                 res._values.Remove(_valueToModify);

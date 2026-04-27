@@ -170,6 +170,11 @@ public class InventoryManager : MonoBehaviour
             if (item.Key == RelicEffect.ValueToModify.Damage_Bonus)
                 continue;
 
+            if (item.Key == RelicEffect.ValueToModify.Bubble)
+            {
+	            Player.INSTANCE._bubbleShield += item.Value;
+            }
+
             Debug.LogError($"Unsupported modification of {item.Key} during OnWordSubmit");
         }
 
@@ -178,33 +183,32 @@ public class InventoryManager : MonoBehaviour
 
     internal void OnEnemyAttack(float baseDamage, out float modifiedDamage)
     {
-        RelicEffect.Result result = new RelicEffect.Result();
+	    
+	    RelicEffect.Result result = new RelicEffect.Result();
 
-        if (!_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Enemy_Attack))
-        {
-            modifiedDamage = baseDamage;
-            return;
-        }
+	    if (_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Enemy_Attack))
+	    {
+		    foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
+		    {
+			    if (!_passiveRelicInventory.Contains(relic.ID))
+				    continue;
 
-        foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
-        {
-            if (!_passiveRelicInventory.Contains(relic.ID))
-                continue;
+			    result += relic.OnEnemyAttack(baseDamage);
+		    }
+	    }
 
-            result += relic.OnEnemyAttack(baseDamage);
-        }
-
-        if (result._values.Count == 0)
-        {
-            modifiedDamage = baseDamage;
-            return;
-        }
+	    if (result._values.Count == 0 && Player.INSTANCE._bubbleShield == 0)
+	    {
+		    modifiedDamage = baseDamage;
+		    return;
+	    }
+	    
 
         float totalResistPercent = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Percent_Increase)
             + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Percent_Increase);
 
         float totalResistBonus = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Bonus)
-            + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus);
+            + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus) + Player.INSTANCE._bubbleShield;
 
         modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
 
@@ -221,6 +225,8 @@ public class InventoryManager : MonoBehaviour
 
             if (item.Key == RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus)
                 continue;
+            if (item.Key == RelicEffect.ValueToModify.Bubble)
+				continue;
 
             Debug.LogError($"Unsupported modification of {item.Key} during OnEnemyAttack");
         }
