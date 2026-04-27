@@ -53,6 +53,7 @@ public class RelicEffectPropertyDrawer : PropertyDrawer
             case RelicEffect.RelicCondition.Fully_Alphabetized_Word:
             case RelicEffect.RelicCondition.Rev_Alphabetical_Chain:
             case RelicEffect.RelicCondition.Fully_Rev_Alphabetized_Word:
+            case RelicEffect.RelicCondition.S_Plural:
                 break;
         }
 
@@ -109,6 +110,7 @@ public class RelicEffectPropertyDrawer : PropertyDrawer
             case RelicEffect.RelicCondition.Fully_Alphabetized_Word:
             case RelicEffect.RelicCondition.Rev_Alphabetical_Chain:
             case RelicEffect.RelicCondition.Fully_Rev_Alphabetized_Word:
+            case RelicEffect.RelicCondition.S_Plural:
                 lines = 1;
                 break;
         }
