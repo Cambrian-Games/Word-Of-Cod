@@ -183,7 +183,6 @@ public class InventoryManager : MonoBehaviour
 
     internal void OnEnemyAttack(float baseDamage, out float modifiedDamage)
     {
-	    
 	    RelicEffect.Result result = new RelicEffect.Result();
 
 	    if (_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Enemy_Attack))
@@ -203,7 +202,6 @@ public class InventoryManager : MonoBehaviour
 		    return;
 	    }
 	    
-
         float totalResistPercent = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Percent_Increase)
             + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Percent_Increase);
 
@@ -225,6 +223,7 @@ public class InventoryManager : MonoBehaviour
 
             if (item.Key == RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus)
                 continue;
+            
             if (item.Key == RelicEffect.ValueToModify.Bubble)
 				continue;
 

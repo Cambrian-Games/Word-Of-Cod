@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UnityEngine;
 
@@ -133,6 +132,7 @@ public class RelicEffect
         Self_Heal,
         
         //Bubble Shield DR
+        
         Bubble,
     }
 
@@ -200,8 +200,6 @@ public class RelicEffect
         {
             numPasses = Math.Min(numPasses, _numTimesToApply);
         }
-
-        
         
         Result res = new Result();
 
@@ -227,7 +225,6 @@ public class RelicEffect
 
             if (newValue != 0)
             {
-
                 res._values[_valueToModify] = newValue;
             }
         

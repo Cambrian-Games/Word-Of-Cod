@@ -270,6 +270,8 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Post_Enemy_Turn:
+	            Player.INSTANCE._bubbleShield = 0f;
+
                 if (Player.INSTANCE.CurrentHealth <= 0)
                 {
                     SetBattleState(BattleState.Lose);
@@ -278,8 +280,7 @@ public class BattleManager : MonoBehaviour
                 {
                     SetBattleState(BattleState.Pre_Player_Turn);
                 }
-
-                Player.INSTANCE._bubbleShield = 0f;
+	            
                 break;
 
             case BattleState.Lose:
