@@ -47,7 +47,7 @@ public class Tile : MonoBehaviour
 	private HighlightState _highlightState = HighlightState.Normal;
 	public HighlightState HighlightState { get => _highlightState; set => SetHighlightState(value); }
 
-    private static readonly Vector3 DEFAULT_LETTER_POSITION = new Vector3(0, 0, -1);
+    private static readonly Vector3 DEFAULT_LETTER_POSITION = new Vector3(0, 0, 0);
 
     private void Start()
     {
