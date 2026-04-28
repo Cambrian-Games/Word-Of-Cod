@@ -215,6 +215,7 @@ public class BattleManager : MonoBehaviour
                 _enemy = Instantiate<Enemy>(_enemyPrefab, this.transform);
 				Vector3 enemyLocalPos = Player.INSTANCE.transform.position - tracker.transform.position;
 				enemyLocalPos.x *= -1;
+				enemyLocalPos.z = 0;
 				_enemy.transform.localPosition = enemyLocalPos;
 
                 GameBoard.INSTANCE.GenerateBoard();
