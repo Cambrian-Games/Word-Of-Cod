@@ -8,6 +8,8 @@ public class Player : Entity
 
 	public float _bubbleShield =  0f;
 
+	public bool _substitute = false;
+
 	protected override void Awake()
 	{
 		base.Awake();

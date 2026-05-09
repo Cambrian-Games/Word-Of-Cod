@@ -37,6 +37,7 @@ public abstract class Item : MonoBehaviour
 
 	public virtual void OnSelect() { }
 	public virtual void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState) { }
+	public virtual void OnEnterRunEvent() { }
 	public virtual void OnTileClicked(Tile tile) { }
 	public virtual void EndUse()
 	{

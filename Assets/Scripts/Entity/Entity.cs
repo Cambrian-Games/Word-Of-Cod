@@ -13,7 +13,11 @@ public class Entity : MonoBehaviour
 
 	// state
     private int _currentHealth;
-	public int CurrentHealth => _currentHealth;
+	public int CurrentHealth
+	{
+		get => _currentHealth;
+		set => _currentHealth = value;
+	}
 
 	protected int _lastDamageTaken = 0;
 	public int LastDamageTaken => _lastDamageTaken;

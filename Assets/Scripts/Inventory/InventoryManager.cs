@@ -196,7 +196,7 @@ public class InventoryManager : MonoBehaviour
 		    }
 	    }
 
-	    if (result._values.Count == 0 && Player.INSTANCE._bubbleShield == 0)
+	    if (result._values.Count == 0 && Player.INSTANCE._bubbleShield == 0 && !Player.INSTANCE._substitute)
 	    {
 		    modifiedDamage = baseDamage;
 		    return;
@@ -208,7 +208,16 @@ public class InventoryManager : MonoBehaviour
         float totalResistBonus = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Bonus)
             + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus) + Player.INSTANCE._bubbleShield;
 
-        modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
+        //if player you substition active deal 0
+        if (Player.INSTANCE._substitute)
+        {
+	        modifiedDamage = 0;
+	        Player.INSTANCE._substitute = false;
+        }
+        else
+        {
+	        modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
+        }
 
         foreach (var item in result._values)
         {
@@ -264,6 +273,19 @@ public class InventoryManager : MonoBehaviour
 		}
 	}
 
+	internal void OnEnterRunEvent()
+	{
+		foreach (int activeRelicID in _activeRelicInventory)
+		{
+			_activeRelics[activeRelicID].OnEnterRunEvent();
+		}
+
+		foreach (Item consumable in _consumables)
+		{
+			consumable.OnEnterRunEvent();
+		}
+	}
+	
 	internal void OnTileClicked(Tile tile)
 	{
 		foreach (int activeRelicID in _activeRelicInventory)

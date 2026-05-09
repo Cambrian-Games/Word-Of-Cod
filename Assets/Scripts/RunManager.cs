@@ -158,6 +158,8 @@ public class RunManager : MonoBehaviour
 					// the way we calculate a destination (or reaching the destination) in Traveling_To_Next_Event falls apart here and needs a better solution.
 					break;
 				case RunState.Enter_Event:
+					//reset once per battle items/relics
+					Player.INSTANCE._inventory.OnEnterRunEvent();
 					// TODO move camera from overworld view into battle view
 					SetRunState(RunState.In_Event);
 					break;
