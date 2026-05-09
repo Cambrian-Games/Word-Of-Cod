@@ -55,11 +55,12 @@ public class Enemy : Entity
 
 
 
-#if UNITY_EDITOR
+
 	protected override void Awake()
 	{
 		base.Awake();
 
+#if UNITY_EDITOR
 		bool hasNullRules = false;
 
 		for (int i = _rules.Count - 1; i >= 0; i--)
@@ -103,8 +104,8 @@ public class Enemy : Entity
 		}
 
 		Debug.Assert(!hasNullRules, $"Enemy {name} has at least one null rule! Removing all null rules.");
-	}
 #endif
+	}
 
 	private void OnValidate()
 	{

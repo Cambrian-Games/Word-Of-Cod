@@ -436,7 +436,7 @@ public class RunManager : MonoBehaviour
 		{
 			_longestWord = this._longestWord,
 			_mostDamagingWord = this._mostDamagingWord,
-			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
+			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select(n => n.ToString())),
 			_highestDamage = this._sortedWordDamages.Count > 0 ? _sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
