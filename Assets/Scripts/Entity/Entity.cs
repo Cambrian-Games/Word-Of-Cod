@@ -16,12 +16,16 @@ public class Entity : MonoBehaviour
 	public int CurrentHealth
 	{
 		get => _currentHealth;
-		set => _currentHealth = value;
+		//set => _currentHealth = value;
 	}
 
 	protected int _lastDamageTaken = 0;
 	public int LastDamageTaken => _lastDamageTaken;
 
+	public void SetHealth(int value)
+	{
+		_currentHealth = value;
+	}
 
 
     protected virtual void Awake()

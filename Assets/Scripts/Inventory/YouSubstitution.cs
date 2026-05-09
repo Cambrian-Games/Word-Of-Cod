@@ -18,7 +18,7 @@ public class YouSubstitution : ActiveRelic
             _canUse = false;
             Player.INSTANCE._substitute = true;
             int loss = Mathf.RoundToInt(Player.INSTANCE.MaxHealth * 0.2f);
-            Player.INSTANCE.CurrentHealth = Mathf.Max(Player.INSTANCE.CurrentHealth - loss, 1);
+            Player.INSTANCE.SetHealth(Mathf.Max(Player.INSTANCE.CurrentHealth - loss, 1));
         }
         EndUse();
 
