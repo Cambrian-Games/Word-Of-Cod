@@ -3324,8 +3324,8 @@ MonoBehaviour:
   _currentRun: []
   _distanceBetweenEvents: 20
   _travelTime: 4
-  _loseScene: {fileID: 102900000, guid: 10aff388008011c4fbd00c7cdaf9cce8, type: 3}
-  _winScene: {fileID: 102900000, guid: 5b4fa5be8a142d04698b939da9f71374, type: 3}
+  _loseScene: LoseScene
+  _winScene: WinScene
   _storeObject: {fileID: 1786051286}
   _bossRewardObject: {fileID: 893356439}
   _analyticsManager: {fileID: 0}
@@ -6028,7 +6028,6 @@ GameObject:
   - component: {fileID: 1161891040}
   - component: {fileID: 1161891039}
   - component: {fileID: 1161891043}
-  - component: {fileID: 1161891042}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -6119,20 +6118,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161891037}
   m_CullTransparentMesh: 1
---- !u!114 &1161891042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1161891037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bc2380bf4ea0fd7da07d9cb17aae5cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InstantiateWordDisplay
-  _location: {fileID: 1161891037}
-  _prefab: {fileID: 6775194119241059653, guid: b3e0541b7340be7aa8e079fdf46598ad, type: 3}
 --- !u!114 &1161891043
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9599,57 +9584,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2056634669}
   m_CullTransparentMesh: 1
---- !u!1 &2105384664
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2105384665}
-  - component: {fileID: 2105384666}
-  m_Layer: 0
-  m_Name: BagOfWorms
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2105384665
+--- !u!4 &2105384665 stripped
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+  m_PrefabInstance: {fileID: 2050334280583505670}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2105384664}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 101.08617, y: 62.54738, z: 0}
-  m_LocalScale: {x: 0.14285712, y: 0.14285712, z: 0.14285712}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 145669134}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2105384666
+--- !u!114 &2105384666 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 4841589177458565411, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+  m_PrefabInstance: {fileID: 2050334280583505670}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2105384664}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f3cf8ea553788798877e22ef977f22f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BagOfWorms
-  _maxCount: 10
-  _currentCount: 2
-  _isConsumable: 1
-  _icon: {fileID: 6083897114130078571, guid: bb10dc1fe80bad0dab9782864ad3e277, type: 3}
-  _displayName: Delicious Bag of Worm Segments
-  _description: Heals 50
-  _countText: {fileID: 423461747}
 --- !u!4 &2106946516 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1818886919343343717, guid: 4258387c65989d24eabb078ed59b522d, type: 3}
@@ -9815,6 +9765,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2132625767}
   m_CullTransparentMesh: 1
+--- !u!1001 &2050334280583505670
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 145669134}
+    m_Modifications:
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 101.08617
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 62.54738
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2598443031529525755, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4381750067749777481, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: m_Name
+      value: BagOfWorms
+      objectReference: {fileID: 0}
+    - target: {fileID: 4841589177458565411, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
+      propertyPath: _countText
+      value: 
+      objectReference: {fileID: 423461747}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5fc1d10a69deaec45b745ccefdbb5d83, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

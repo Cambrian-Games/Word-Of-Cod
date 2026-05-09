@@ -164,33 +164,32 @@ public class AttackRule
 			effectTurnComplete = CurrentEffect.UpdateEffect(owner);
 		}
 
-		if (effectTurnComplete)
-		{
-			// If this is a multiturn effect and it has turns remaining, end turn and prevent advancing to next effect
-
-			if (!CurrentEffect.IsEffectComplete(owner))
-			{
-				_stayInCurrentEffect = true;
-				return true;
-			}
-				
-			// This explicitly ends the turn
-
-			if (CurrentEffect.EndsTurn)
-				return true;
-
-			// try to go to next effect. If none exists, return true, otherwise start next effect.
-
-			_currentEffectIndex++;
-
-			if (_currentEffectIndex >= _effects.Count)
-				return true;
-
-			CurrentEffect.StartEffect(owner);
-			CurrentEffect.StartTurn(owner);
-
+		if (!effectTurnComplete)
 			return false;
+
+
+		// If this is a multiturn effect and it has turns remaining, end turn and prevent advancing to next effect
+
+		if (!CurrentEffect.IsEffectComplete(owner))
+		{
+			_stayInCurrentEffect = true;
+			return true;
 		}
+				
+		// This explicitly ends the turn
+
+		if (CurrentEffect.EndsTurn)
+			return true;
+
+		// try to go to next effect. If none exists, return true, otherwise start next effect.
+
+		_currentEffectIndex++;
+
+		if (_currentEffectIndex >= _effects.Count)
+			return true;
+
+		CurrentEffect.StartEffect(owner);
+		CurrentEffect.StartTurn(owner);
 
 		return false;
 	}

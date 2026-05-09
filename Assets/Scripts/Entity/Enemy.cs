@@ -55,6 +55,7 @@ public class Enemy : Entity
 
 
 
+
 	protected override void Awake()
 	{
 		base.Awake();
@@ -219,6 +220,13 @@ public class Enemy : Entity
 
 		if (activeRule != null && !activeRule.IsComplete(this))
 			return false;
+
+		// clear out any state data in all rules. Required for CanRun() to behave properly on a previously-started rule
+
+		foreach (AttackRule rule in _rules)
+		{
+			rule.CancelRule(this);
+		}
 
 		// no active rule or interrupt, select a new attack
 

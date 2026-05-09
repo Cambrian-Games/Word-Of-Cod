@@ -4,10 +4,10 @@ using UnityEngine.SceneManagement;
 
 public class ClickToLoadScene : MonoBehaviour
 {
-	public SceneAsset _targetScene;
+	public string _targetScene;
 
 	public void LoadScene()
 	{
-		SceneManager.LoadScene(_targetScene.name);
+		SceneManager.LoadScene(_targetScene);
 	}
 }

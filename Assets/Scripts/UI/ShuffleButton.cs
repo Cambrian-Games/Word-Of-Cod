@@ -23,7 +23,7 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		if (!GameBoard.INSTANCE.IsSettled())
+		if (!GameBoard.INSTANCE.IsSettled() || BattleManager.INSTANCE.CurrentState != BattleManager.BattleState.Player_Turn)
 			return;
 
 		if (!_hasFirstClick)

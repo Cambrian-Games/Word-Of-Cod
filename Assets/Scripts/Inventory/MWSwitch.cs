@@ -21,6 +21,10 @@ public class MWSwitch : ActiveRelic
 			_inUse = true;
 			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
 		}
+		else
+		{
+			EndUse();
+		}
 	}
 
 	public override void OnTileClicked(Tile tile)
