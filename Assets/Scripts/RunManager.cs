@@ -31,6 +31,7 @@ public class RunManager : MonoBehaviour
 	public SceneAsset _winScene;
 
 	public GameObject _storeObject;
+	public GameObject _bossRewardObject;
 	private Vector3 _destination;
 
 	private bool _hasSelectedNextEvent = false;
@@ -172,6 +173,10 @@ public class RunManager : MonoBehaviour
 					// if event was shop, I don't think we do anything
 
 					// if this was a fight, we wait for items/relics to be purchased
+					if (_bossRewardObject.activeSelf)
+					{
+						break;
+					}
 
 					// if this was the last event, win
 
@@ -210,6 +215,7 @@ public class RunManager : MonoBehaviour
 		//}
 
 		_state = newState;
+		EncounterPoolKind encounter;
 
 		switch (_state)
 		{
@@ -237,8 +243,7 @@ public class RunManager : MonoBehaviour
 				_hasSelectedNextEvent = false;
 				break;
 			case RunState.In_Event:
-
-				EncounterPoolKind encounter = _currentRun[^1]._encounterKind;
+				encounter = _currentRun[^1]._encounterKind;
 
 				if (encounter == EncounterPoolKind.Shop)
 				{
@@ -255,7 +260,17 @@ public class RunManager : MonoBehaviour
 				break;
 			case RunState.Post_Event:
 				// if this was a fight, display items/relics screen
-				BattleManager.INSTANCE.Unload();
+				encounter = _currentRun[^1]._encounterKind;
+				
+				if (encounter == EncounterPoolKind.Area_1_Boss || encounter == EncounterPoolKind.Area_1_Miniboss)
+				{
+					_bossRewardObject.SetActive(true);
+				}
+
+				if (!_bossRewardObject.activeSelf)
+				{
+					BattleManager.INSTANCE.Unload();
+				}
 				break;
 			case RunState.Win:
 				//TODO Add Analytics for End Game
