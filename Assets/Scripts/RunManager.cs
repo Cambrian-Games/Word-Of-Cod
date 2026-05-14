@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
-using UnityEngine.Analytics;
 using UnityEngine.UnityConsent;
 
 public class RunManager : MonoBehaviour
@@ -27,8 +26,8 @@ public class RunManager : MonoBehaviour
 	public float _distanceBetweenEvents = 7.5f;
 	public float _travelTime = 3.0f;
 
-	public SceneAsset _loseScene;
-	public SceneAsset _winScene;
+	public string _loseScene;
+	public string _winScene;
 
 	public GameObject _storeObject;
 	public GameObject _bossRewardObject;
@@ -275,12 +274,13 @@ public class RunManager : MonoBehaviour
 			case RunState.Win:
 				//TODO Add Analytics for End Game
 				SendWinEvent();
+				SceneManager.LoadScene(_winScene);
 				break;
 			case RunState.Lose:
 				//TODO Add analytics for lost run
 				//    same as End Game, but with added "what you lost to" event
 				SendLoseEvent();
-				SceneManager.LoadScene(_loseScene.name);
+				SceneManager.LoadScene(_loseScene);
 				break;
 		}
 	}
@@ -401,17 +401,27 @@ public class RunManager : MonoBehaviour
 	private void CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength,
 		out float medianLength)
 	{
-		meanDamage = (float) _sortedWordDamages.Average();
-		meanLength = (float) _sortedWordLengths.Average();
-		if (_sortedWordDamages.Count % 2 != 0)
+		if (_sortedWordDamages.Count > 0)
 		{
-			medianLength = _sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2);
-			medianDamage = _sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2);
+			meanDamage = (float)_sortedWordDamages.Average();
+			meanLength = (float)_sortedWordLengths.Average();
+			if (_sortedWordDamages.Count % 2 != 0)
+			{
+				medianLength = _sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2);
+				medianDamage = _sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2);
+			}
+			else
+			{
+				medianLength = (_sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2) + _sortedWordLengths.ElementAt((_sortedWordLengths.Count / 2) - 1)) / 2.0f;
+				medianDamage = (_sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2) + _sortedWordDamages.ElementAt((_sortedWordDamages.Count / 2) - 1)) / 2.0f;
+			}
 		}
 		else
 		{
-			medianLength = (_sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2) + _sortedWordLengths.ElementAt((_sortedWordLengths.Count / 2) - 1)) / 2.0f;
-			medianDamage = (_sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2) + _sortedWordDamages.ElementAt((_sortedWordDamages.Count / 2) - 1)) / 2.0f;
+			meanDamage = 0;
+			meanLength = 0;
+			medianDamage = 0;
+			medianLength = 0;
 		}
 	}
 	
@@ -422,8 +432,8 @@ public class RunManager : MonoBehaviour
 		{
 			_longestWord = this._longestWord,
 			_mostDamagingWord = this._mostDamagingWord,
-			_relicList = String.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
-			_highestDamage = this._sortedWordDamages.Last(),
+			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
+			_highestDamage = this._sortedWordDamages.Count > 0 ? this._sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
 			_medianDamage = medianDamage,
@@ -443,8 +453,8 @@ public class RunManager : MonoBehaviour
 		{
 			_longestWord = this._longestWord,
 			_mostDamagingWord = this._mostDamagingWord,
-			_relicList = String.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
-			_highestDamage = this._sortedWordDamages.Last(),
+			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select(n => n.ToString())),
+			_highestDamage = this._sortedWordDamages.Count > 0 ? _sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
 			_medianDamage = medianDamage,

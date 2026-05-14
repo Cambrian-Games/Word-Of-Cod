@@ -16,7 +16,7 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
     {
-        if (GameBoard.INSTANCE.IsSettled())
+        if (GameBoard.INSTANCE.IsSettled() && BattleManager.INSTANCE.CurrentState == BattleManager.BattleState.Player_Turn)
         {
             UpdateNeedle(eventData);
         }
@@ -24,7 +24,7 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (GameBoard.INSTANCE.IsSettled())
+        if (GameBoard.INSTANCE.IsSettled() && BattleManager.INSTANCE.CurrentState == BattleManager.BattleState.Player_Turn)
         {
             UpdateNeedle(eventData);
         }
@@ -32,7 +32,7 @@ public class Compass : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (GameBoard.INSTANCE.IsSettled())
+        if (GameBoard.INSTANCE.IsSettled() && BattleManager.INSTANCE.CurrentState == BattleManager.BattleState.Player_Turn)
         {
             UpdateNeedle(eventData);
         }

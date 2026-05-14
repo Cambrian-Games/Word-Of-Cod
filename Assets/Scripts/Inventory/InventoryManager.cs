@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
@@ -301,20 +302,17 @@ public class InventoryManager : MonoBehaviour
 
 	internal void OnPlayerTakeDamage()
 	{
-		if (_activeRelicInventory.Contains(1))
+		SalmonStone salmonStone = (SalmonStone) _activeRelics.Where(relic => relic.GetComponent<SalmonStone>()).FirstOrDefault();
+
+		bool hasSalmonStone = salmonStone && _activeRelicInventory.Contains(salmonStone.ID);
+		bool canUseSalmonStone = !salmonStone._used && Player.INSTANCE.CurrentHealth <= 0;
+
+		if (hasSalmonStone && canUseSalmonStone)
 		{
-			SalmonStone stone = _activeRelics[1].gameObject.GetComponent<SalmonStone>();
-			if (!stone._used == false)
-			{
-				if (Player.INSTANCE.CurrentHealth <= 0)
-				{
-					Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
-					stone._used = true;
-					int index = _activeRelicInventory.IndexOf(1);
-					_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite =
-						stone._brokenIcon;
-				}
-			}
+			Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
+			salmonStone._used = true;
+			int index = _activeRelicInventory.IndexOf(1);
+			_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite = salmonStone._brokenIcon;
 		}
 	}
 

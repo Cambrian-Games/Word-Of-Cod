@@ -56,6 +56,7 @@ public class LetterTile : Item
 			GameBoard.INSTANCE.ChangeTileLetter(_selectedTile, char.ToUpper(input[0]));
 
 			_currentCount--;
+			_countText.text = _currentCount.ToString();
 
 			EndUse();
 		}
@@ -72,6 +73,10 @@ public class LetterTile : Item
 		{
 			_state = UseState.In_Use;
 			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
+		}
+		else if (_state == UseState.Unususable)
+		{
+			EndUse();
 		}
 	}
 
