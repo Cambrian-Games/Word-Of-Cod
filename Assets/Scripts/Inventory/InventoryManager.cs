@@ -174,6 +174,7 @@ public class InventoryManager : MonoBehaviour
             if (item.Key == RelicEffect.ValueToModify.Bubble)
             {
 	            Player.INSTANCE._bubbleShield += item.Value;
+				continue;
             }
 
             Debug.LogError($"Unsupported modification of {item.Key} during OnWordSubmit");
