@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
-using UnityEngine.Analytics;
 using UnityEngine.UnityConsent;
 
 public class RunManager : MonoBehaviour
@@ -27,10 +26,11 @@ public class RunManager : MonoBehaviour
 	public float _distanceBetweenEvents = 7.5f;
 	public float _travelTime = 3.0f;
 
-	public SceneAsset _loseScene;
-	public SceneAsset _winScene;
+	public string _loseScene;
+	public string _winScene;
 
 	public GameObject _storeObject;
+	public GameObject _bossRewardObject;
 	private Vector3 _destination;
 
 	private bool _hasSelectedNextEvent = false;
@@ -158,6 +158,8 @@ public class RunManager : MonoBehaviour
 					// the way we calculate a destination (or reaching the destination) in Traveling_To_Next_Event falls apart here and needs a better solution.
 					break;
 				case RunState.Enter_Event:
+					//reset once per battle items/relics
+					Player.INSTANCE._inventory.OnEnterRunEvent();
 					// TODO move camera from overworld view into battle view
 					SetRunState(RunState.In_Event);
 					break;
@@ -170,6 +172,10 @@ public class RunManager : MonoBehaviour
 					// if event was shop, I don't think we do anything
 
 					// if this was a fight, we wait for items/relics to be purchased
+					if (_bossRewardObject.activeSelf)
+					{
+						break;
+					}
 
 					// if this was the last event, win
 
@@ -208,6 +214,7 @@ public class RunManager : MonoBehaviour
 		//}
 
 		_state = newState;
+		EncounterPoolKind encounter;
 
 		switch (_state)
 		{
@@ -235,8 +242,7 @@ public class RunManager : MonoBehaviour
 				_hasSelectedNextEvent = false;
 				break;
 			case RunState.In_Event:
-
-				EncounterPoolKind encounter = _currentRun[^1]._encounterKind;
+				encounter = _currentRun[^1]._encounterKind;
 
 				if (encounter == EncounterPoolKind.Shop)
 				{
@@ -253,17 +259,28 @@ public class RunManager : MonoBehaviour
 				break;
 			case RunState.Post_Event:
 				// if this was a fight, display items/relics screen
-				BattleManager.INSTANCE.Unload();
+				encounter = _currentRun[^1]._encounterKind;
+				
+				if (encounter == EncounterPoolKind.Area_1_Boss || encounter == EncounterPoolKind.Area_1_Miniboss)
+				{
+					_bossRewardObject.SetActive(true);
+				}
+
+				if (!_bossRewardObject.activeSelf)
+				{
+					BattleManager.INSTANCE.Unload();
+				}
 				break;
 			case RunState.Win:
 				//TODO Add Analytics for End Game
 				SendWinEvent();
+				SceneManager.LoadScene(_winScene);
 				break;
 			case RunState.Lose:
 				//TODO Add analytics for lost run
 				//    same as End Game, but with added "what you lost to" event
 				SendLoseEvent();
-				SceneManager.LoadScene(_loseScene.name);
+				SceneManager.LoadScene(_loseScene);
 				break;
 		}
 	}
@@ -384,17 +401,27 @@ public class RunManager : MonoBehaviour
 	private void CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength,
 		out float medianLength)
 	{
-		meanDamage = (float) _sortedWordDamages.Average();
-		meanLength = (float) _sortedWordLengths.Average();
-		if (_sortedWordDamages.Count % 2 != 0)
+		if (_sortedWordDamages.Count > 0)
 		{
-			medianLength = _sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2);
-			medianDamage = _sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2);
+			meanDamage = (float)_sortedWordDamages.Average();
+			meanLength = (float)_sortedWordLengths.Average();
+			if (_sortedWordDamages.Count % 2 != 0)
+			{
+				medianLength = _sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2);
+				medianDamage = _sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2);
+			}
+			else
+			{
+				medianLength = (_sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2) + _sortedWordLengths.ElementAt((_sortedWordLengths.Count / 2) - 1)) / 2.0f;
+				medianDamage = (_sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2) + _sortedWordDamages.ElementAt((_sortedWordDamages.Count / 2) - 1)) / 2.0f;
+			}
 		}
 		else
 		{
-			medianLength = (_sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2) + _sortedWordLengths.ElementAt((_sortedWordLengths.Count / 2) - 1)) / 2.0f;
-			medianDamage = (_sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2) + _sortedWordDamages.ElementAt((_sortedWordDamages.Count / 2) - 1)) / 2.0f;
+			meanDamage = 0;
+			meanLength = 0;
+			medianDamage = 0;
+			medianLength = 0;
 		}
 	}
 	
@@ -405,8 +432,8 @@ public class RunManager : MonoBehaviour
 		{
 			_longestWord = this._longestWord,
 			_mostDamagingWord = this._mostDamagingWord,
-			_relicList = String.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
-			_highestDamage = this._sortedWordDamages.Last(),
+			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
+			_highestDamage = this._sortedWordDamages.Count > 0 ? this._sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
 			_medianDamage = medianDamage,
@@ -426,8 +453,8 @@ public class RunManager : MonoBehaviour
 		{
 			_longestWord = this._longestWord,
 			_mostDamagingWord = this._mostDamagingWord,
-			_relicList = String.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select( n => n.ToString( ) )),
-			_highestDamage = this._sortedWordDamages.Last(),
+			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory.Select(n => n.ToString())),
+			_highestDamage = this._sortedWordDamages.Count > 0 ? _sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
 			_medianDamage = medianDamage,

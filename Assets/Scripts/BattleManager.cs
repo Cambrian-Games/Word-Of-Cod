@@ -271,6 +271,8 @@ public class BattleManager : MonoBehaviour
 				break;
 
             case BattleState.Post_Enemy_Turn:
+	            Player.INSTANCE._bubbleShield = 0f;
+
                 if (Player.INSTANCE.CurrentHealth <= 0)
                 {
                     SetBattleState(BattleState.Lose);
@@ -279,6 +281,7 @@ public class BattleManager : MonoBehaviour
                 {
                     SetBattleState(BattleState.Pre_Player_Turn);
                 }
+	            
                 break;
 
             case BattleState.Lose:
@@ -465,10 +468,14 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            //Analytics for Failed Word Here0
-            WordFailedEvent wordFailedEvent = new WordFailedEvent { _failedWord = text };
-            AnalyticsService.Instance.RecordEvent(wordFailedEvent);
-            Debug.Log("FailedWordEventSent");
+            //Analytics for Failed Word Here
+			if (text.Length > 0)
+			{
+				WordFailedEvent wordFailedEvent = new WordFailedEvent { _failedWord = text };
+				AnalyticsService.Instance.RecordEvent(wordFailedEvent);
+				Debug.Log("FailedWordEventSent");
+			}
+
             return false;
         }
     }

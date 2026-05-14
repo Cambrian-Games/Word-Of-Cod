@@ -1,34 +1,21 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-public class ShopManager : MonoBehaviour
+public class BattleRewardManager : MonoBehaviour
 {
     public Button _relicChoiceButton;
 
     private int _relicChoice = -1;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    
     private void OnEnable()
     {
         _relicChoiceButton.gameObject.SetActive(true);
 
         //choose new unowned relic and display
         List<int> unownedRelics = new List<int>();
-
+        
         for (int i = 0; i < Player.INSTANCE._inventory._passiveRelics.Count; i++)
         {
             if (!Player.INSTANCE._inventory._passiveRelicInventory.Contains(i))
@@ -39,7 +26,7 @@ public class ShopManager : MonoBehaviour
 
         for (int i = 0; i < Player.INSTANCE._inventory._activeRelics.Count; i++)
         {
-            if (!Player.INSTANCE._inventory._passiveRelicInventory.Contains(i))
+            if (!Player.INSTANCE._inventory._activeRelicInventory.Contains(i))
             {
                 //offset active relics by passive count
                 unownedRelics.Add(i + Player.INSTANCE._inventory._passiveRelics.Count);
@@ -79,6 +66,7 @@ public class ShopManager : MonoBehaviour
     public void LeaveShop()
     {
         gameObject.SetActive(false);
-        RunManager.INSTANCE.SetRunState(RunManager.RunState.Traveling_To_Next_Event);
+        //RunManager.INSTANCE.SetRunState(RunManager.RunState.Traveling_To_Next_Event);
+        BattleManager.INSTANCE.Unload();
     }
 }

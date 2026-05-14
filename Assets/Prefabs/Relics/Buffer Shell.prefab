@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5783411971413309479}
   - component: {fileID: 7595469887087623229}
   m_Layer: 0
-  m_Name: Unquestionably Unique Rock
+  m_Name: Buffer Shell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,15 +44,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fdb4e367799c5e498d08af4024aca7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
-  _displayName: Unquestionably Unique Rock
-  _description: '[Placeholder] More unique vowels = more damage'
-  _icon: {fileID: -3268270820148773124, guid: e5e43467b7316570e94db1dda926a248, type: 3}
+  _displayName: Buffer Shell
+  _description: '[BS Desc]'
+  _icon: {fileID: 247780611821353869, guid: cdeb77f0855ceec0f9c1c56745859515, type: 3}
   _effects:
   - _event: 0
-    _condition: 3
+    _condition: 0
     _filterString: AEIOUY
     _filterPOS: 0
-    _numTimesToApply: 0
+    _numTimesToApply: 1
     _chanceToTrigger: 1
-    _valueToModify: 0
-    _value: 0.1
+    _valueToModify: 9
+    _value: -1

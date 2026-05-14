@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5120576705522523531
+--- !u!1 &435936030495270834
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,51 +8,46 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5783411971413309479}
-  - component: {fileID: 7595469887087623229}
+  - component: {fileID: 1818886919343343717}
+  - component: {fileID: 5399917610523326959}
   m_Layer: 0
-  m_Name: Unquestionably Unique Rock
+  m_Name: You Substitution
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5783411971413309479
+--- !u!4 &1818886919343343717
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5120576705522523531}
+  m_GameObject: {fileID: 435936030495270834}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.22542, y: -4.51662, z: 0}
+  m_LocalPosition: {x: 70.61986, y: 58.24206, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7595469887087623229
+--- !u!114 &5399917610523326959
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5120576705522523531}
+  m_GameObject: {fileID: 435936030495270834}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fdb4e367799c5e498d08af4024aca7d, type: 3}
+  m_Script: {fileID: 11500000, guid: a37fb6f86656413fa8e21f29bf967ec2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Relic
-  _displayName: Unquestionably Unique Rock
-  _description: '[Placeholder] More unique vowels = more damage'
-  _icon: {fileID: -3268270820148773124, guid: e5e43467b7316570e94db1dda926a248, type: 3}
-  _effects:
-  - _event: 0
-    _condition: 3
-    _filterString: AEIOUY
-    _filterPOS: 0
-    _numTimesToApply: 0
-    _chanceToTrigger: 1
-    _valueToModify: 0
-    _value: 0.1
+  m_EditorClassIdentifier: Assembly-CSharp::MWSwitch
+  _maxCount: 1
+  _currentCount: 1
+  _isConsumable: 0
+  _icon: {fileID: 2814304524802023395, guid: e28215cfbaaacd3efaf71c00d9950f16, type: 3}
+  _displayName: You Substitution
+  _description: Once Per Battle, Pay 20% max hp to reduce next enemy attack damage
+    to 0

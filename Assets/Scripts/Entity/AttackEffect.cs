@@ -64,7 +64,7 @@ public abstract class AttackEffect
 		return _isEffectComplete;
 	}
 
-	internal bool OnLastTurn() => _currentTurn >= _numTurns;
+	internal virtual bool OnLastTurn() => _currentTurn >= _numTurns;
 
 	public virtual string FormattedForecast()
 	{
@@ -795,6 +795,8 @@ public class SandSuckAttack : VariableTurnAttack
 		_isEffectComplete = _state == SandGatherState.Has_Attempted_Gather && _tilesGathered == 0;
 		return _isEffectComplete;
 	}
+
+	internal override bool OnLastTurn() => _repetitions >= _numTurns;
 
 	public override string FormattedForecast()
 	{

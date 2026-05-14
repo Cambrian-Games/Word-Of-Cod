@@ -6,7 +6,9 @@ public class Player : Entity
 
 	public InventoryManager _inventory;
 
+	public float _bubbleShield =  0f;
 
+	public bool _substitute = false;
 
 	protected override void Awake()
 	{

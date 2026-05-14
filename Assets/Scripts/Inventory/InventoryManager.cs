@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
@@ -170,6 +171,11 @@ public class InventoryManager : MonoBehaviour
             if (item.Key == RelicEffect.ValueToModify.Damage_Bonus)
                 continue;
 
+            if (item.Key == RelicEffect.ValueToModify.Bubble)
+            {
+	            Player.INSTANCE._bubbleShield += item.Value;
+            }
+
             Debug.LogError($"Unsupported modification of {item.Key} during OnWordSubmit");
         }
 
@@ -178,35 +184,41 @@ public class InventoryManager : MonoBehaviour
 
     internal void OnEnemyAttack(float baseDamage, out float modifiedDamage)
     {
-        RelicEffect.Result result = new RelicEffect.Result();
+	    RelicEffect.Result result = new RelicEffect.Result();
 
-        if (!_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Enemy_Attack))
-        {
-            modifiedDamage = baseDamage;
-            return;
-        }
+	    if (_sortedPassiveRelics.ContainsKey(RelicEffect.EventTiming.On_Enemy_Attack))
+	    {
+		    foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
+		    {
+			    if (!_passiveRelicInventory.Contains(relic.ID))
+				    continue;
 
-        foreach (Relic relic in _sortedPassiveRelics[RelicEffect.EventTiming.On_Enemy_Attack])
-        {
-            if (!_passiveRelicInventory.Contains(relic.ID))
-                continue;
+			    result += relic.OnEnemyAttack(baseDamage);
+		    }
+	    }
 
-            result += relic.OnEnemyAttack(baseDamage);
-        }
-
-        if (result._values.Count == 0)
-        {
-            modifiedDamage = baseDamage;
-            return;
-        }
-
+	    if (result._values.Count == 0 && Player.INSTANCE._bubbleShield == 0 && !Player.INSTANCE._substitute)
+	    {
+		    modifiedDamage = baseDamage;
+		    return;
+	    }
+	    
         float totalResistPercent = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Percent_Increase)
             + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Percent_Increase);
 
         float totalResistBonus = result._values.GetValueOrDefault(RelicEffect.ValueToModify.Resist_Bonus)
-            + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus);
+            + result._values.GetValueOrDefault(RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus) + Player.INSTANCE._bubbleShield;
 
-        modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
+        //if player you substition active deal 0
+        if (Player.INSTANCE._substitute)
+        {
+	        modifiedDamage = 0;
+	        Player.INSTANCE._substitute = false;
+        }
+        else
+        {
+	        modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
+        }
 
         foreach (var item in result._values)
         {
@@ -221,6 +233,9 @@ public class InventoryManager : MonoBehaviour
 
             if (item.Key == RelicEffect.ValueToModify.Enemy_Damage_Resist_Bonus)
                 continue;
+            
+            if (item.Key == RelicEffect.ValueToModify.Bubble)
+				continue;
 
             Debug.LogError($"Unsupported modification of {item.Key} during OnEnemyAttack");
         }
@@ -259,6 +274,19 @@ public class InventoryManager : MonoBehaviour
 		}
 	}
 
+	internal void OnEnterRunEvent()
+	{
+		foreach (int activeRelicID in _activeRelicInventory)
+		{
+			_activeRelics[activeRelicID].OnEnterRunEvent();
+		}
+
+		foreach (Item consumable in _consumables)
+		{
+			consumable.OnEnterRunEvent();
+		}
+	}
+	
 	internal void OnTileClicked(Tile tile)
 	{
 		foreach (int activeRelicID in _activeRelicInventory)
@@ -274,20 +302,17 @@ public class InventoryManager : MonoBehaviour
 
 	internal void OnPlayerTakeDamage()
 	{
-		if (_activeRelicInventory.Contains(1))
+		SalmonStone salmonStone = (SalmonStone) _activeRelics.Where(relic => relic.GetComponent<SalmonStone>()).FirstOrDefault();
+
+		bool hasSalmonStone = salmonStone && _activeRelicInventory.Contains(salmonStone.ID);
+		bool canUseSalmonStone = !salmonStone._used && Player.INSTANCE.CurrentHealth <= 0;
+
+		if (hasSalmonStone && canUseSalmonStone)
 		{
-			SalmonStone stone = _activeRelics[1].gameObject.GetComponent<SalmonStone>();
-			if (!stone._used == false)
-			{
-				if (Player.INSTANCE.CurrentHealth <= 0)
-				{
-					Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
-					stone._used = true;
-					int index = _activeRelicInventory.IndexOf(1);
-					_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite =
-						stone._brokenIcon;
-				}
-			}
+			Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
+			salmonStone._used = true;
+			int index = _activeRelicInventory.IndexOf(1);
+			_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite = salmonStone._brokenIcon;
 		}
 	}
 

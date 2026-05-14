@@ -13,11 +13,19 @@ public class Entity : MonoBehaviour
 
 	// state
     private int _currentHealth;
-	public int CurrentHealth => _currentHealth;
+	public int CurrentHealth
+	{
+		get => _currentHealth;
+		//set => _currentHealth = value;
+	}
 
 	protected int _lastDamageTaken = 0;
 	public int LastDamageTaken => _lastDamageTaken;
 
+	public void SetHealth(int value)
+	{
+		_currentHealth = value;
+	}
 
 
     protected virtual void Awake()
@@ -45,7 +53,7 @@ public class Entity : MonoBehaviour
 		_lastDamageTaken = 0;
 
 		float amountHealed = Mathf.Min(heal, _maxHealth - _currentHealth);
-		_currentHealth = Mathf.Min(_maxHealth, _maxHealth + heal);
+		_currentHealth = Mathf.Min(_maxHealth, _currentHealth + heal);
 
 		if (amountHealed > 0)
 		{

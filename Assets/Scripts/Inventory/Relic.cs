@@ -130,6 +130,10 @@ public class RelicEffect
         Self_Damage_Resist_Bonus,
 
         Self_Heal,
+        
+        //Bubble Shield DR
+        
+        Bubble,
     }
 
     [SerializeField]
@@ -196,7 +200,7 @@ public class RelicEffect
         {
             numPasses = Math.Min(numPasses, _numTimesToApply);
         }
-
+        
         Result res = new Result();
 
         // this is a bit sketchy. Do we want multiple rolls to apply the thing once, or should it apply multiple times?
@@ -204,17 +208,26 @@ public class RelicEffect
 
         for (int i = 0; i < numPasses; i++)
         {
-            if (UnityEngine.Random.Range(0, 1) > _chanceToTrigger)
+            if (UnityEngine.Random.Range(0.0f, 1.0f) > _chanceToTrigger)
             {
                 continue;
             }
 
-            float newValue = res._values.GetValueOrDefault(_valueToModify) + _value;
+            float newValue;
+            if (_valueToModify == ValueToModify.Bubble && _value == -1.0f)
+            {
+                newValue = word.Text.Length * 2.0f;
+            }
+            else
+            {
+                newValue = res._values.GetValueOrDefault(_valueToModify) + _value;
+            }
 
             if (newValue != 0)
             {
                 res._values[_valueToModify] = newValue;
             }
+        
             else
             {
                 res._values.Remove(_valueToModify);
@@ -437,19 +450,15 @@ public class RelicEffect
                     break;
                 }
 
-                int currentChain = 0;
+                int currentChain = 1;
                 char lastChar = '\0';
 
                 // does stack overflow have a cleaner implementation of this?
                 // It's O(n) so we won't have a faster one but cleaner might be possible
 
                 for (int i = 0; i < text.Length; i++)
-                {// see if SO knows a faster way?
-                    if (currentChain == 0)
-                    {
-                        currentChain = 1;
-                    }
-                    else
+                {	// see if SO knows a faster way?
+					if (lastChar != '\0')
                     {
                         if (text[i] >= lastChar)
                         {
@@ -462,7 +471,8 @@ public class RelicEffect
                         }
                         else
                         {
-                            currentChain = 0;
+							// reset, this is now the first letter in the chain
+                            currentChain = 1;
                         }
                     }
 
@@ -488,30 +498,27 @@ public class RelicEffect
                     break;
                 }
 
-                int currentChainRev = 0;
+                int currentChainRev = 1;
                 char lastCharRev = '\0';
 
                 for (int i = 0; i < text.Length; i++)
                 {
-                    if (currentChainRev == 0)
-                    {
-                        currentChainRev = 1;
-                    }
-                    else
-                    {
-                        if (text[i] <= lastCharRev)
-                        {
-                            currentChainRev++;
+					if (lastCharRev != '\0')
+					{
+						if (text[i] <= lastCharRev)
+						{
+							currentChainRev++;
 
-                            if (currentChainRev > numPasses)
-                            {
-                                numPasses = currentChainRev;
-                            }
-                        }
-                        else
-                        {
-                            currentChain = 0;
-                        }
+							if (currentChainRev > numPasses)
+							{
+								numPasses = currentChainRev;
+							}
+						}
+						else
+						{
+							// reset, this is now the first letter in the chain
+							currentChain = 1;
+						} 
                     }
 
                     lastChar = text[i];
