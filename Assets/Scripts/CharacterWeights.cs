@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CharacterWeights", menuName = "Scriptable Objects/Character Weights")]
@@ -19,19 +20,21 @@ public class CharacterWeights : ScriptableObject
     /// DO NOT MODIFY THIS AT RUNTIME. It has to be public for the custom editor to work, but modifying it via code during gameplay will save those changes.
     /// </summary>
     public int[] _baseScores;
+	[Min(0.1f)]
+	public float _globalScoreMultiplier;
 
 	public AnimationCurve _vowelCurve;
 	public bool _reducePercent;
 	public int _defaultDecayThreshold;
 	public int _defaultZeroThreshold;
 
-    public int Score(char c) => _baseScores[c - 'A'];
+    public int Score(char c) => Mathf.RoundToInt(_baseScores[CharToIndex(c)] * _globalScoreMultiplier);
 
 	private static readonly char[] VOWELS = { 'A', 'E', 'I', 'O', 'U' };
 
 
 
-	public char[] FreshBoard(BoardState state)
+    public char[] FreshBoard(BoardState state)
 	{
 		Vector2Int dims = state._layout.Dims();
 		char[] newChars = new char[dims.x * dims.y];
@@ -41,7 +44,7 @@ public class CharacterWeights : ScriptableObject
 		for (int i = 0; i < newChars.Length; i++)
 		{
 			newChars[i] = RandomLetter(ref charCounts);
-			charCounts[newChars[i] - 'A']++;
+			charCounts[CharToIndex(newChars[i])]++;
 		}
 
 		EnforceVowelMinimums(ref newChars, newChars.Length, ref charCounts);
@@ -62,7 +65,7 @@ public class CharacterWeights : ScriptableObject
 		{
 			if (state[coord] != ' ')
 			{
-				charCounts[state[coord] - 'A']++;
+				charCounts[CharToIndex(state[coord])]++;
 				charsInBoardState++;
 			}
 		}
@@ -79,7 +82,7 @@ public class CharacterWeights : ScriptableObject
 		for (int i = 0; i < newChars.Length; i++)
 		{
 			newChars[i] = RandomLetter(ref charCounts);
-			charCounts[newChars[i] - 'A']++;
+			charCounts[CharToIndex(newChars[i])]++;
 		}
 
 		// if we want to enforce vowel minimum here, we can
@@ -97,13 +100,13 @@ public class CharacterWeights : ScriptableObject
 
 		int charIter = 0;
 
-		while (rand > modifiedWeights[charIter])
+		while ((charIter < modifiedWeights.Length - 1) && rand > modifiedWeights[charIter])
 		{
 			rand -= modifiedWeights[charIter];
 			charIter++;
 		}
 
-		return (char) ('A' + charIter);
+		return IndexToChar(charIter);
 	}
 
 	public char RandomVowel(ref byte[] charCounts)
@@ -115,13 +118,13 @@ public class CharacterWeights : ScriptableObject
 
 		int vowelIter = 0;
 
-		while (rand > modifiedWeights[VOWELS[vowelIter]])
+		while ((vowelIter < VOWELS.Length - 1) && rand > modifiedWeights[CharToIndex(VOWELS[vowelIter])])
 		{
-			rand -= modifiedWeights[VOWELS[vowelIter]];
+			rand -= modifiedWeights[CharToIndex(VOWELS[vowelIter])];
 			vowelIter++;
 		}
 
-		return (char)('A' + VOWELS[vowelIter]);
+		return VOWELS[vowelIter];
 	}
 
 	public void EnforceVowelMinimums(ref char[] newChars, int totalChars, ref byte[] charCounts)
@@ -129,7 +132,7 @@ public class CharacterWeights : ScriptableObject
 		int vowelCount = 0;
 		foreach (char vowel in VOWELS)
 		{
-			vowelCount += charCounts[vowel - 'A'];
+			vowelCount += charCounts[CharToIndex(vowel)];
 		}
 		
 		float vowelRate = vowelCount / (float)totalChars;
@@ -141,13 +144,17 @@ public class CharacterWeights : ScriptableObject
 			if (VOWELS.Contains(newChars[charIter]))
 				continue;
 
-			// if the char is not a vowel, subtract it from the char counts and get a vowel
+            // if the char is not a vowel, subtract it from the char counts and get a vowel
 
-			charCounts[newChars[charIter] - 'A']--;
+            int removeIndex = CharToIndex(newChars[charIter]);
+
+			charCounts[removeIndex]--;
 
 			newChars[charIter] = RandomVowel(ref charCounts);
 
-			charCounts[newChars[charIter] - 'A']++;
+            int addIndex = CharToIndex(newChars[charIter]);
+
+            charCounts[addIndex]++;
 
 			vowelCount++;
 			vowelRate = vowelCount / (float)newChars.Length;
@@ -175,11 +182,11 @@ public class CharacterWeights : ScriptableObject
 
 		foreach (char vowel in VOWELS)
 		{
-			byte charCount = charCounts[vowel - 'A'];
+			byte charCount = charCounts[CharToIndex(vowel)];
 
 			if (charCount >= _defaultZeroThreshold)
 			{
-				newWeights[vowel - 'A'] = 0;
+				newWeights[CharToIndex(vowel)] = 0;
 				continue;
 			}
 
@@ -192,12 +199,18 @@ public class CharacterWeights : ScriptableObject
 
 				// u = (a-x) / (a-b)
 
-				float u = (_defaultDecayThreshold - charCount) / (float)(_defaultDecayThreshold - (_defaultZeroThreshold - 1));
-				newWeights[vowel - 'A'] *= _vowelCurve.Evaluate(u);
+				//float u = (_defaultDecayThreshold - charCount) / (float)(_defaultDecayThreshold - (_defaultZeroThreshold - 1));
+				float u = Mathf.InverseLerp(_defaultDecayThreshold, _defaultZeroThreshold - 1, charCount);
+				newWeights[CharToIndex(vowel)] *= _vowelCurve.Evaluate(u);
 				continue;
 			}
 		}
 
 		return newWeights;
 	}
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private char IndexToChar(int index) => (char)('A' + index);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CharToIndex(char c) => c - 'A';
 }

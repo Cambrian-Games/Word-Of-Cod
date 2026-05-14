@@ -21,6 +21,7 @@ public class CharacterWeightsEditor : Editor
 			charweights._weights = new float[26];
 		}
 
+		charweights._globalScoreMultiplier = Mathf.Max(0.1f, EditorGUILayout.FloatField(charweights._globalScoreMultiplier));
 		charweights._minVowelRate = EditorGUILayout.Slider(new GUIContent("Vowel Threshold", "The fraction of tiles that are vowels will never drop below this."), charweights._minVowelRate, 0, 1);
 		charweights._vowelCurve = EditorGUILayout.CurveField("Vowel Curve", charweights._vowelCurve);
 		//charweights._reducePercent = EditorGUILayout.Toggle(charweights._reducePercent ? "Modify Percentage" : "Modify Raw Weight", charweights._reducePercent);
