@@ -2968,10 +2968,10 @@ RectTransform:
   - {fileID: 61884919}
   m_Father: {fileID: 840065089}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 12.5, y: -46.5}
-  m_SizeDelta: {x: 25, y: 25}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &489965358
 MonoBehaviour:
@@ -3961,7 +3961,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &683767546
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5515,10 +5515,10 @@ RectTransform:
   - {fileID: 423461746}
   m_Father: {fileID: 840065089}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 12.5, y: -12.5}
-  m_SizeDelta: {x: 25, y: 25}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &962625516
 MonoBehaviour:
@@ -7251,6 +7251,7 @@ MonoBehaviour:
   _activeRelicGrid: {fileID: 1571437848}
   _consumableGrid: {fileID: 840065088}
   _startingRelics: 2
+  tooltip: {fileID: 2056634671}
 --- !u!4 &1342681911 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3122789982281046568, guid: 38244eab106481d4282cfe564163e2ca, type: 3}

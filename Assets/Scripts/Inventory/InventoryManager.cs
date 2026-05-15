@@ -28,6 +28,9 @@ public class InventoryManager : MonoBehaviour
 	private Item _activeRelicInUse;
 
 	public int _startingRelics;
+
+	[SerializeField]
+	private TMP_Text tooltip;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -39,8 +42,8 @@ public class InventoryManager : MonoBehaviour
 		{
 			GrantRelic();
 		}
-		
-		GameObject.Find("Tooltip Text").GetComponent<TMP_Text>().text = "";
+
+		tooltip.text = "";
 	}
 
 	private void InitPassiveRelics()
