@@ -42,6 +42,8 @@ public class RunManager : MonoBehaviour
 	public List<int> _sortedWordLengths;
 	public List<int> _sortedWordDamages;
 
+	private Enemy _overworldEnemy;
+
 	public enum RunState
 	{
 		Nil = -1,
@@ -76,33 +78,14 @@ public class RunManager : MonoBehaviour
 	void Start()
     {
 		SetRunState(RunState.Run_Start);
-		GameObject analyticsGameObject = GameObject.Find("Analytics Manager");
-		if (analyticsGameObject)
-		{
-			_analyticsManager = analyticsGameObject.GetComponent<AnalyticsManager>();
-			if (_analyticsManager._analyticsEnabled)
-			{
-				EndUserConsent.SetConsentState(new ConsentState
-				{
-					AnalyticsIntent = ConsentStatus.Granted
-				});
-				Debug.Log("start Data Collection");
-			}
-			else
-			{
-				EndUserConsent.SetConsentState(new ConsentState
-				{
-					AnalyticsIntent = ConsentStatus.Denied
-				});
-			}
-		}
+		TryInitializeAnalytics();
 
 		_sortedWordDamages = new List<int>();
 		_sortedWordLengths = new List<int>();
     }
 
-    // Update is called once per frame
-    void Update()
+	// Update is called once per frame
+	void Update()
 	{
 		UpdateRunState();
 	}
@@ -228,6 +211,16 @@ public class RunManager : MonoBehaviour
 				if (evtNext.EventKinds.Count == 1)
 				{
 					SelectNextEvent(); // we can pick the event now since there aren't multiple options.
+					encounter = _currentRun[^1]._encounterKind;
+					Enemy prefab = Pool(encounter).EncounterPrefab(_currentRun[^1]._poolIndex);
+
+					if (prefab != null)
+					{
+						_overworldEnemy = Instantiate(prefab);
+						Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
+						Vector3 targetPos = _destination - new Vector3(2 * offset.x, 0, 0);
+						_overworldEnemy.transform.position = targetPos;
+					}
 				}
 				break;
 
@@ -255,6 +248,7 @@ public class RunManager : MonoBehaviour
 					// This is starting to become a problem, will likely have to be changed later
 					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position; // the cast sets the z coord to zero
 					BattleManager.INSTANCE.Load();
+					Destroy(_overworldEnemy);
 				}
 				break;
 			case RunState.Post_Event:
@@ -398,6 +392,7 @@ public class RunManager : MonoBehaviour
 		}
 	}
 
+#region Analytics
 	private void CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength,
 		out float medianLength)
 	{
@@ -424,7 +419,7 @@ public class RunManager : MonoBehaviour
 			medianLength = 0;
 		}
 	}
-	
+
 	private void SendWinEvent()
 	{
 		CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength, out float medianLength);
@@ -468,6 +463,31 @@ public class RunManager : MonoBehaviour
 		AnalyticsService.Instance.Flush();
 		Debug.Log("LoseEventSent");
 	}
+
+	private void TryInitializeAnalytics()
+	{
+		GameObject analyticsGameObject = GameObject.Find("Analytics Manager");
+		if (analyticsGameObject)
+		{
+			_analyticsManager = analyticsGameObject.GetComponent<AnalyticsManager>();
+			if (_analyticsManager._analyticsEnabled)
+			{
+				EndUserConsent.SetConsentState(new ConsentState
+				{
+					AnalyticsIntent = ConsentStatus.Granted
+				});
+				Debug.Log("start Data Collection");
+			}
+			else
+			{
+				EndUserConsent.SetConsentState(new ConsentState
+				{
+					AnalyticsIntent = ConsentStatus.Denied
+				});
+			}
+		}
+	}
+	#endregion
 
 	public RunEvent Event(int index) => _runFormat[index];
 	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
