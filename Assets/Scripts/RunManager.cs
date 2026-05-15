@@ -248,7 +248,13 @@ public class RunManager : MonoBehaviour
 					// This is starting to become a problem, will likely have to be changed later
 					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position; // the cast sets the z coord to zero
 					BattleManager.INSTANCE.Load();
-					Destroy(_overworldEnemy);
+
+					// this transition's actually pretty seamless
+
+					if (_overworldEnemy)
+					{
+						Destroy(_overworldEnemy.gameObject);
+					}
 				}
 				break;
 			case RunState.Post_Event:

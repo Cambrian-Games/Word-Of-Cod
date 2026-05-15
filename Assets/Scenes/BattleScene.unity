@@ -2968,10 +2968,10 @@ RectTransform:
   - {fileID: 61884919}
   m_Father: {fileID: 840065089}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 12.5, y: -46.5}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &489965358
 MonoBehaviour:
@@ -3961,7 +3961,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &683767546
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5515,10 +5515,10 @@ RectTransform:
   - {fileID: 423461746}
   m_Father: {fileID: 840065089}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 12.5, y: -12.5}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &962625516
 MonoBehaviour:
@@ -8551,6 +8551,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   _enemyPrefab: {fileID: 3799837967197732049, guid: 3623c6aabd9f7b24298d276bc17382f0, type: 3}
   _enemyDamagePopup: {fileID: 971867692}
+  _battleCanvas: {fileID: 683767548}
   _forecastText: {fileID: 1879326042}
   _wordHistoryBox: {fileID: 531968410}
   _tileDestination: {fileID: 714759286}
