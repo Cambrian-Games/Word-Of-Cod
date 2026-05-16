@@ -1,15 +1,19 @@
+using System;
 using UnityEngine;
 
 public class SalmonStone : ActiveRelic
 {
-    internal bool _used = false;
     public Sprite _brokenIcon;
 
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+	// This is the single sketchiest 
+    public void Start()
     {
-        _used = false;
+		State = UseState.Can_Use;
     }
+
+	protected override void OnUseStateChanged(UseState oldState, UseState newState)
+	{
+		base.OnUseStateChanged(oldState, newState);
+		Player.INSTANCE._inventory.SetIcon(ID, InventoryManager.InventorySection.Active_Relic, _brokenIcon);
+	}
 }

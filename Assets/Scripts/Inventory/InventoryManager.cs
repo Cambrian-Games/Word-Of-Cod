@@ -8,7 +8,14 @@ using Random = UnityEngine.Random;
 
 public class InventoryManager : MonoBehaviour
 {
-    public List<Relic> _passiveRelics;
+	public enum InventorySection
+	{
+		Passive_Relic,
+		Active_Relic,
+		Consumable_Item,
+	}
+
+	public List<Relic> _passiveRelics;
 	public List<Item> _activeRelics;
 	public List<Item> _consumables;
 
@@ -24,16 +31,20 @@ public class InventoryManager : MonoBehaviour
     private int _prevNumPassive = 0;
     private int _prevNumActive = 0;
 
-	private Item _consumableInUse;
-	private Item _activeRelicInUse;
+	private Item _itemInUse;
 
 	public int _startingRelics;
+
+	private static Color USABLE_COLOR = Color.white;
+	private static Color UNUSABLE_COLOR = Color.grey;
+	private static Color IN_USE_COLOR = Color.orange;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
 		InitPassiveRelics();
 		InitActiveRelics();
+		InitConsumables();
 
 		for (int i = 0; i < _startingRelics; i++)
 		{
@@ -53,7 +64,7 @@ public class InventoryManager : MonoBehaviour
 
 		for (int i = 0; i < _passiveRelics.Count; i++)
 		{
-			_passiveRelics[i].SetID(i);
+			_passiveRelics[i].ID = i;
 
 			List<RelicEffect> effects = _passiveRelics[i].Effects;
 
@@ -80,7 +91,7 @@ public class InventoryManager : MonoBehaviour
 
 		for (int i = 0; i < _activeRelics.Count; i++)
 		{
-			_activeRelics[i].SetID(i);
+			_activeRelics[i].ID = i;
 		}
 
 		//_activeRelicInventory.Add(Random.Range(0, _activeRelics.Count));
@@ -90,6 +101,14 @@ public class InventoryManager : MonoBehaviour
 		//	_activeRelics[_activeRelicInventory[0]].Icon;
 //
 		//_activeRelicGrid.transform.GetChild(0).gameObject.SetActive(true);
+	}
+
+	private void InitConsumables()
+	{
+		for (int i = 0; i < _consumables.Count; i++)
+		{
+			_consumables[i].ID = i;
+		}
 	}
 
 	// Update is called once per frame
@@ -130,14 +149,9 @@ public class InventoryManager : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.Escape) || Input.GetMouseButtonDown((int) MouseButton.Right))
 			{
-				if (_activeRelicInUse)
+				if (_itemInUse)
 				{
-					_activeRelicInUse.EndUse();
-				}
-
-				if (_consumableInUse)
-				{
-					_consumableInUse.EndUse();
+					_itemInUse.EndUse();
 				}
 			}
 		}
@@ -242,23 +256,35 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-	// we need a way to deselect a relic or consumable
+	internal void OnItemClicked(InventorySection section, int inventoryIndex)
+	{
+		if (!_itemInUse)
+		{
+			switch (section)
+			{
+				case InventorySection.Passive_Relic:
+					break;
 
-	internal void OnActiveRelicClicked(int inventoryIndex)
-	{
-		if (!_activeRelicInUse && !_consumableInUse)
-		{
-			_activeRelicInUse = _activeRelics[_activeRelicInventory[inventoryIndex]];
-			_activeRelicInUse.OnSelect();
-		}
-	}
-	
-	internal void OnConsumableClicked(int inventoryIndex)
-	{
-		if (!_activeRelicInUse && !_consumableInUse)
-		{
-			_consumableInUse = _consumables[inventoryIndex];
-			_consumableInUse.OnSelect();
+				case InventorySection.Active_Relic:
+					Item targetRelic = _activeRelics[_activeRelicInventory[inventoryIndex]];
+
+					if (targetRelic.State == Item.UseState.Can_Use)
+					{
+						_itemInUse = targetRelic;
+						_itemInUse.OnSelect();
+					}
+					break;
+
+				case InventorySection.Consumable_Item:
+					Item targetConsumable = _consumables[inventoryIndex];
+
+					if (targetConsumable.State == Item.UseState.Can_Use && targetConsumable._currentCount > 0)
+					{
+						_itemInUse = targetConsumable;
+						_itemInUse.OnSelect();
+					}
+					break;
+			}
 		}
 	}
 
@@ -290,43 +316,27 @@ public class InventoryManager : MonoBehaviour
 	
 	internal void OnTileClicked(Tile tile)
 	{
-		foreach (int activeRelicID in _activeRelicInventory)
-		{
-			_activeRelics[activeRelicID].OnTileClicked(tile);
-		}
-
-		foreach (Item consumable in _consumables)
-		{
-			consumable.OnTileClicked(tile);
-		}
+		_itemInUse.OnTileClicked(tile);
 	}
 
 	internal void OnPlayerTakeDamage()
 	{
-		SalmonStone salmonStone = (SalmonStone) _activeRelics.Where(relic => relic.GetComponent<SalmonStone>()).FirstOrDefault();
+		Item salmonStone = _activeRelics.Where(relic => relic.GetComponent<SalmonStone>()).FirstOrDefault();
 
 		bool hasSalmonStone = salmonStone && _activeRelicInventory.Contains(salmonStone.ID);
-		bool canUseSalmonStone = !salmonStone._used && Player.INSTANCE.CurrentHealth <= 0;
+		bool canUseSalmonStone = salmonStone.State == Item.UseState.Can_Use && Player.INSTANCE.CurrentHealth <= 0;
 
 		if (hasSalmonStone && canUseSalmonStone)
 		{
 			Player.INSTANCE.Heal(Mathf.FloorToInt(Player.INSTANCE.MaxHealth * 0.3f));
-			salmonStone._used = true;
-			int index = _activeRelicInventory.IndexOf(1);
-			_activeRelicGrid.transform.GetChild(index).gameObject.GetComponent<Image>().sprite = salmonStone._brokenIcon;
+			salmonStone.State = Item.UseState.Unususable;
 		}
 	}
 
-	internal void EndActiveRelicUse(ActiveRelic relic)
+	internal void EndItemUse(Item item)
 	{
-		Debug.Assert(_activeRelicInUse == relic);
-		_activeRelicInUse = null;
-	}
-
-	internal void EndConsumableUse(Item item)
-	{
-		Debug.Assert(_consumableInUse == item);
-		_consumableInUse = null;
+		Debug.Assert(_itemInUse == item);
+		_itemInUse = null;
 	}
 
 	public void GrantRelic()
@@ -357,7 +367,7 @@ public class InventoryManager : MonoBehaviour
 				
 				//add relic
 				_passiveRelicInventory.Add(relicToGrant);
-				Debug.Log("PassiveAdded");
+				Debug.Log("Passive Added");
 				granted = true;
 			}
 			//otherwise it's in the active list
@@ -378,5 +388,64 @@ public class InventoryManager : MonoBehaviour
 			}
 			
 		}
+	}
+
+	internal void SetIconColorFromUseState(int id, InventorySection section, Item.UseState newState)
+	{
+		int index = section switch
+		{
+			InventorySection.Passive_Relic => _passiveRelicInventory.IndexOf(id),
+			InventorySection.Active_Relic => _activeRelicInventory.IndexOf(id),
+			InventorySection.Consumable_Item => id,
+			_ => throw new System.NotImplementedException()
+		};
+
+		// This is an unobtained item, ignore it
+		if (index == -1)
+			return;
+
+		GameObject grid = section switch
+		{
+			InventorySection.Passive_Relic => _passiveRelicGrid,
+			InventorySection.Active_Relic => _activeRelicGrid,
+			InventorySection.Consumable_Item => _consumableGrid,
+			_ => throw new System.NotImplementedException(),
+		};
+
+		Image icon = grid.transform.GetChild(index).GetComponent<Image>();
+
+		icon.color = newState switch
+		{
+			Item.UseState.Unususable => UNUSABLE_COLOR,
+			Item.UseState.Can_Use => USABLE_COLOR,
+			Item.UseState.In_Use => IN_USE_COLOR,
+			_ => throw new System.NotImplementedException(),
+		};
+	}
+
+	internal void SetIcon(int id, InventorySection section, Sprite newSprite)
+	{
+		int index = section switch
+		{
+			InventorySection.Passive_Relic => _passiveRelicInventory.IndexOf(id),
+			InventorySection.Active_Relic => _activeRelicInventory.IndexOf(id),
+			InventorySection.Consumable_Item => id,
+			_ => throw new System.NotImplementedException()
+		};
+
+		// This is an unobtained item, ignore it
+		if (index == -1)
+			return;
+
+		GameObject grid = section switch
+		{
+			InventorySection.Passive_Relic => _passiveRelicGrid,
+			InventorySection.Active_Relic => _activeRelicGrid,
+			InventorySection.Consumable_Item => _consumableGrid,
+			_ => throw new System.NotImplementedException(),
+		};
+
+		Image icon = grid.transform.GetChild(index).GetComponent<Image>();
+		icon.sprite = newSprite;
 	}
 }
