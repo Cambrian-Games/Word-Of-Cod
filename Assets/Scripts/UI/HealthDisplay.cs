@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum EntityType
 {
@@ -14,6 +15,8 @@ public class HealthScript : MonoBehaviour
     public TMP_Text _text;
     public EntityType _type;
     private Enemy currEnemy;
+
+    [SerializeField] private Slider _slider;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -36,11 +39,13 @@ public class HealthScript : MonoBehaviour
             if (currEnemy != null)
             {
                 _text.text = $"{currEnemy.CurrentHealth} / {currEnemy.MaxHealth}";
+                _slider.value = currEnemy.HealthPercent();
             } 
         }
         else
         {
             _text.text = $"{Player.INSTANCE.CurrentHealth} / {Player.INSTANCE.MaxHealth}";
+            _slider.value = Player.INSTANCE.HealthPercent();
         }
     }
 }
