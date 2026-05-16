@@ -186,7 +186,7 @@ public class Enemy : Entity
 
 				int index = 0;
 
-				while (output > interruptCandidates[index]._weight)
+				while ((index < interruptCandidates.Count - 1) && output > interruptCandidates[index]._weight)
 				{
 					output -= interruptCandidates[index]._weight;
 					index++;
@@ -294,7 +294,7 @@ public class Enemy : Entity
 
 					int index = 0;
 
-					while (output > attackCandidates[index]._weight)
+					while ((index < attackCandidates.Count - 1) && output > attackCandidates[index]._weight)
 					{
 						output -= attackCandidates[index]._weight;
 						index++;
