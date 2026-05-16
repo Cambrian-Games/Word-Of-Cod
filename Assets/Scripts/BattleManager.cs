@@ -46,9 +46,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private GameObject _enemyDamagePopup;
 
-	[SerializeField]
-	private Canvas _battleCanvas;
-
 	private Enemy _enemy;
     public Enemy CurrentEnemy => _enemy;
 
@@ -210,7 +207,7 @@ public class BattleManager : MonoBehaviour
 				_wordHistory.Clear();
                 _wordHistoryBox.ClearHistoryBox();
 
-				_battleCanvas.enabled = false;
+				RunManager.INSTANCE.MainCanvas.enabled = false;
                 break;
 
             case BattleState.Load:
@@ -222,7 +219,7 @@ public class BattleManager : MonoBehaviour
 				enemyLocalPos.x *= -1;
 				enemyLocalPos.z = 0;
 				_enemy.transform.localPosition = enemyLocalPos;
-				_battleCanvas.enabled = true;
+				RunManager.INSTANCE.MainCanvas.enabled = true;
 
                 GameBoard.INSTANCE.GenerateBoard();
 

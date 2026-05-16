@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 public class ShopManager : MonoBehaviour
 {
     public Button _relicChoiceButton;
-
+	
     private int _relicChoice = -1;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -78,6 +78,7 @@ public class ShopManager : MonoBehaviour
 
     public void LeaveShop()
     {
+		RunManager.INSTANCE.ShopCanvas.enabled = false;
         gameObject.SetActive(false);
         RunManager.INSTANCE.SetRunState(RunManager.RunState.Traveling_To_Next_Event);
     }

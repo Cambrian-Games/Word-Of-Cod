@@ -37,6 +37,14 @@ public class RunManager : MonoBehaviour
 
 	public AnalyticsManager _analyticsManager;
 
+	[SerializeField]
+	private Canvas _mainCanvas;
+	public Canvas MainCanvas => _mainCanvas;
+
+	[SerializeField]
+	private Canvas _shopCanvas;
+	public Canvas ShopCanvas => _shopCanvas;
+
 	public string _longestWord ="";
 	public string _mostDamagingWord = "";
 	public List<int> _sortedWordLengths;
@@ -212,14 +220,18 @@ public class RunManager : MonoBehaviour
 				{
 					SelectNextEvent(); // we can pick the event now since there aren't multiple options.
 					encounter = _currentRun[^1]._encounterKind;
-					Enemy prefab = Pool(encounter).EncounterPrefab(_currentRun[^1]._poolIndex);
-
-					if (prefab != null)
+					EncounterPool pool = Pool(encounter);
+					if (pool != null)
 					{
-						_overworldEnemy = Instantiate(prefab);
-						Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
-						Vector3 targetPos = _destination - new Vector3(2 * offset.x, 0, 0);
-						_overworldEnemy.transform.position = targetPos;
+						Enemy prefab = pool.EncounterPrefab(_currentRun[^1]._poolIndex);
+
+						if (prefab != null)
+						{
+							_overworldEnemy = Instantiate(prefab);
+							Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
+							Vector3 targetPos = _destination - new Vector3(2 * offset.x, 0, 0);
+							_overworldEnemy.transform.position = targetPos;
+						}
 					}
 				}
 				break;
@@ -239,6 +251,7 @@ public class RunManager : MonoBehaviour
 
 				if (encounter == EncounterPoolKind.Shop)
 				{
+					_shopCanvas.enabled = true;
 					_storeObject.SetActive(true);
 				}
 				else
@@ -310,7 +323,6 @@ public class RunManager : MonoBehaviour
 			}
 		}
 	}
-
 
 	public void SelectNextEvent(int option = 0)
 	{
