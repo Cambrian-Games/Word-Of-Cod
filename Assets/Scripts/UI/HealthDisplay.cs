@@ -16,7 +16,8 @@ public class HealthScript : MonoBehaviour
     public EntityType _type;
     private Enemy currEnemy;
 
-    [SerializeField] private Slider _slider;
+    [SerializeField] 
+    private Slider _slider;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
