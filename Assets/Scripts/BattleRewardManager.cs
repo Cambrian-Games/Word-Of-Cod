@@ -7,7 +7,8 @@ public class BattleRewardManager : MonoBehaviour
 {
     public Button _relicChoiceButton;
 
-    private int _relicChoice = -1;
+    [HideInInspector]
+    public int _relicChoice = -1;
     
     private void OnEnable()
     {
