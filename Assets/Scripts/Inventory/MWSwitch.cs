@@ -3,35 +3,33 @@ using UnityEngine;
 
 public class MWSwitch : ActiveRelic
 {
-	private bool _inUse;
-	private bool _canUse;
-
-
-
-	public override void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
+	public override void OnBattleStateChanged(BattleManager.BattleState oldBattleState, BattleManager.BattleState newBattleState)
 	{
-		_canUse = newState == BattleManager.BattleState.Player_Turn;
-		_inUse = false;
+		bool isPlayerTurn = (newBattleState == BattleManager.BattleState.Player_Turn);
+
+		if (isPlayerTurn)
+		{
+			// Do we want to grey it out if there are no Ms or Ws? It's functionally not usable if there are none.
+			bool hasValidTarget = GameBoard.INSTANCE.CountTiles('M') > 0 || GameBoard.INSTANCE.CountTiles('W') > 0;
+			State = (hasValidTarget) ? UseState.Can_Use : UseState.Unususable;
+		}
+		else
+		{
+			State = UseState.Unususable;
+		}	
 	}
 
 	public override void OnSelect()
 	{
-		if (_canUse)
-		{
-			_inUse = true;
-			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
-		}
-		else
-		{
-			EndUse();
-		}
+		Debug.Assert(State == UseState.Can_Use);
+
+		State = UseState.In_Use;
+		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
 	}
 
 	public override void OnTileClicked(Tile tile)
 	{
-		if (!_inUse || !_canUse)
-			return;
-
+		Debug.Assert(State == UseState.In_Use);
 		Debug.Assert(TileSelector.INSTANCE.Mode == TileSelector.SelectionMode.Item_Use);
 
 		bool isM = tile._letter == 'M';
@@ -42,23 +40,25 @@ public class MWSwitch : ActiveRelic
 		if (isSelected)
 			return;
 
-		if (!isM && !isW)
+		// The EndUse() call is duplicated in case we decide that we want to get rid of the else case
+		//  because this is the only situation where a misclick will auto-exit the relic
+
+		if (isM || isW)
 		{
+			GameBoard.INSTANCE.ChangeTileLetter(tile, isM ? 'W' : 'M');
+			State = UseState.Unususable;
 			EndUse();
-			return;
 		}
-
-		GameBoard.INSTANCE.ChangeTileLetter(tile, isM ? 'W' : 'M');
-		_canUse = false;
-
-		EndUse();
+		else
+		{
+			State = UseState.Can_Use;
+			EndUse();
+		}
 	}
 
 	public override void EndUse()
 	{
-		_inUse = false;
 		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
-
 		base.EndUse();
 	}
 }

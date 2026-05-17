@@ -1,16 +1,10 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static InventoryManager;
 
 public class RelicTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
-	public enum InventorySection
-	{
-		Passive_Relic,
-		Active_Relic,
-		Consumable_Item,
-	}
-
 	public InventorySection _section = InventorySection.Passive_Relic;
 
 	public int _inventoryIndex;
@@ -43,15 +37,7 @@ public class RelicTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		switch (_section)
-		{
-			case InventorySection.Active_Relic:
-				_inventoryManager.OnActiveRelicClicked(_inventoryIndex);
-				break;
-			case InventorySection.Consumable_Item:
-				_inventoryManager.OnConsumableClicked(_inventoryIndex);
-				break;
-		}
+		_inventoryManager.OnItemClicked(_section, _inventoryIndex);
 	}
 
 	// Update is called once per frame

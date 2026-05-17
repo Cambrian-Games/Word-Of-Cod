@@ -2,38 +2,32 @@ using UnityEngine;
 using TMPro;
 
 public class BagOfWorms : Item
-{
-    public TMP_Text _countText;
-
-	private bool _canUse = false;
-
-
-    
+{  
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _countText.text = _currentCount.ToString();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-	public override void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
+	public override void OnBattleStateChanged(BattleManager.BattleState oldBattleState, BattleManager.BattleState newBattleState)
 	{
-		_canUse = newState == BattleManager.BattleState.Player_Turn;
+		bool isPlayerTurn = newBattleState == BattleManager.BattleState.Player_Turn;
+		bool isPlayerAtFullHealth = Player.INSTANCE.HealthPercent() >= 1.0f;
+		bool hasItem = _currentCount > 0;
+		State = (hasItem && isPlayerTurn && !isPlayerAtFullHealth) ? UseState.Can_Use : UseState.Unususable;
 	}
 
 	public override void OnSelect()
     {
-        if (_currentCount > 0 && _canUse && Player.INSTANCE.HealthPercent() < 1.0f)
-        {
-            _currentCount--;
-            _countText.text = _currentCount.ToString();
-            Player.INSTANCE.Heal(50);
-        }
+		Debug.Assert(State == UseState.Can_Use);
+        _currentCount--;
+        _countText.text = _currentCount.ToString();
+		Player.INSTANCE.Heal(50);
+
+		if (Player.INSTANCE.HealthPercent() >= 1.0f || _currentCount == 0)
+		{
+			State = UseState.Unususable;
+		}
 
 		EndUse();
     }  

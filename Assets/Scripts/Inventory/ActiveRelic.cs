@@ -4,14 +4,11 @@ public abstract class ActiveRelic : Item
 {
 	private void OnValidate()
 	{
-		_isConsumable = false;
 		_maxCount = 1;
 	}
 
-	public override void EndUse()
+	protected override void OnUseStateChanged(UseState oldState, UseState newState)
 	{
-		// does not call Item::EndUse()
-
-		Player.INSTANCE._inventory.EndActiveRelicUse(this);
+		Player.INSTANCE._inventory.SetIconColorFromUseState(this.ID, InventoryManager.InventorySection.Active_Relic, newState);
 	}
 }

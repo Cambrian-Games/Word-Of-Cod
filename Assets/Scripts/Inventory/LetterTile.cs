@@ -4,22 +4,9 @@ using UnityEngine;
 
 public class LetterTile : Item
 {
-	private enum UseState
-	{
-		Unususable,
-		Can_Use,
-		In_Use
-	}
-
 	private Tile _selectedTile;
-	private UseState _state;
 
-	public TMP_Text _countText;
-
-
-
-	// Start is called once before the first execution of Update after the MonoBehaviour is created
-	void Start()
+	public void Start()
 	{
 		_countText.text = _currentCount.ToString();
 	}
@@ -27,17 +14,9 @@ public class LetterTile : Item
 	// Update is called once per frame
 	void Update()
 	{
-		if (_state != UseState.In_Use)
+		if (State != UseState.In_Use)
 		{
 			_selectedTile = null;
-			return;
-		}
-
-		// at this point, the item is in use
-
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			EndUse();
 			return;
 		}
 
@@ -51,11 +30,17 @@ public class LetterTile : Item
 		if (input == null || input.Length == 0)
 			return;
 
-		if (char.IsLetter(input[0]))
+		if (char.IsLetter(input[0]) && _selectedTile._letter != input[0])
 		{
 			GameBoard.INSTANCE.ChangeTileLetter(_selectedTile, char.ToUpper(input[0]));
 
 			_currentCount--;
+
+			if (_currentCount == 0)
+			{
+				State = UseState.Unususable;
+			}
+
 			_countText.text = _currentCount.ToString();
 
 			EndUse();
@@ -64,29 +49,21 @@ public class LetterTile : Item
 
 	public override void OnBattleStateChanged(BattleManager.BattleState oldState, BattleManager.BattleState newState)
 	{
-		_state = (newState == BattleManager.BattleState.Player_Turn && _currentCount > 0) ? UseState.Can_Use : UseState.Unususable;
+		State = (newState == BattleManager.BattleState.Player_Turn && _currentCount > 0) ? UseState.Can_Use : UseState.Unususable;
 	}
 
 	public override void OnSelect()
 	{
-		if (_state == UseState.Can_Use)
-		{
-			_state = UseState.In_Use;
-			TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
-		}
-		else if (_state == UseState.Unususable)
-		{
-			EndUse();
-		}
+		Debug.Assert(State == UseState.Can_Use);
+
+		State = UseState.In_Use;
+		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
 	}
 
 	public override void OnTileClicked(Tile tile)
 	{
-		if (_state != UseState.In_Use)
-			return;
-
+		Debug.Assert(State == UseState.In_Use);
 		Debug.Assert(_currentCount > 0);
-
 		Debug.Assert(TileSelector.INSTANCE.Mode == TileSelector.SelectionMode.Item_Use);
 
 		_selectedTile = tile;
@@ -94,7 +71,7 @@ public class LetterTile : Item
 
 	public override void EndUse()
 	{
-		_state = UseState.Can_Use;
+		State = (_currentCount > 0) ? UseState.Can_Use : UseState.Unususable;
 		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
 		base.EndUse();
 	}

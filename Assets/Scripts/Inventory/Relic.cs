@@ -7,9 +7,9 @@ public class Relic : MonoBehaviour
 {
     private int _id = -1; // will be assigned by the inventory manager
 
-    public int ID => _id;
+	public int ID { get => _id; set => SetID(value); }
 
-    [SerializeField]
+	[SerializeField]
     private string _displayName;
     public string DisplayName => _displayName;
 
@@ -26,7 +26,7 @@ public class Relic : MonoBehaviour
 
     internal List<RelicEffect> Effects => new List<RelicEffect>(_effects);
 
-    public void SetID(int i)
+    private void SetID(int i)
     {
         if (_id != -1 && _id != i)
         {
