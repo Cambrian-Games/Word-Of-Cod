@@ -292,6 +292,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Win:
+				Player.INSTANCE.Heal(Mathf.RoundToInt(Player.INSTANCE.MaxHealth / 10.0f));
                 RunManager.INSTANCE.SetRunState(RunManager.RunState.Post_Event);
                 break;
         }
