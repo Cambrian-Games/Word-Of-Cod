@@ -74,7 +74,7 @@ public abstract class AttackEffect
 
 		// there is probably a bug with the forecast math when an interrupt happens.
 
-		return nowReplaced.Replace("$ROUNDS", inOneRound ? "Next Round" : $"In {_numTurns - _currentTurn} Rounds");
+		return nowReplaced.Replace("$ROUNDS", inOneRound ? "In 1 Round" : $"In {_numTurns - _currentTurn} Rounds");
 	}
 
 
