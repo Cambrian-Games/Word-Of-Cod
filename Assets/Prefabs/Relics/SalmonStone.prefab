@@ -49,6 +49,6 @@ MonoBehaviour:
   _isConsumable: 0
   _icon: {fileID: -8057786581774235389, guid: 598822b31afff9c2db32eab0aeabb078, type: 3}
   _displayName: Sacred Salmon Stone
-  _description: 'If Would Die: Don''t'
-  _used: 0
+  _description: '[Placeholder]\nOnce per game, regain 30% of your health\nwhen you
+    have none left.'
   _brokenIcon: {fileID: 7968025414813492670, guid: ebce248a0ec63fb78a918310f8f2e3bd, type: 3}

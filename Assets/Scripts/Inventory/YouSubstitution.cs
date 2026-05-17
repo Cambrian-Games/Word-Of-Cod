@@ -15,6 +15,7 @@ public class YouSubstitution : ActiveRelic
 	{
 		Debug.Assert(State == UseState.Can_Use);
 
+		// Consider having this switch to In_Use and only drop to Unusable once the substitute has been broken
 		State = UseState.Unususable;
 		Player.INSTANCE._substitute = true;
 		int loss = Mathf.RoundToInt(Player.INSTANCE.MaxHealth * 0.2f);

@@ -49,5 +49,6 @@ MonoBehaviour:
   _isConsumable: 1
   _icon: {fileID: 4655453815507530927, guid: a70d6e9e193b6544993ba77c65e41797, type: 3}
   _displayName: Letter Tile
-  _description: Replace a Tile
+  _description: '[Placeholder]\nClick this item''s icon,\nclick a tile in the grid,\nand
+    then type a letter to change that tile''s letter.'
   _countText: {fileID: 0}

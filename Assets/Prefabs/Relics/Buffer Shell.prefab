@@ -45,7 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: Buffer Shell
-  _description: '[BS Desc]'
+  _description: '[Placeholder]\nEach word you spell creates\na temporary shield that
+    blocks damage equal to twice the length of the word.\nResets every turn.'
   _icon: {fileID: 247780611821353869, guid: cdeb77f0855ceec0f9c1c56745859515, type: 3}
   _effects:
   - _event: 0

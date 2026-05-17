@@ -49,4 +49,6 @@ MonoBehaviour:
   _isConsumable: 0
   _icon: {fileID: 7256466799113633062, guid: 734f494590a88d7459dd2fa89796812f, type: 3}
   _displayName: M-W Shift Belt
-  _description: Once Per Turn, Change a M into a W or a W into an M
+  _description: '[Placeholder]\nClick this relic''s icon and an M or W tile in the
+    grid to flip it upside down and turn it into the other letter.\nUsable once per
+    turn.'
