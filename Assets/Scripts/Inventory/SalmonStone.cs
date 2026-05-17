@@ -5,7 +5,7 @@ public class SalmonStone : ActiveRelic
 {
     public Sprite _brokenIcon;
 
-	// This is the single sketchiest 
+	// This is the single sketchiest piece of code in the entire inventory
     public void Start()
     {
 		State = UseState.Can_Use;

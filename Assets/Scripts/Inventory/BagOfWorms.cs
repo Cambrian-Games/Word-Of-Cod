@@ -13,7 +13,8 @@ public class BagOfWorms : Item
 	{
 		bool isPlayerTurn = newBattleState == BattleManager.BattleState.Player_Turn;
 		bool isPlayerAtFullHealth = Player.INSTANCE.HealthPercent() >= 1.0f;
-		State = (isPlayerTurn && !isPlayerAtFullHealth) ? UseState.Can_Use : UseState.Unususable;
+		bool hasItem = _currentCount > 0;
+		State = (hasItem && isPlayerTurn && !isPlayerAtFullHealth) ? UseState.Can_Use : UseState.Unususable;
 	}
 
 	public override void OnSelect()
@@ -23,7 +24,7 @@ public class BagOfWorms : Item
         _countText.text = _currentCount.ToString();
 		Player.INSTANCE.Heal(50);
 
-		if (Player.INSTANCE.HealthPercent() >= 1.0f)
+		if (Player.INSTANCE.HealthPercent() >= 1.0f || _currentCount == 0)
 		{
 			State = UseState.Unususable;
 		}

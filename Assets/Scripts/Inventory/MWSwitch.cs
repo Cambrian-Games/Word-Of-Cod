@@ -5,7 +5,7 @@ public class MWSwitch : ActiveRelic
 {
 	public override void OnBattleStateChanged(BattleManager.BattleState oldBattleState, BattleManager.BattleState newBattleState)
 	{
-		bool isPlayerTurn = newBattleState == BattleManager.BattleState.Player_Turn;
+		bool isPlayerTurn = (newBattleState == BattleManager.BattleState.Player_Turn);
 
 		if (isPlayerTurn)
 		{
