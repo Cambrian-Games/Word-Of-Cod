@@ -4067,7 +4067,7 @@ MonoBehaviour:
   _runFormat:
   - _eventKinds: 00000000
   - _eventKinds: 00000000
-  - _eventKinds: 0100000000000000
+  - _eventKinds: 01000000
   - _eventKinds: 09000000
   - _eventKinds: 03000000
   _currentRun: []
