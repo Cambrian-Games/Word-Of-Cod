@@ -40,7 +40,7 @@ public class ShopManager : MonoBehaviour
 
         for (int i = 0; i < Player.INSTANCE._inventory._activeRelics.Count; i++)
         {
-            if (!Player.INSTANCE._inventory._passiveRelicInventory.Contains(i))
+            if (!Player.INSTANCE._inventory._activeRelicInventory.Contains(i))
             {
                 //offset active relics by passive count
                 unownedRelics.Add(i + Player.INSTANCE._inventory._passiveRelics.Count);
