@@ -48,6 +48,7 @@ MonoBehaviour:
   _displayName: Urchin
   _sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 50
+  _enemyTypes: 257
   _schedulePolicy: 0
   _rules:
   - _name: Scatter Spines

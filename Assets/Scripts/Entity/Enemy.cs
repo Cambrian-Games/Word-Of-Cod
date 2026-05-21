@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,7 +19,21 @@ public enum AttackSchedulePolicy
 
 public class Enemy : Entity
 {
-	// config
+    [Flags]
+    public enum FENEMYTYPE
+    {
+        STANDARD = 0x0001,
+        MINIBOSS = 0x0002,
+        BOSS     = 0x0004,
+
+        ACT_1    = 0x0100
+    }
+
+    // config
+
+    [SerializeField, InspectorName("Tags")]
+    private FENEMYTYPE _enemyTypes;
+    public FENEMYTYPE EnemyTypes => _enemyTypes;
 
 	[SerializeField]
 	private AttackSchedulePolicy _schedulePolicy;
@@ -178,11 +193,11 @@ public class Enemy : Entity
 
 			if (totalWeight == 0)
 			{
-				newInterruptIndex = interruptCandidates[Random.Range(0, interruptCandidates.Count)]._index;
+				newInterruptIndex = interruptCandidates[UnityEngine.Random.Range(0, interruptCandidates.Count)]._index;
 			}
 			else
 			{
-				float output = Random.Range(0, totalWeight);
+				float output = UnityEngine.Random.Range(0, totalWeight);
 
 				int index = 0;
 
@@ -286,11 +301,11 @@ public class Enemy : Entity
 
 				if (totalWeight == 0)
 				{
-					return attackCandidates[Random.Range(0, attackCandidates.Count)]._index;
+					return attackCandidates[UnityEngine.Random.Range(0, attackCandidates.Count)]._index;
 				}
 				else
 				{
-					float output = Random.Range(0, totalWeight);
+					float output = UnityEngine.Random.Range(0, totalWeight);
 
 					int index = 0;
 

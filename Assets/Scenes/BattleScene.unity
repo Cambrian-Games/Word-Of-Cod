@@ -4046,30 +4046,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5481367058db6c4ea56151711451518, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  _pools:
-  - _poolKind: 0
-    _canRepeat: 1
-    _entries:
-    - _prefab: {fileID: 3799837967197732049, guid: 3623c6aabd9f7b24298d276bc17382f0, type: 3}
-      _weight: 1
-    - _prefab: {fileID: 3799837967197732049, guid: 9c2538c23ef18f744b8d4a27eef21909, type: 3}
-      _weight: 1
-  - _poolKind: 1
-    _canRepeat: 0
-    _entries:
-    - _prefab: {fileID: 3799837967197732049, guid: 07ef0dae21f527d4e99cc77a5508ce60, type: 3}
-      _weight: 1
-  - _poolKind: 3
-    _canRepeat: 0
-    _entries:
-    - _prefab: {fileID: 3799837967197732049, guid: ea5ebdb01c3b4514989c694d7010b8c9, type: 3}
-      _weight: 1
-  _runFormat:
-  - _eventKinds: 00000000
-  - _eventKinds: 00000000
-  - _eventKinds: 0100000000000000
-  - _eventKinds: 09000000
-  - _eventKinds: 03000000
+  _format: {fileID: 11400000, guid: a1669849e3044e741b51d6cd01128c34, type: 2}
   _currentRun: []
   _distanceBetweenEvents: 20
   _travelTime: 4

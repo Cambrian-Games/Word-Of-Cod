@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Analytics;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
@@ -10,21 +8,22 @@ using UnityEngine.UnityConsent;
 
 public class RunManager : MonoBehaviour
 {
-	[SerializeField]
-	private List<EncounterPool> _pools;
+	public static RunManager INSTANCE;
 
-	[SerializeField]
-	private List<RunEvent> _runFormat;
-	public List<RunEvent> RunFormat => _runFormat;
+    [SerializeField]
+    private RunFormat _format;
 
 	[Header("Do not modify this! This shows what has been selected so far")]
 	[SerializeField]
-	private List<SelectedEvent> _currentRun;
-	public SelectedEvent GetCurrentEvent() { return _currentRun.Last(); }
-	public static RunManager INSTANCE;
+	private List<RunFormat.SelectedEvent> _currentRun;
+    public RunFormat.SelectedEvent CurrentEvent => _currentRun.Last();
 
 	public float _distanceBetweenEvents = 7.5f;
 	public float _travelTime = 3.0f;
+
+    private bool _hasChoicePending;
+    private Vector3 _lastEventPos;
+    private Vector3 _nextEventPos;
 
 	public string _loseScene;
 	public string _winScene;
@@ -32,8 +31,6 @@ public class RunManager : MonoBehaviour
 	public GameObject _storeObject;
 	public GameObject _bossRewardObject;
 	private Vector3 _destination;
-
-	private bool _hasSelectedNextEvent = false;
 
 	public AnalyticsManager _analyticsManager;
 
@@ -45,6 +42,7 @@ public class RunManager : MonoBehaviour
 	private Canvas _shopCanvas;
 	public Canvas ShopCanvas => _shopCanvas;
 
+    [Header("Analytics")]
 	public string _longestWord ="";
 	public string _mostDamagingWord = "";
 	public List<int> _sortedWordLengths;
@@ -57,8 +55,6 @@ public class RunManager : MonoBehaviour
 		Nil = -1,
 		Run_Start,
 		Traveling_To_Next_Event,
-		Choice,
-		Post_Choice_Travel, // may not be needed if we can reuse Traveling_To_Next_Event
 		Enter_Event,
 		In_Event,
 		Post_Event, // rewards post-battle, usually
@@ -98,192 +94,168 @@ public class RunManager : MonoBehaviour
 		UpdateRunState();
 	}
 
-	internal void UpdateRunState()
-	{
-		while (true)
-		{
-			RunState stateCur = _state;
+    private void UpdateRunState()
+    {
+        while (true)
+        {
+            RunState currentState = _state;
 
-			switch (_state)
-			{
-				case RunState.Nil:
-					break;
-				case RunState.Run_Start:
-					break;
-				case RunState.Traveling_To_Next_Event:
-					if (Player.INSTANCE.transform.position.x > _destination.x) // not great check here
-					{
-						Player.INSTANCE.transform.position = _destination;
+            switch (_state)
+            {
+                case RunState.Traveling_To_Next_Event:
+                    if (Player.INSTANCE.transform.position.x > _destination.x) // not great check here
+                    {
+                        Player.INSTANCE.transform.position = _destination;
 
-						if (_hasSelectedNextEvent)
-						{
-							SetRunState(RunState.Enter_Event);
-						}
-						else // if we haven't already chosen the event, we have a choice to make
-						{
-							SetRunState(RunState.Choice);
-						}
-					}
-					else
-					{
-						Player.INSTANCE.transform.position += Vector3.right * _distanceBetweenEvents / _travelTime * Time.deltaTime;
-					}
-					break;
+                        // we may be able to handle choosing inside this state. Just listen for a choice here,
+                        //  and once one has been made we update the destination
 
-				case RunState.Choice:
-					// I don't like that we're selecting the event here, might store the number and toss it into PostChoiceTravel?
-					// and/or have a bool for choiceMade and kick us back into Traveling_To_Next_Event. idk. 
-					if (Input.GetMouseButtonDown((int)MouseButton.Left))
-					{
-						SelectNextEvent(0);
-						SetRunState(RunState.Post_Choice_Travel);
-					}
-					else if (Input.GetMouseButtonDown((int)MouseButton.Right))
-					{
-						SelectNextEvent(1);
-						SetRunState(RunState.Post_Choice_Travel);
-					}
-					break;
+                        if (_hasChoicePending)
+                        {
+                            // peek next event
+                            int nextRunEventIndex = _currentRun.Count;
+                            RunFormat.RunEvent nextEvent = _format.Event(nextRunEventIndex);
 
-				case RunState.Post_Choice_Travel:
-					// the way we calculate a destination (or reaching the destination) in Traveling_To_Next_Event falls apart here and needs a better solution.
-					break;
-				case RunState.Enter_Event:
-					//reset once per battle items/relics
-					Player.INSTANCE._inventory.OnEnterRunEvent();
-					// TODO move camera from overworld view into battle view
-					SetRunState(RunState.In_Event);
-					break;
+                            int choiceIndex = CheckForChoice(nextEvent);
 
-				case RunState.In_Event:
-					// if the event we're in is a shop, do something here?
-					// otherwise we're just waiting for the battle manager to kick us into Post_Event
-					break;
-				case RunState.Post_Event:
-					// if event was shop, I don't think we do anything
+                            if (choiceIndex != -1)
+                            {
+                                _destination = _nextEventPos;
+                                _hasChoicePending = false;
+                                SelectNextEvent(nextEvent, choiceIndex);
+                            }
+                        }
+                        else 
+                        {
+                            SetRunState(RunState.Enter_Event);
+                        }
+                    }
+                    else
+                    {
+                        Player.INSTANCE.transform.position += Vector3.right * _distanceBetweenEvents / _travelTime * Time.deltaTime;
+                    }
+                    break;
 
-					// if this was a fight, we wait for items/relics to be purchased
-					if (_bossRewardObject.activeSelf)
-					{
-						break;
-					}
+                case RunState.Enter_Event:
+                    // Complete any transitions set up in SetRunState(RunState.Enter_Event)
+                    SetRunState(RunState.In_Event);
+                    break;
 
-					// if this was the last event, win
+                case RunState.In_Event:
+                    // Wait for the battle manager to kick us into Post_Event
+                    break;
 
-					if (_currentRun.Count == _runFormat.Count)
-					{
-						SetRunState(RunState.Win);
-						break;
-					}
-					
-					if (_currentRun[^1]._encounterKind != EncounterPoolKind.Shop)
-					{
-						SetRunState(RunState.Traveling_To_Next_Event);
-					}
-					break;
-				case RunState.Win:
-					break;
-				case RunState.Lose:
-					break;
-			}
+                case RunState.Post_Event:
+                    // if this was a boss fight, we wait for items/relics to be purchased
+                    if (_bossRewardObject.activeSelf)
+                        break;
 
-			if (stateCur == _state)
-				break;
-		}
-	}
-	
-	internal void SetRunState(RunState newState)
+                    // if this was the last event, win
+                    if (_currentRun.Count == _format.Events.Count)
+                    {
+                        SetRunState(RunState.Win);
+                        break;
+                    }
+
+                    if (!CurrentEvent._isShop)
+                    {
+                        SetRunState(RunState.Traveling_To_Next_Event);
+                        break;
+                    }
+                    break;
+                case RunState.Win:
+                    break;
+                case RunState.Lose:
+                    break;
+            }
+
+            if (currentState == _state)
+                break;
+        }
+    }
+
+    internal void SetRunState(RunState newState)
 	{
 		if (newState == _state)
 			return;
 
-		// leave old state
-
-		//switch (_state)
-		//{
-		//
-		//}
-
 		_state = newState;
-		EncounterPoolKind encounter;
 
 		switch (_state)
 		{
 			case RunState.Run_Start:
+                _lastEventPos = Player.INSTANCE.transform.position;
 				SetRunState(RunState.Traveling_To_Next_Event);
 				break;
 			case RunState.Traveling_To_Next_Event:
-				_destination = Player.INSTANCE.transform.position + Vector3.right * _distanceBetweenEvents;
-				RunEvent evtNext = Event(_currentRun.Count);
+                // peek next event, determine whether a choice must be made
+                int nextRunEventIndex = _currentRun.Count;
+                RunFormat.RunEvent nextEvent = _format.Event(nextRunEventIndex);
 
-				if (evtNext.EventKinds.Count == 1)
-				{
-					SelectNextEvent(); // we can pick the event now since there aren't multiple options.
-					encounter = _currentRun[^1]._encounterKind;
-					EncounterPool pool = Pool(encounter);
-					if (pool != null)
-					{
-						Enemy prefab = pool.EncounterPrefab(_currentRun[^1]._poolIndex);
+                _hasChoicePending = nextEvent.HasChoice;
+                _nextEventPos = _lastEventPos + (_hasChoicePending ? 2 : 1) * _distanceBetweenEvents * Vector3.right;
+                // equals nextEventPos if there isn't a choice, halfway if there is
+                _destination = _lastEventPos + _distanceBetweenEvents * Vector3.right;
+                _lastEventPos = Player.INSTANCE.transform.position;
 
-						if (prefab != null)
-						{
-							_overworldEnemy = Instantiate(prefab);
-							Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
-							Vector3 targetPos = _destination - new Vector3(2 * offset.x, 0, 0);
-							_overworldEnemy.transform.position = targetPos;
-						}
-					}
-				}
-				break;
+                if (!_hasChoicePending)
+                {
+                    SelectNextEvent(nextEvent, 0);
+                }
+                else
+                {
+                    // display crossroads here
+                }
+                break;
 
-			case RunState.Choice:
-				break;
-			case RunState.Post_Choice_Travel:
-				// currently does nothing due to the way destinations are calculated
-				SetRunState(RunState.Enter_Event);
-				break;
-			case RunState.Enter_Event:
-				// would have animations
-				_hasSelectedNextEvent = false;
-				break;
-			case RunState.In_Event:
-				encounter = _currentRun[^1]._encounterKind;
+            case RunState.Enter_Event:
+                // queue screen transitions here if this is a battle
+                //reset once per battle items/relics
+                Player.INSTANCE._inventory.OnEnterRunEvent();
+                break;
 
-				if (encounter == EncounterPoolKind.Shop)
-				{
-					_shopCanvas.enabled = true;
-					_storeObject.SetActive(true);
-				}
-				else
-				{
-					Enemy enemy = Pool(encounter).EncounterPrefab(_currentRun[^1]._poolIndex);
-					BattleManager.INSTANCE.SetEnemy(enemy);
-					// This is starting to become a problem, will likely have to be changed later
-					BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position; // the cast sets the z coord to zero
-					BattleManager.INSTANCE.Load();
+            case RunState.In_Event:
+                // will modify this field if we ever have more than two event kinds
+                if (CurrentEvent._isShop)
+                {
+                    // Better to tell the shop manager to handle all of this
+                    _shopCanvas.enabled = true;
+                    _storeObject.SetActive(true);
+                }
+                else
+                {
+                    BattleManager.INSTANCE.SetEnemy(CurrentEvent.EncounterPrefab);
+                    // This is starting to become a problem, will likely have to be changed later
+                    BattleManager.INSTANCE.transform.position = (Vector2)Camera.main.transform.position; // the cast sets the z coord to zero
+                    BattleManager.INSTANCE.Load();
 
-					// this transition's actually pretty seamless
+                    // this transition's actually pretty seamless
 
-					if (_overworldEnemy)
-					{
-						Destroy(_overworldEnemy.gameObject);
-					}
-				}
-				break;
-			case RunState.Post_Event:
-				// if this was a fight, display items/relics screen
-				encounter = _currentRun[^1]._encounterKind;
-				
-				if (encounter == EncounterPoolKind.Area_1_Boss || encounter == EncounterPoolKind.Area_1_Miniboss)
-				{
-					_bossRewardObject.SetActive(true);
-				}
+                    if (_overworldEnemy)
+                    {
+                        Destroy(_overworldEnemy.gameObject);
+                    }
+                }
+                break;
 
-				if (!_bossRewardObject.activeSelf)
-				{
-					BattleManager.INSTANCE.Unload();
-				}
-				break;
+            case RunState.Post_Event:
+                Enemy defeatedEnemyPrefab = CurrentEvent.EncounterPrefab;
+
+                if (defeatedEnemyPrefab)
+                {
+                    Enemy.FENEMYTYPE enemyTypes = defeatedEnemyPrefab.EnemyTypes;
+                    if (enemyTypes.HasFlag(Enemy.FENEMYTYPE.MINIBOSS) ||
+                        enemyTypes.HasFlag(Enemy.FENEMYTYPE.BOSS))
+                    {
+                        _bossRewardObject.SetActive(true);
+                    }
+                    else
+                    {
+                        BattleManager.INSTANCE.Unload();
+                    }
+                }
+                break;
+
 			case RunState.Win:
 				//TODO Add Analytics for End Game
 				SendWinEvent();
@@ -298,85 +270,67 @@ public class RunManager : MonoBehaviour
 		}
 	}
 
-	private void OnValidate()
-	{
-		if (_pools != null)
-		{
-			bool[] poolsFound = new bool[(int) EncounterPoolKind.Max];
+    private int CheckForChoice(RunFormat.RunEvent runEvent)
+    {
+        Debug.Assert(runEvent.HasChoice);
 
-			for (int i = _pools.Count - 1; i >= 0; i--)
-			{
-				if (poolsFound[(int) _pools[i].PoolKind])
-				{
-					Debug.LogWarning($"Found more than one {_pools[i].PoolKind} Encounter Pool");
-				}
+        // allow mouse selecting if there are exactly two options
+        if (runEvent.OptionCount == 2)
+        {
+            if (Input.GetMouseButtonDown((int)MouseButton.Left))
+            {
+                return 0;
+            }
+            else if (Input.GetMouseButtonDown((int)MouseButton.Right))
+            {
+                return 1;
+            }
+        }
 
-				poolsFound[(int)_pools[i].PoolKind] = true;
+        string input = Input.inputString;
 
-				switch (_pools[i].PoolKind)
-				{
-					case EncounterPoolKind.All:
-					case EncounterPoolKind.Shop:
-						Debug.LogError($"Do not create pools with pool kind {_pools[i].PoolKind}, that is metadata.");
-						break;
-				}
-			}
-		}
-	}
+        if (input == null || input.Length != 1 || !char.IsNumber(input[0]))
+            return -1;
 
-	public void SelectNextEvent(int option = 0)
-	{
-		if (_currentRun.Count >= _runFormat.Count)
-			return;
+        return int.Parse(input) - 1;
+    }
 
-		int eventIndex = _currentRun.Count;
+    private void SelectNextEvent(RunFormat.RunEvent runEvent, int option = 0)
+    {
+        RunFormat.SelectedEvent selectedEvent = runEvent.Select(option);
 
-		RunEvent nextEvent = _runFormat[eventIndex];
+        // If we haven't used this pool before, create a SpawnHistory for it
 
-		if (nextEvent.EventKinds.Count == 0)
-			return;
 
-		if (nextEvent.EventKinds.Count < option)
-		{
-			Debug.LogWarning("Invalid option for RunEvent!");
-			option = 0;
-		}
+        if (!EncounterPool.SPAWN_HISTORIES.TryGetValue(selectedEvent._pool, out EncounterPool.SpawnHistory history))
+        {
+            EncounterPool.SPAWN_HISTORIES.Add(selectedEvent._pool, selectedEvent._pool.CreateSpawnHistory());
+        }
 
-		SelectedEvent selectedEvent = new SelectedEvent();
-		selectedEvent._eventIndex = eventIndex;
-		selectedEvent._encounterKind = nextEvent.EventKinds[option];
+        _currentRun.Add(selectedEvent);
 
-		switch (selectedEvent._encounterKind)
-		{
-			case EncounterPoolKind.Shop:
-				selectedEvent._poolIndex = -1;
-				break;
+        if (!selectedEvent._isShop)
+        {
+            // these two lines could be more tightly coupled, or GetNextPrefab could auto-add to history
+            selectedEvent.EncounterPrefab = selectedEvent._pool.GetNextPrefab(history);
+            history.TryAddEntry(selectedEvent._pool, selectedEvent.EncounterPrefab);
 
-			case EncounterPoolKind.All:
-				Debug.LogError("We don't support EncounterPoolKind.All yet");
-				selectedEvent._poolIndex = -1;
-				break;
+            Debug.Assert(selectedEvent.EncounterPrefab != null);
 
-			default:
-				EncounterPool pool = Pool(selectedEvent._encounterKind);
+            SpawnOverworldEnemy(selectedEvent.EncounterPrefab);
+        }
+    }
 
-				if (eventIndex == 0)
-				{
-					selectedEvent._poolIndex = pool.GetWeightedIndex(-1, null);
-				}
-				else
-				{
-					selectedEvent._poolIndex = pool.GetWeightedIndex(eventIndex, _currentRun[^1]);
-				}
-				break;
-		}
+    private void SpawnOverworldEnemy(Enemy encounterPrefab)
+    {
+        Debug.Assert(encounterPrefab != null);
+        _overworldEnemy = Instantiate(encounterPrefab);
+        Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
+        Vector3 targetPos = _nextEventPos - new Vector3(2 * offset.x, 0, 0);
+        _overworldEnemy.transform.position = targetPos;
+    }
 
-		_currentRun.Add(selectedEvent);
-
-		_hasSelectedNextEvent = true;
-	}
-
-	public void AddWordToStats(Word word)
+    public void AddWordToStats(Word word)
 	{
 		//if first word, simply set all
 		if (_sortedWordDamages.Count == 0)
@@ -475,7 +429,7 @@ public class RunManager : MonoBehaviour
 			_medianDamage = medianDamage,
 			_medianLength = medianLength,
 			_numWords = this._sortedWordLengths.Count(),
-			_enemyIndex = RunManager.INSTANCE.GetCurrentEvent()._eventIndex, 
+			_enemyIndex = CurrentEvent._eventIndex, 
 			_enemyName = BattleManager.INSTANCE.CurrentEnemy.name
 		};
 		AnalyticsService.Instance.RecordEvent(loseEvent);
@@ -507,142 +461,5 @@ public class RunManager : MonoBehaviour
 			}
 		}
 	}
-	#endregion
-
-	public RunEvent Event(int index) => _runFormat[index];
-	public EncounterPool Pool(EncounterPoolKind kind) => _pools.Find(pool => pool.PoolKind == kind);
-}
-
-[Serializable]
-public class RunEvent
-{
-	[SerializeField]
-	private List<EncounterPoolKind> _eventKinds;
-
-	public List<EncounterPoolKind> EventKinds => _eventKinds;
-}
-
-[Serializable]
-public class SelectedEvent
-{
-	public int _eventIndex; // what RunEvent this points to
-	public EncounterPoolKind _encounterKind;
-	public int _poolIndex = -1; // which encounter was picked from the pool
-}
-
-public enum EncounterPoolKind
-{
-	Area_1_Common,
-	Area_1_Miniboss,
-
-	Area_1_NonBoss,
-
-	Area_1_Boss,
-
-	All_Common,
-	All_Miniboss,
-
-	All_NonBoss,
-
-	All_Boss,
-
-	All,
-
-	Shop,
-
-	[InspectorName(null)]
-	Max
-}
-
-[Serializable]
-public class EncounterPool
-{
-	[SerializeField]
-	private EncounterPoolKind _poolKind;
-	public EncounterPoolKind PoolKind => _poolKind;
-
-	public enum RepeatKind
-	{
-		Allowed,
-		No_Consecutive,
-		Never
-	}
-
-	[SerializeField]
-	private RepeatKind _canRepeat;
-	public RepeatKind CanRepeat => _canRepeat;
-
-	[SerializeField]
-	private PoolEntry[] _entries;
-
-	[Serializable]
-	public class PoolEntry
-	{
-		[SerializeField]
-		private Enemy _prefab;
-		public Enemy Prefab => _prefab;
-		[SerializeField, Min(0.1f)]
-		private float _weight = 1.0f;
-		public float Weight => _weight;
-	}
-
-	internal int GetWeightedIndex(int lastEventIndex, SelectedEvent lastSelection)
-	{
-		if (_canRepeat == RepeatKind.No_Consecutive && lastEventIndex >= 0)
-		{
-			EncounterPool lastPool = RunManager.INSTANCE.Pool(lastSelection._encounterKind);
-
-			if (lastPool == this)
-			{
-				float sumNoRepeat = 0;
-
-				for (int i = 0; i < _entries.Length; i++)
-				{
-					if (i == lastSelection._poolIndex)
-						continue;
-
-					sumNoRepeat += _entries[i].Weight;
-				}
-
-				float randNoRepeat = UnityEngine.Random.Range(0.0f, 1.0f) * sumNoRepeat; // long-term we should have a centralized RNG so we can have consistent test cases.
-
-				for (int i = 0; i < _entries.Length; i++)
-				{
-					if (i == lastSelection._poolIndex)
-						continue;
-
-					if (randNoRepeat < _entries[i].Weight)
-						return i;
-
-					randNoRepeat -= _entries[i].Weight;
-				}
-
-				return 0;
-			}
-		}
-
-		if (_canRepeat == RepeatKind.Never)
-		{
-			throw new NotSupportedException("We do not currently support encounter pools that can never repeat an entry. If/when we run into cases where this is needed, we'll add it");
-		}
-
-		float sum = _entries.Sum(entry => entry.Weight);
-		float rand = UnityEngine.Random.Range(0.0f, 1.0f) * sum; // long-term we should have a centralized RNG so we can have consistent test cases.
-
-		for (int i = 0; i < _entries.Length; i++)
-		{
-			if (rand < _entries[i].Weight)
-				return i;
-
-			rand -= _entries[i].Weight;
-		}
-
-		return 0;
-	}
-
-	public Enemy EncounterPrefab(int index)
-	{
-        Debug.Assert(0 <= index && index < _entries.Length);
-		return _entries[index].Prefab;
-	}
+    #endregion
 }

@@ -16,10 +16,10 @@ public class OverworldManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        for (int i = 0; i < RunManager.INSTANCE.RunFormat.Count; i++)
-		{
-			SpawnNext();
-		}
+        //for (int i = 0; i < RunManager.INSTANCE.RunFormat.Count; i++)
+		//{
+		//	SpawnNext();
+		//}
     }
 
     // Update is called once per frame
