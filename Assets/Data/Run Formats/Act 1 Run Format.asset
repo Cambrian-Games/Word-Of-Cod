@@ -27,8 +27,8 @@ MonoBehaviour:
     _canBeShop: 0
     _shopOptionIndex: 0
     _encounterPools:
+    - {fileID: 11400000, guid: 910453acc8a98e44095529ea384929a2, type: 2}
     - {fileID: 11400000, guid: 3ed72e0244901bc448da914579ff4cae, type: 2}
-    - {fileID: 0}
   - _index: 3
     _canBeShop: 1
     _shopOptionIndex: 0

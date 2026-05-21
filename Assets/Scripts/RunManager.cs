@@ -12,6 +12,7 @@ public class RunManager : MonoBehaviour
 
     [SerializeField]
     private RunFormat _format;
+    public int SegmentsInFormat() => _format.Events.Sum(evt => evt.HasChoice ? 2 : 1);
 
 	[Header("Do not modify this! This shows what has been selected so far")]
 	[SerializeField]
@@ -103,7 +104,7 @@ public class RunManager : MonoBehaviour
             switch (_state)
             {
                 case RunState.Traveling_To_Next_Event:
-                    if (Player.INSTANCE.transform.position.x > _destination.x) // not great check here
+                    if (Player.INSTANCE.transform.position.x >= _destination.x) // not great check here
                     {
                         Player.INSTANCE.transform.position = _destination;
 
@@ -193,10 +194,10 @@ public class RunManager : MonoBehaviour
                 RunFormat.RunEvent nextEvent = _format.Event(nextRunEventIndex);
 
                 _hasChoicePending = nextEvent.HasChoice;
+                _lastEventPos = Player.INSTANCE.transform.position;
                 _nextEventPos = _lastEventPos + (_hasChoicePending ? 2 : 1) * _distanceBetweenEvents * Vector3.right;
                 // equals nextEventPos if there isn't a choice, halfway if there is
                 _destination = _lastEventPos + _distanceBetweenEvents * Vector3.right;
-                _lastEventPos = Player.INSTANCE.transform.position;
 
                 if (!_hasChoicePending)
                 {
@@ -299,18 +300,15 @@ public class RunManager : MonoBehaviour
     {
         RunFormat.SelectedEvent selectedEvent = runEvent.Select(option);
 
-        // If we haven't used this pool before, create a SpawnHistory for it
-
-
-        if (!EncounterPool.SPAWN_HISTORIES.TryGetValue(selectedEvent._pool, out EncounterPool.SpawnHistory history))
-        {
-            EncounterPool.SPAWN_HISTORIES.Add(selectedEvent._pool, selectedEvent._pool.CreateSpawnHistory());
-        }
-
-        _currentRun.Add(selectedEvent);
-
         if (!selectedEvent._isShop)
         {
+            // If we haven't used this pool before, create a SpawnHistory for it
+            if (!EncounterPool.SPAWN_HISTORIES.TryGetValue(selectedEvent._pool, out EncounterPool.SpawnHistory history))
+            {
+                history = selectedEvent._pool.CreateSpawnHistory();
+                EncounterPool.SPAWN_HISTORIES.Add(selectedEvent._pool, history);
+            }
+
             // these two lines could be more tightly coupled, or GetNextPrefab could auto-add to history
             selectedEvent.EncounterPrefab = selectedEvent._pool.GetNextPrefab(history);
             history.TryAddEntry(selectedEvent._pool, selectedEvent.EncounterPrefab);
@@ -319,6 +317,8 @@ public class RunManager : MonoBehaviour
 
             SpawnOverworldEnemy(selectedEvent.EncounterPrefab);
         }
+
+        _currentRun.Add(selectedEvent);
     }
 
     private void SpawnOverworldEnemy(Enemy encounterPrefab)

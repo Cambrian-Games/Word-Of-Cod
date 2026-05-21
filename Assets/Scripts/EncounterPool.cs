@@ -51,7 +51,7 @@ public class EncounterPool : ScriptableObject
 
     public Enemy GetNextPrefab(SpawnHistory history)
     {
-        if (history.MatchesSource(this))
+        if (!history.MatchesSource(this))
         {
             Debug.LogError("Incompatible spawn history!");
             return null;
@@ -68,11 +68,17 @@ public class EncounterPool : ScriptableObject
                     return null;
                 }
 
-                spawnCandidates = _entries.Where(entry => history.MatchesAnySpawn(entry.Prefab)).ToList();
+                spawnCandidates = _entries.Where(entry => !history.MatchesAnySpawn(entry.Prefab)).ToList();
                 break;
 
             case RepeatKind.No_Consecutive:
-                spawnCandidates = _entries.Where(entry => history.MatchesLastSpawn(entry.Prefab)).ToList();
+                if (_entries.Count == 1)
+                {
+                    Debug.LogError("No spawn options!");
+                    return null;
+                }
+
+                spawnCandidates = _entries.Where(entry => !history.MatchesLastSpawn(entry.Prefab)).ToList();
                 break;
 
             default:

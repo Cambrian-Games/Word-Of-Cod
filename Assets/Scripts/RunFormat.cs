@@ -50,7 +50,7 @@ public class RunFormat : ScriptableObject
                 pool = _encounterPools[selectionIndex - 1];
             }
 
-            return new SelectedEvent(_index, selectionIndex, isShop: selectionIndex == _shopOptionIndex, pool);
+            return new SelectedEvent(_index, selectionIndex, isShop: _canBeShop && selectionIndex == _shopOptionIndex, pool);
         }
     }
 
