@@ -24,7 +24,7 @@ public class HoverTextBattle : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
         else
         {
-            int index = _shopManager._relicChoice - Player.INSTANCE._inventory._activeRelics.Count;
+            int index = _shopManager._relicChoice - Player.INSTANCE._inventory._passiveRelics.Count;
             _text.text = Player.INSTANCE._inventory
                 ._activeRelics[index]
                 .Description;
