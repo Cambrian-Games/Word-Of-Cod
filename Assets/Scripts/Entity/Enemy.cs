@@ -37,7 +37,8 @@ public class Enemy : Entity
 	internal int _currentRuleIndex = -1;
 	internal int _currentInterruptIndex = -1;
 
-	// used for attack selection
+	// used for attack selection and as a cache of the most recent main rule when an interrupt is active
+
 	private int _lastRuleIndex = -1;
 
 	public AttackRule CurrentRule => _currentRuleIndex == -1 ? null : _rules[_currentRuleIndex];
@@ -51,6 +52,7 @@ public class Enemy : Entity
 	private bool _hasSelectedAttack = false;
 
 	// create once, never re-assign
+
 	internal readonly Dictionary<string, float> _blackboard = new Dictionary<string, float>();
 
 
@@ -112,7 +114,6 @@ public class Enemy : Entity
 		for (int ruleIndex = 0; ruleIndex < _rules.Count; ruleIndex++)
 		{
 			_rules[ruleIndex]._index = ruleIndex;
-			// if we decide we want effect-specific validation we can add it here
 		}
 
 		for (int ruleIndex = 0; ruleIndex < _interruptRules.Count; ruleIndex++)
@@ -121,11 +122,13 @@ public class Enemy : Entity
 		}
 	}
 
+    /// <returns>Whether the rule that was selected by this function is different from the previously-selected rule</returns>
+    /// <exception cref="System.InvalidOperationException">Unrecognized AttackSchedulePolicy</exception>
 	public bool SelectRule()
 	{
 		if (_hasSelectedAttack)
 		{
-			Debug.Assert((CurrentRule != null) != (CurrentInterrupt != null), "One of CurrentRule and CurrentInterrupt should always be null");
+			Debug.Assert((CurrentRule != null) != (CurrentInterrupt != null), "Once any rule has been selected, one of CurrentRule and CurrentInterrupt should always be null");
 		}
 
 		_hasSelectedAttack = true;
@@ -153,14 +156,15 @@ public class Enemy : Entity
 			}
 		}
 
-		// check for an applicable interrupt. This CanRun() check may be funky for interrupts and may require
-		//  extra fields in AttackRule::Condition.
+		// check for an applicable interrupt
 
 		List<AttackRule> interruptCandidates = new List<AttackRule>();
 
 		foreach (AttackRule interrupt in _interruptRules)
 		{
-			// no self-interrupting. Make a duplicate if you want this
+			// interrupt rules cannot interrupt themselves.
+            // If this functionality is ever needed, a duplicate rule must be created.
+
 			if (interrupt != null && (interrupt == CurrentInterrupt))
 				continue;
 
@@ -195,23 +199,18 @@ public class Enemy : Entity
 				newInterruptIndex = interruptCandidates[index]._index;
 			}
 
-			// if we've found a new interrupt
+			Debug.Assert(_interruptRules[newInterruptIndex].CanRun(this));
 
-			//if (newInterruptIndex != -1)
-			{
-				Debug.Assert(_interruptRules[newInterruptIndex].CanRun(this));
+			_currentInterruptIndex = newInterruptIndex;
 
-				_currentInterruptIndex = newInterruptIndex;
+			// ensure that CurrentRule is null because CurrentInterrupt is now non-null
 
-				// ensure that CurrentRule is null because CurrentInterrupt is now non-null
+			_lastRuleIndex = _currentRuleIndex;
+			_currentRuleIndex = -1;
 
-				_lastRuleIndex = _currentRuleIndex;
-				_currentRuleIndex = -1;
+			CurrentInterrupt.StartRule(this);
 
-				CurrentInterrupt.StartRule(this);
-
-				return true;
-			}
+			return true;
 		}
 
 		// no applicable new interrupt was found, and we have an in-progress rule (normal or interrupt), stay in it
@@ -312,7 +311,7 @@ public class Enemy : Entity
 			AttackSchedulePolicy.Next_Available => NextAvailable(),
 			AttackSchedulePolicy.First_Available => FirstAvailable(),
 			AttackSchedulePolicy.Random_From_All_Available => RandomFromAllAvailable(),
-			_ => throw new System.NotImplementedException(),
+			_ => throw new System.InvalidOperationException(),
 		};
 
 		Debug.Assert(_rules[pendingRule].CanRun(this));
@@ -368,7 +367,6 @@ public class Enemy : Entity
 		Debug.Assert(_currentForecast != null, "CurrentInterrupt or CurrentRule should be non-null.");
     }
 	
-	// this should be cached and should be called by a UI file, not the Battle Manager. Fine for now.
     internal string FormattedForecast()
     {
         return _currentForecast.Replace("$NAME", this._displayName);
