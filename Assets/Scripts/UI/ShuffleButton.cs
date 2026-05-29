@@ -36,7 +36,7 @@ public class ShuffleButton : MonoBehaviour, IPointerDownHandler
 			TileSelector.INSTANCE.DeselectAllTiles();
 			GameBoard.INSTANCE.Shuffle();
 			//Shuffle Log analytics
-			ShuffleEvent shuffleEvent = new ShuffleEvent() { _enemyIndex = RunManager.INSTANCE.GetCurrentEvent()._eventIndex, 
+			ShuffleEvent shuffleEvent = new ShuffleEvent() { _enemyIndex = RunManager.INSTANCE.CurrentEvent._eventIndex,
 				_enemyName = BattleManager.INSTANCE.CurrentEnemy.name};
 			AnalyticsService.Instance.RecordEvent(shuffleEvent);
 			Debug.Log("ShuffleEventSent");

@@ -48,6 +48,7 @@ MonoBehaviour:
   _displayName: Bass-ic
   _sprite: {fileID: -5126555826676708157, guid: 70b00a981e61b7e41914e0d6237fcca0, type: 3}
   _maxHealth: 50
+  _enemyTypes: 257
   _schedulePolicy: 0
   _rules:
   - _name: Basic Attack

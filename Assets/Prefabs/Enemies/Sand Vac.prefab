@@ -48,6 +48,7 @@ MonoBehaviour:
   _displayName: School of Fish
   _sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   _maxHealth: 300
+  _enemyTypes: 260
   _schedulePolicy: 3
   _rules:
   - _name: Sand Lash
