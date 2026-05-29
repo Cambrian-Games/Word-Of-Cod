@@ -44,7 +44,7 @@ public class RunManager : MonoBehaviour
 	public Canvas ShopCanvas => _shopCanvas;
 
     [Header("Analytics")]
-	public string _longestWord ="";
+	public string _longestWord = "";
 	public string _mostDamagingWord = "";
 	public List<int> _sortedWordLengths;
 	public List<int> _sortedWordDamages;
@@ -185,7 +185,6 @@ public class RunManager : MonoBehaviour
 		switch (_state)
 		{
 			case RunState.Run_Start:
-                _lastEventPos = Player.INSTANCE.transform.position;
 				SetRunState(RunState.Traveling_To_Next_Event);
 				break;
 			case RunState.Traveling_To_Next_Event:
