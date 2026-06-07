@@ -46,8 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BagOfWorms
   _maxCount: 10
   _currentCount: 2
-  _isConsumable: 1
   _icon: {fileID: 6083897114130078571, guid: bb10dc1fe80bad0dab9782864ad3e277, type: 3}
-  _displayName: Delicious Bag of Worm Segments
-  _description: '[Placeholder]\nClick this item''s icon to regain 50 health.'
   _countText: {fileID: 0}
+  _displayName: Delicious Bag of Worm Segments
+  _description: Click this item's icon to regain 50 health.

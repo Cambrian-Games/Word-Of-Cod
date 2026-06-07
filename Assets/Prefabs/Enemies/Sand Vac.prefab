@@ -123,7 +123,7 @@ MonoBehaviour:
     - _category: 100
       _parameter: Sandy
       _comparator: 2
-      _value: 6
+      _value: 12
       _cancelKind: 1
       _firstCancelRound: 2
       _lastCancelRound: 2
@@ -141,7 +141,7 @@ MonoBehaviour:
         _numTurns: 1
         _endsTurn: 0
         _isCritical: 0
-        _baseDamage: 25
+        _baseDamage: 10
     - rid: 7225786354854789307
       type: {class: Wait, ns: , asm: Assembly-CSharp}
       data:
@@ -179,7 +179,7 @@ MonoBehaviour:
         _numTurns: 1
         _endsTurn: 0
         _isCritical: 0
-        _baseDamage: 25
+        _baseDamage: 10
     - rid: 7225786354854789312
       type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
       data:

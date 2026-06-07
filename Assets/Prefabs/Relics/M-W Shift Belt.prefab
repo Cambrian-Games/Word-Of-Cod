@@ -46,9 +46,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MWSwitch
   _maxCount: 1
   _currentCount: 1
-  _isConsumable: 0
   _icon: {fileID: 7256466799113633062, guid: 734f494590a88d7459dd2fa89796812f, type: 3}
+  _countText: {fileID: 0}
   _displayName: M-W Shift Belt
-  _description: '[Placeholder]\nClick this relic''s icon and an M or W tile in the
-    grid to flip it upside down and turn it into the other letter.\nUsable once per
-    turn.'
+  _description: 'Once a turn: /nclick this relic and an M/W /nto turn it into the
+    other letter. '

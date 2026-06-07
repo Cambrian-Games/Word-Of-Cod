@@ -46,9 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SalmonStone
   _maxCount: 1
   _currentCount: 1
-  _isConsumable: 0
   _icon: {fileID: -8057786581774235389, guid: 598822b31afff9c2db32eab0aeabb078, type: 3}
+  _countText: {fileID: 0}
   _displayName: Sacred Salmon Stone
-  _description: '[Placeholder]\nOnce per game, regain 30% of your health\nwhen you
-    have none left.'
+  _description: 'Once per game, /nsurvive a fatal hit and /n recover 30% of your
+    HP. '
   _brokenIcon: {fileID: 7968025414813492670, guid: ebce248a0ec63fb78a918310f8f2e3bd, type: 3}
