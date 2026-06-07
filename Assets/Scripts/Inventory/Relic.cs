@@ -536,26 +536,36 @@ public class RelicEffect
                 numPasses = longestChainRev == text.Length ? longestChainRev : 0;
                 break;
             case RelicCondition.S_Plural:
-                if (text.Length >= 2)
+
+                // Only consider nouns and pronouns
+                if ((word.PartsOfSpeech & (FPART.NOUN | FPART.PRONOUN)) == 0)
                 {
-                    if (text.Length >=3 && text.EndsWith("ES"))
-                    {
-                        if (WordChecker.INSTANCE._allWords._dict.TryGetValue(text.Substring(0, text.Length - 2).ToLower(), out FPART pos))
-                        {
-                            numPasses = 1;
-                            break;
-                        }
-                    }
-                    if (text.EndsWith("S"))
-                    {
-                        if (WordChecker.INSTANCE._allWords._dict.TryGetValue(text.Substring(0, text.Length - 1).ToLower(),
-                                out FPART pos))
-                        {
-                            numPasses = 1;
-                        }
-                    }
+                    numPasses = 0;
+                    break;
                 }
-                break;
+
+                // if the word length is 1, doesn't end in S, or ends in SS, ignore
+                if (text.Length < 2 || text[^1] != 'S' || text[^2] == 'S')
+                {
+                    numPasses = 0;
+                    break;
+                }
+                else
+                {
+                    FPART depluralS = FPART.NONE;
+                    FPART depluralES = FPART.NONE;
+
+                    bool pluralS = WordChecker.INSTANCE._allWords._dict.TryGetValue(text[..^1].ToLower(), out depluralS);
+                    pluralS &= (depluralS & (FPART.NOUN | FPART.PRONOUN)) != 0;
+                    bool pluralES = text.Length >= 3 & text[^2] == 'E' && WordChecker.INSTANCE._allWords._dict.TryGetValue(text[..^2].ToLower(), out depluralES);
+                    pluralES &= (depluralES & (FPART.NOUN | FPART.PRONOUN)) != 0;
+
+                    if (pluralS || pluralES)
+                    {
+                        numPasses = 1;
+                    }
+                    break;
+                }
             default:
                 Debug.LogError($"Unsupported Condition {condition}");
                 break;

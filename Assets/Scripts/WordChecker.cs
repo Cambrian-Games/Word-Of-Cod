@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 //#define DICTIONARY_TESTING // comment out to turn off this logging
+//#define PLURAL_TESTING
 #endif
 
 using odin.serialize.OdinSerializer;
@@ -13,8 +14,12 @@ public class WordChecker : MonoBehaviour
     //the dictionary
     public SerializedDict _allWords;
 
-#if UNITY_EDITOR && DICTIONARY_TESTING
+#if UNITY_EDITOR && (DICTIONARY_TESTING || PLURAL_TESTING)
 	private bool _hasRunTest = false;
+#endif
+
+#if UNITY_EDITOR && PLURAL_TESTING
+    private Dictionary<string, (string, string)> _plurals = new Dictionary<string, (string, string)>();
 #endif
 
     public static WordChecker INSTANCE;
@@ -75,6 +80,43 @@ public class WordChecker : MonoBehaviour
 	}
 #endif
 
+#if UNITY_EDITOR && PLURAL_TESTING
+    // checks if the word is a valid plural
+    public bool CheckPlural(string text, out string minusS, out string minusES)
+    {
+        FPART partsOfSpeech = _allWords._dict.GetValueOrDefault(text);
+
+        // Only consider nouns and pronouns
+        if ((partsOfSpeech & (FPART.NOUN | FPART.PRONOUN)) == 0)
+        {
+            minusS = null;
+            minusES = null;
+            return false;
+        }
+
+        // if the word length is 1, doesn't end in S, or ends in SS, ignore
+        if (text.Length < 2 || text[^1] != 's' || text[^2] == 's')
+        {
+            minusS = null;
+            minusES = null;
+            return false;
+        }
+        else
+        {
+            FPART depluralS = FPART.NONE;
+            FPART depluralES = FPART.NONE;
+
+            bool pluralS = _allWords._dict.TryGetValue(text[..^1].ToLower(), out depluralS);
+            pluralS &= (depluralS & (FPART.NOUN | FPART.PRONOUN)) != 0;
+            bool pluralES = text.Length >= 3 & text[^2] == 'e' && _allWords._dict.TryGetValue(text[..^2].ToLower(), out depluralES);
+            pluralES &= (depluralES & (FPART.NOUN | FPART.PRONOUN)) != 0;
+
+            minusS = pluralS ? text[..^1] : null;
+            minusES = pluralES ? text[..^2] : null;
+            return pluralS || pluralES;
+        }
+    }
+
     internal bool TryGetWord(string text, List<Tile> tilesUsed, out Word word)
     {
         Debug.Log("Checking: " + text);
@@ -109,6 +151,7 @@ public class WordChecker : MonoBehaviour
 
         return false;
     }
+#endif
 
     // Update is called once per frame
     void Update()
@@ -166,5 +209,38 @@ public class WordChecker : MonoBehaviour
 			_hasRunTest = true;
 		}
 #endif
-	}
+
+#if UNITY_EDITOR && PLURAL_TESTING
+        if (!_hasRunTest)
+        {
+            foreach (string word in _allWords._dict.Keys)
+            {
+                if (CheckPlural(word, out string minusS, out string minusES))
+                {
+                    _plurals.Add(word, (minusS, minusES));
+                }
+            }
+
+            FileStream outStream = File.OpenWrite("./Utils/Plurals.txt");
+            StreamWriter writer = new StreamWriter(outStream);
+            foreach (var kvp in _plurals)
+            {
+                writer.Write(kvp.Key);
+                if (kvp.Value.Item1 != null)
+                {
+                    writer.Write(", " + kvp.Value.Item1);
+                }
+                if (kvp.Value.Item2 != null)
+                {
+                    writer.Write(", " + kvp.Value.Item2);
+                }
+                writer.Write('\n');
+            }
+            writer.Close();
+            outStream.Close();
+
+            _hasRunTest = true;
+        }
+    }
+#endif
 }
