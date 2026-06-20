@@ -49,5 +49,5 @@ MonoBehaviour:
   _icon: {fileID: 2814304524802023395, guid: e28215cfbaaacd3efaf71c00d9950f16, type: 3}
   _countText: {fileID: 0}
   _displayName: You Substitution
-  _description: Once Per Battle, Click this relic to pay /n20% of your max health
-    and take /nno damage from one enemy attack.
+  _description: Once Per Battle, Click this relic to pay \n20% of your max health
+    and take \nno damage from one enemy attack.

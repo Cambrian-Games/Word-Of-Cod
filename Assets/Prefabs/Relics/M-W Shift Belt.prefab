@@ -49,5 +49,5 @@ MonoBehaviour:
   _icon: {fileID: 7256466799113633062, guid: 734f494590a88d7459dd2fa89796812f, type: 3}
   _countText: {fileID: 0}
   _displayName: M-W Shift Belt
-  _description: 'Once a turn: /nclick this relic and an M/W /nto turn it into the
+  _description: 'Once a turn: \nclick this relic and an M/W \nto turn it into the
     other letter. '

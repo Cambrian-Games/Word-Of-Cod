@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: Buffer Shell
-  _description: Spelling a word creates /na barrier that absorbs damage. /n(Power
+  _description: Spelling a word creates \na barrier that absorbs damage. \n(Power
     equal to double word length) \nResets every turn.
   _icon: {fileID: 247780611821353869, guid: cdeb77f0855ceec0f9c1c56745859515, type: 3}
   _effects:

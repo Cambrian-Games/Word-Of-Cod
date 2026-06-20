@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: Alphabetical Amulet
-  _description: Damage increased if /nsubmitted word features at /nleast 3 letters
-    in /nalphabetical sequence.
+  _description: Damage increased if \nsubmitted word features at \nleast 3 letters
+    in \nalphabetical sequence.
   _icon: {fileID: -1089779338242571621, guid: b0fddc64a60ef3d92b2ca4160ef76659, type: 3}
   _effects:
   - _event: 0

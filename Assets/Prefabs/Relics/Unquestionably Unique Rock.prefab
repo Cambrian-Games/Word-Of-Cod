@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: Unquestionably Unique Rock
-  _description: 'Increases damage of words /nbased on the number of unique vowels\n(including
+  _description: 'Increases damage of words \nbased on the number of unique vowels\n(including
     Y). '
   _icon: {fileID: -3268270820148773124, guid: e5e43467b7316570e94db1dda926a248, type: 3}
   _effects:

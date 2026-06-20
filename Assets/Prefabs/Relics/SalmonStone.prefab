@@ -49,6 +49,6 @@ MonoBehaviour:
   _icon: {fileID: -8057786581774235389, guid: 598822b31afff9c2db32eab0aeabb078, type: 3}
   _countText: {fileID: 0}
   _displayName: Sacred Salmon Stone
-  _description: 'Once per game, /nsurvive a fatal hit and /n recover 30% of your
+  _description: 'Once per game, \nsurvive a fatal hit and \n recover 30% of your
     HP. '
   _brokenIcon: {fileID: 7968025414813492670, guid: ebce248a0ec63fb78a918310f8f2e3bd, type: 3}

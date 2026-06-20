@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Relic
   _displayName: The Cool S
-  _description: 'Increase damage of plural words /n(ending in S or ES.) '
+  _description: 'Increase damage of plural words \n(ending in S or ES.) '
   _icon: {fileID: -7162549641268330034, guid: a2582d5cc669f22f3b033b2910c94dc8, type: 3}
   _effects:
   - _event: 0
