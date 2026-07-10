@@ -4401,10 +4401,7 @@ MonoBehaviour:
   _analyticsManager: {fileID: 0}
   _mainCanvas: {fileID: 683767548}
   _shopCanvas: {fileID: 1881385116}
-  _longestWord: 
-  _mostDamagingWord: 
-  _sortedWordLengths: 
-  _sortedWordDamages: 
+  _statsHolder: {fileID: 1714602142}
 --- !u!4 &628337404
 Transform:
   m_ObjectHideFlags: 0
@@ -10823,6 +10820,58 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1704358214}
   m_CullTransparentMesh: 1
+--- !u!1 &1714602141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1714602143}
+  - component: {fileID: 1714602142}
+  m_Layer: 0
+  m_Name: StatsHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1714602142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714602141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4061c31d79578e88f8f479b58ffa16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatsHolder
+  _longestWord: 
+  _mostDamagingWord: 
+  _sortedWordLengths: 
+  _sortedWordDamages: 
+  _medianWordLength: 0
+  _meanWordLength: 0
+  _medianWordDamage: 0
+  _meanWordDamage: 0
+--- !u!4 &1714602143
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714602141}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.82344, y: 0.8585, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1723441859
 GameObject:
   m_ObjectHideFlags: 0
@@ -13036,6 +13085,7 @@ SceneRoots:
   - {fileID: 868568181}
   - {fileID: 1645519830}
   - {fileID: 628337404}
+  - {fileID: 1714602143}
   - {fileID: 1992314816}
   - {fileID: 426003711}
   - {fileID: 683767549}

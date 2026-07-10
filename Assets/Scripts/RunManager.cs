@@ -43,12 +43,9 @@ public class RunManager : MonoBehaviour
 	private Canvas _shopCanvas;
 	public Canvas ShopCanvas => _shopCanvas;
 
-    [Header("Analytics")]
-	public string _longestWord = "";
-	public string _mostDamagingWord = "";
-	public List<int> _sortedWordLengths;
-	public List<int> _sortedWordDamages;
-
+    [SerializeField]
+    private StatsHolder _statsHolder;
+    
 	private Enemy _overworldEnemy;
 
 	public enum RunState
@@ -85,8 +82,7 @@ public class RunManager : MonoBehaviour
 		SetRunState(RunState.Run_Start);
 		TryInitializeAnalytics();
 
-		_sortedWordDamages = new List<int>();
-		_sortedWordLengths = new List<int>();
+
     }
 
 	// Update is called once per frame
@@ -332,34 +328,34 @@ public class RunManager : MonoBehaviour
     public void AddWordToStats(Word word)
 	{
 		//if first word, simply set all
-		if (_sortedWordDamages.Count == 0)
+		if (_statsHolder._sortedWordDamages.Count == 0)
 		{
-			_sortedWordDamages.Add(word.EffectiveDamage);
-			_sortedWordLengths.Add(word.NumTilesUsed);
-			_longestWord = word.Text;
-			_mostDamagingWord = word.Text;
+			_statsHolder._sortedWordDamages.Add(word.EffectiveDamage);
+			_statsHolder._sortedWordLengths.Add(word.NumTilesUsed);
+			_statsHolder._longestWord = word.Text;
+			_statsHolder._mostDamagingWord = word.Text;
 		}
 		//if not first word
 		else
 		{
 			//check for new longest
-			if (word.Text.Length > _sortedWordLengths.Last())
+			if (word.Text.Length > _statsHolder._sortedWordLengths.Last())
 			{
-				_longestWord = word.Text;
+				_statsHolder._longestWord = word.Text;
 			}
 			//check for new highest damage
-			if (word.EffectiveDamage > _sortedWordDamages.Last())
+			if (word.EffectiveDamage > _statsHolder._sortedWordDamages.Last())
 			{
-				_mostDamagingWord = word.Text;
+				_statsHolder._mostDamagingWord = word.Text;
 			}
 			//insert sorted to appropriate list
-			int index = _sortedWordLengths.BinarySearch(word.NumTilesUsed);
+			int index = _statsHolder._sortedWordLengths.BinarySearch(word.NumTilesUsed);
 			if (index < 0) index = ~index;
-			_sortedWordLengths.Insert(index, word.NumTilesUsed);
+			_statsHolder._sortedWordLengths.Insert(index, word.NumTilesUsed);
 			
-			index = _sortedWordDamages.BinarySearch(word.EffectiveDamage);
+			index = _statsHolder._sortedWordDamages.BinarySearch(word.EffectiveDamage);
 			if (index < 0) index = ~index;
-			_sortedWordDamages.Insert(index, word.EffectiveDamage);
+			_statsHolder._sortedWordDamages.Insert(index, word.EffectiveDamage);
 		}
 	}
 
@@ -367,19 +363,19 @@ public class RunManager : MonoBehaviour
 	private void CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength,
 		out float medianLength)
 	{
-		if (_sortedWordDamages.Count > 0)
+		if (_statsHolder._sortedWordDamages.Count > 0)
 		{
-			meanDamage = (float)_sortedWordDamages.Average();
-			meanLength = (float)_sortedWordLengths.Average();
-			if (_sortedWordDamages.Count % 2 != 0)
+			meanDamage = (float)_statsHolder._sortedWordDamages.Average();
+			meanLength = (float)_statsHolder._sortedWordLengths.Average();
+			if (_statsHolder._sortedWordDamages.Count % 2 != 0)
 			{
-				medianLength = _sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2);
-				medianDamage = _sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2);
+				medianLength = _statsHolder._sortedWordLengths.ElementAt(_statsHolder._sortedWordLengths.Count / 2);
+				medianDamage = _statsHolder._sortedWordDamages.ElementAt(_statsHolder._sortedWordDamages.Count / 2);
 			}
 			else
 			{
-				medianLength = (_sortedWordLengths.ElementAt(_sortedWordLengths.Count / 2) + _sortedWordLengths.ElementAt((_sortedWordLengths.Count / 2) - 1)) / 2.0f;
-				medianDamage = (_sortedWordDamages.ElementAt(_sortedWordDamages.Count / 2) + _sortedWordDamages.ElementAt((_sortedWordDamages.Count / 2) - 1)) / 2.0f;
+				medianLength = (_statsHolder._sortedWordLengths.ElementAt(_statsHolder._sortedWordLengths.Count / 2) + _statsHolder._sortedWordLengths.ElementAt((_statsHolder._sortedWordLengths.Count / 2) - 1)) / 2.0f;
+				medianDamage = (_statsHolder._sortedWordDamages.ElementAt(_statsHolder._sortedWordDamages.Count / 2) + _statsHolder._sortedWordDamages.ElementAt((_statsHolder._sortedWordDamages.Count / 2) - 1)) / 2.0f;
 			}
 		}
 		else
@@ -394,18 +390,22 @@ public class RunManager : MonoBehaviour
 	private void SendWinEvent()
 	{
 		CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength, out float medianLength);
+		_statsHolder._meanWordDamage = meanDamage;
+		_statsHolder._medianWordDamage = medianDamage;
+		_statsHolder._meanWordLength = meanLength;
+		_statsHolder._medianWordLength = medianLength;
 		WinEvent winEvent = new WinEvent()
 		{
-			_longestWord = this._longestWord,
-			_mostDamagingWord = this._mostDamagingWord,
+			_longestWord = _statsHolder._longestWord,
+			_mostDamagingWord = _statsHolder._mostDamagingWord,
 			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory)
 				+ "; " + string.Join(", ", Player.INSTANCE._inventory._activeRelicInventory),
-			_highestDamage = this._sortedWordDamages.Count > 0 ? this._sortedWordDamages.Last() : 0,
+			_highestDamage = _statsHolder._sortedWordDamages.Count > 0 ? _statsHolder._sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
 			_medianDamage = medianDamage,
 			_medianLength = medianLength,
-			_numWords = this._sortedWordLengths.Count()
+			_numWords = _statsHolder._sortedWordLengths.Count()
 		};
 		AnalyticsService.Instance.RecordEvent(winEvent);
 		//need to flush to force upload before user quits
@@ -416,18 +416,22 @@ public class RunManager : MonoBehaviour
 	private void SendLoseEvent()
 	{
 		CalculateAverages(out float meanDamage, out float medianDamage, out float meanLength, out float medianLength);
+		_statsHolder._meanWordDamage = meanDamage;
+		_statsHolder._medianWordDamage = medianDamage;
+		_statsHolder._meanWordLength = meanLength;
+		_statsHolder._medianWordLength = medianLength;
 		LoseEvent loseEvent = new LoseEvent()
 		{
-			_longestWord = this._longestWord,
-			_mostDamagingWord = this._mostDamagingWord,
+			_longestWord = _statsHolder._longestWord,
+			_mostDamagingWord = _statsHolder._mostDamagingWord,
 			_relicList = string.Join(", ", Player.INSTANCE._inventory._passiveRelicInventory)
 				+ "; " + string.Join(", ", Player.INSTANCE._inventory._activeRelicInventory),
-			_highestDamage = this._sortedWordDamages.Count > 0 ? _sortedWordDamages.Last() : 0,
+			_highestDamage = _statsHolder._sortedWordDamages.Count > 0 ? _statsHolder._sortedWordDamages.Last() : 0,
 			_meanDamage = meanDamage,
 			_meanLength = meanLength,
 			_medianDamage = medianDamage,
 			_medianLength = medianLength,
-			_numWords = this._sortedWordLengths.Count(),
+			_numWords = _statsHolder._sortedWordLengths.Count(),
 			_enemyIndex = CurrentEvent._eventIndex, 
 			_enemyName = BattleManager.INSTANCE.CurrentEnemy.name
 		};
