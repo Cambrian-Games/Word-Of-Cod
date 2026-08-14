@@ -6,6 +6,8 @@ public class AnalyticsManager : MonoBehaviour
     public bool _analyticsEnabled;
 
     public static AnalyticsManager INSTANCE;
+
+    private bool _loaded = false;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -27,18 +29,23 @@ public class AnalyticsManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (!_loaded && SaveManager.INSTANCE._saveData != null)
+        {
+            _analyticsEnabled = SaveManager.INSTANCE._saveData._analyticsState;
+            _loaded = true;
+        }
     }
 
     public void AnalyticsOptIn()
     {
         _analyticsEnabled = true;
+        SaveManager.INSTANCE._saveData._analyticsState = true;
     }
 
     public void AnalyticsOptOut()
     {
         _analyticsEnabled = false;
-        
+        SaveManager.INSTANCE._saveData._analyticsState = false;
     }
     
 }

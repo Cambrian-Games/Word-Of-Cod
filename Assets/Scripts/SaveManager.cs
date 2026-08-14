@@ -1,6 +1,9 @@
 using UnityEngine;
+using odin.serialize.OdinSerializer;
+using System.IO;
 
-public struct SaveData
+
+public class SaveData
 {
     public bool _analyticsState;
 }
@@ -26,6 +29,8 @@ public class SaveManager : MonoBehaviour
         INSTANCE = this;
         
         DontDestroyOnLoad(gameObject);
+        
+        ReadSaveData();
     }
     
     
@@ -34,5 +39,25 @@ public class SaveManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private void ReadSaveData()
+    {
+        if (File.Exists(Application.streamingAssetsPath + "/saveData"))
+        {
+            byte[] savebytes = File.ReadAllBytes(Application.streamingAssetsPath + "/saveData");
+            _saveData = SerializationUtility.DeserializeValue<SaveData>(savebytes, DataFormat.Binary);
+        }
+        else
+        {
+            _saveData = new SaveData();
+        }
+
+    }
+
+    public void WriteSaveData()
+    {
+        byte[] outBytes = SerializationUtility.SerializeValue(_saveData, DataFormat.Binary);
+        File.WriteAllBytes(Application.streamingAssetsPath + "/saveData", outBytes);
     }
 }
