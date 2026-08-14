@@ -7,6 +7,7 @@ public class AnalyticsManager : MonoBehaviour
     public bool _analyticsEnabled;
 
     public static AnalyticsManager INSTANCE;
+    
     void Start()
     {
         if (INSTANCE != null && INSTANCE != this)
