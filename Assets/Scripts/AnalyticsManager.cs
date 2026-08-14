@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class AnalyticsManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     public bool _analyticsEnabled;
 
     public static AnalyticsManager INSTANCE;
     
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         if (INSTANCE != null && INSTANCE != this)
