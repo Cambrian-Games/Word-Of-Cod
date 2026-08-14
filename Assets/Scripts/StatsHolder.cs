@@ -24,6 +24,8 @@ public class StatsHolder : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        INSTANCE = this;
         
         DontDestroyOnLoad(gameObject);
         _sortedWordDamages = new List<int>();

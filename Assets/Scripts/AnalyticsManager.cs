@@ -16,6 +16,8 @@ public class AnalyticsManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        INSTANCE = this;
         
         _analyticsEnabled = false;
         DontDestroyOnLoad(gameObject);
