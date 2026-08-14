@@ -253,12 +253,14 @@ public class RunManager : MonoBehaviour
 			case RunState.Win:
 				//TODO Add Analytics for End Game
 				SendWinEvent();
+				endGameSave(true);
 				SceneManager.LoadScene(_winScene);
 				break;
 			case RunState.Lose:
 				//TODO Add analytics for lost run
 				//    same as End Game, but with added "what you lost to" event
 				SendLoseEvent();
+				endGameSave(false);
 				SceneManager.LoadScene(_loseScene);
 				break;
 		}
@@ -462,5 +464,21 @@ public class RunManager : MonoBehaviour
 			}
 		}
 	}
-    #endregion
+
+	
+	private void endGameSave(bool win)
+	{
+		if (win)
+		{
+			SaveManager.INSTANCE._saveData._runsWon += 1;
+		}
+		SaveManager.INSTANCE._saveData._totalRuns += 1;
+		SaveManager.INSTANCE._saveData._longestWord = (StatsHolder.INSTANCE._longestWord,
+			StatsHolder.INSTANCE._longestWord.Length);
+		SaveManager.INSTANCE._saveData._bestWord = (StatsHolder.INSTANCE._mostDamagingWord,
+			StatsHolder.INSTANCE._sortedWordDamages[^1]);
+		SaveManager.INSTANCE.WriteSaveData();
+	}
+
+	#endregion
 }
