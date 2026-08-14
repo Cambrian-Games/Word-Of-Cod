@@ -81,8 +81,6 @@ public class RunManager : MonoBehaviour
     {
 		SetRunState(RunState.Run_Start);
 		TryInitializeAnalytics();
-
-
     }
 
 	// Update is called once per frame

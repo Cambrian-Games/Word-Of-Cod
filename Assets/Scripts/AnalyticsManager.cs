@@ -5,9 +5,17 @@ public class AnalyticsManager : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public bool _analyticsEnabled;
-    
+
+    public static AnalyticsManager INSTANCE;
     void Start()
     {
+        if (INSTANCE != null && INSTANCE != this)
+        {
+            Debug.LogError("Attempted to create second player!");
+            Destroy(gameObject);
+            return;
+        }
+        
         _analyticsEnabled = false;
         DontDestroyOnLoad(gameObject);
         UnityServices.InitializeAsync();

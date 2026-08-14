@@ -4,6 +4,8 @@ using System.Linq;
 
 public class StatsHolder : MonoBehaviour
 {
+    public static StatsHolder INSTANCE;
+    
     [Header("Analytics")]
     public string _longestWord = "";
     public string _mostDamagingWord = "";
@@ -16,14 +18,16 @@ public class StatsHolder : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (INSTANCE != null && INSTANCE != this)
+        {
+            Debug.LogError("Attempted to create second player!");
+            Destroy(gameObject);
+            return;
+        }
+        
         DontDestroyOnLoad(gameObject);
         _sortedWordDamages = new List<int>();
         _sortedWordLengths = new List<int>();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }
