@@ -48,6 +48,7 @@ MonoBehaviour:
   _description: '[Placeholder]\nIncreases the damage of plural words ending in S
     or ES.'
   _icon: {fileID: -7162549641268330034, guid: a2582d5cc669f22f3b033b2910c94dc8, type: 3}
+  _passivePools: -1
   _effects:
   - _event: 0
     _condition: 16

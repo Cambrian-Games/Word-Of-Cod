@@ -21,6 +21,17 @@ public class Relic : MonoBehaviour
     private Sprite _icon;
     public Sprite Icon => _icon;
 
+    [Flags]
+    public enum FPASSIVEPOOL
+    {
+        LETTER          = 0x1,
+        PART_OF_SPEECH  = 0x2
+    }
+
+    [SerializeField]
+    private FPASSIVEPOOL _passivePools;
+    public FPASSIVEPOOL PassivePools => _passivePools;
+
     [SerializeField]
     private List<RelicEffect> _effects;
 

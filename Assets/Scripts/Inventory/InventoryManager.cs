@@ -4,8 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
-
 public class InventoryManager : MonoBehaviour
 {
 	public enum InventorySection
@@ -14,6 +12,53 @@ public class InventoryManager : MonoBehaviour
 		Active_Relic,
 		Consumable_Item,
 	}
+
+    public struct InventoryReference
+    {
+        public InventorySection _section;
+        public int _id;
+
+        public readonly Relic PassiveRelic()
+        {
+            if (_section == InventorySection.Passive_Relic)
+            {
+                return Player.INSTANCE._inventory._passiveRelics[_id];
+            }
+            Debug.Assert(_section == InventorySection.Passive_Relic);
+            return null;
+        }
+
+        public readonly ActiveRelic ActiveRelic()
+        {
+            if (_section == InventorySection.Active_Relic)
+            {
+                return (ActiveRelic) Player.INSTANCE._inventory._activeRelics[_id];
+            }
+            Debug.Assert(_section == InventorySection.Active_Relic);
+            return null;
+        }
+
+        public readonly Item ConsumableItem()
+        {
+            if (_section == InventorySection.Consumable_Item)
+            {
+                return Player.INSTANCE._inventory._consumables[_id];
+            }
+            Debug.Assert(_section == InventorySection.Consumable_Item);
+            return null;
+        }
+
+        public override readonly string ToString()
+        {
+            return _section switch
+            {
+                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].DisplayName + " (Passive Relic)",
+                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].DisplayName + " (Active Relic)",
+                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].DisplayName + " (Consumable Item)",
+                _ => "",
+            };
+        }
+    }
 
 	public List<Relic> _passiveRelics;
 	public List<Item> _activeRelics;
@@ -48,10 +93,18 @@ public class InventoryManager : MonoBehaviour
 		InitActiveRelics();
 		InitConsumables();
 
-		for (int i = 0; i < _startingRelics; i++)
-		{
-			GrantRelic();
-		}
+        //for (int i = 0; i < _startingRelics; i++)
+        //{
+        //	GrantRelic();
+        //}
+
+        List<InventoryReference> relicRefs = GenerateItemReferences(_startingRelics);
+        List<InventoryReference> test = GenerateItemReferences(_passiveRelics.Count(), new float[] { 100, 1 });
+
+        foreach (InventoryReference relicRef in relicRefs)
+        {
+            GrantRelic(relicRef);
+        }
 
 		_tooltip.text = "";
 	}
@@ -82,8 +135,8 @@ public class InventoryManager : MonoBehaviour
 		}
 
 		//_passiveRelicInventory.Add(Random.Range(0, _passiveRelics.Count));
-//
-		////sets the starting relic icon
+
+		//sets the starting relic icon
 		//_passiveRelicGrid.transform.GetChild(0).gameObject.GetComponent<Image>().sprite =
 		//	_passiveRelics[_passiveRelicInventory[0]].Icon;
 	}
@@ -392,6 +445,23 @@ public class InventoryManager : MonoBehaviour
 		}
 	}
 
+    public void GrantRelic(InventoryReference relicRef)
+    {
+        Debug.Assert(relicRef._section != InventorySection.Consumable_Item);
+
+        switch (relicRef._section)
+        {
+            case InventorySection.Active_Relic:
+                Debug.Assert(!_activeRelicInventory.Contains(relicRef._id));
+                _activeRelicInventory.Add(relicRef._id);
+                break;
+            case InventorySection.Passive_Relic:
+                Debug.Assert(!_passiveRelicInventory.Contains(relicRef._id));
+                _passiveRelicInventory.Add(relicRef._id);
+                break;
+        }
+    }
+
 	internal void SetIconColorFromUseState(int id, InventorySection section, Item.UseState newState)
 	{
 		int index = section switch
@@ -450,4 +520,189 @@ public class InventoryManager : MonoBehaviour
 		Image icon = grid.transform.GetChild(index).GetComponent<Image>();
 		icon.sprite = newSprite;
 	}
+
+    public List<InventoryReference> GenerateItemReferences(int count)
+    {
+        return GenerateItemReferences(count, new float[] { 1, 1 });
+    }
+
+    public List<InventoryReference> GenerateItemReferences(int count, float[] sectionWeights, float[] passiveRelicWeights = null, List<InventoryReference> relicsToIgnore = null)
+    {
+        if (count <= 0)
+            return new List<InventoryReference>();
+
+        Debug.Assert(sectionWeights.Length == 2 && (sectionWeights[0] > 0 || sectionWeights[1] > 0));
+
+        // set up relic candidates and selection weights
+
+        List<int> activeIDs = _activeRelics.Select(relic => relic.ID).Where(id => !_activeRelicInventory.Contains(id)).ToList();
+        List<int> passiveIDs = _passiveRelics.Select(relic => relic.ID).Where(id => !_passiveRelicInventory.Contains(id)).ToList();
+
+        // Part of Speech, Letter, Other
+        List<int>[] sublists = { new List<int>(passiveIDs), new List<int>(passiveIDs), new List<int>(passiveIDs) };
+
+        if (relicsToIgnore != null)
+        {
+            foreach (InventoryReference ir in relicsToIgnore)
+            {
+                if (ir._section == InventorySection.Active_Relic)
+                    activeIDs.Remove(ir._id);
+
+                else if (ir._section == InventorySection.Passive_Relic)
+                {
+                    passiveIDs.Remove(ir._id);
+                    sublists[0].Remove(ir._id);
+                    sublists[1].Remove(ir._id);
+                    sublists[2].Remove(ir._id);
+                }
+            }
+        }
+
+        float activeWeight = sectionWeights[0];
+        float passiveWeight = sectionWeights[1];
+
+        float[] subWeights = { -1, -1, -1 };
+
+        if (passiveWeight >= 0 && passiveRelicWeights != null)
+        {
+            Debug.Assert(passiveRelicWeights.Length == 3);
+            float totalSubWeight = passiveRelicWeights[0] + passiveRelicWeights[1] + passiveRelicWeights[2];
+            float scaleFactor = passiveWeight / totalSubWeight;
+
+            for (int i = 0; i < 3; i++)
+            {
+                subWeights[i] = passiveRelicWeights[i] * scaleFactor;
+            }
+        }
+
+        // 
+
+        List<InventoryReference> relicsSelected = new List<InventoryReference>();
+        bool canFindMoreRelics = true;
+
+        while (relicsSelected.Count < count && canFindMoreRelics)
+        {
+            CheckForEmptyRelicPools();
+
+            if (activeWeight + passiveWeight == 0)
+                canFindMoreRelics = false;
+
+            float category = Random.Range(0.0f, 1.0f) * (activeWeight + passiveWeight);
+            float selection = Random.Range(0.0f, 1.0f);
+
+            if (category < activeWeight)
+            {
+                relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Active_Relic, selection));
+            }
+            else
+            {
+                if (passiveRelicWeights != null)
+                {
+                    category -= activeWeight;
+
+                    for (int i = 0; i < subWeights.Length; i++)
+                    {
+                        if (category < subWeights[i])
+                        {
+                            relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Passive_Relic, selection, i));
+                            break;
+                        }
+                        else
+                        {
+                            category -= subWeights[i];
+                        }
+                    }
+                }
+                else
+                {
+                    relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Passive_Relic, selection));
+                }
+            }
+        }
+
+        return relicsSelected;
+
+        // Local helper functions
+
+        void CheckForEmptyRelicPools()
+        {
+            if (activeIDs.Count == 0)
+            {
+                activeWeight = 0;
+            }
+
+            bool[] unclaimedPassives = sublists.Select(list => list.Count > 0).ToArray();
+
+            if (!unclaimedPassives[0] || !unclaimedPassives[1] || !unclaimedPassives[2])
+            {
+                float totalSubWeight =
+                    (unclaimedPassives[0] ? 0 : 1) * passiveRelicWeights[0] +
+                    (unclaimedPassives[1] ? 0 : 1) * passiveRelicWeights[1] +
+                    (unclaimedPassives[2] ? 0 : 1) * passiveRelicWeights[2];
+
+                if (totalSubWeight == 0)
+                {
+                    passiveWeight = 0;
+                    subWeights = new float[] { 0, 0, 0 };
+                }
+                else
+                {
+                    float scaleFactor = passiveWeight / totalSubWeight;
+                    subWeights[0] = (unclaimedPassives[0] ? 0 : 1) * passiveRelicWeights[0] * scaleFactor;
+                    subWeights[1] = (unclaimedPassives[1] ? 0 : 1) * passiveRelicWeights[1] * scaleFactor;
+                    subWeights[2] = (unclaimedPassives[2] ? 0 : 1) * passiveRelicWeights[2] * scaleFactor;
+                }
+            }
+        }
+
+        InventoryReference InventoryReferenceFromUValue(InventorySection section, float uSelection, int subpoolIndex = -1)
+        {
+            List<int> pool;
+
+            if (section == InventorySection.Active_Relic)
+            {
+                pool = activeIDs;
+            }
+            else if (subpoolIndex == -1)
+            {
+                pool = passiveIDs;
+            }
+            else
+            {
+                pool = sublists[subpoolIndex];
+            }
+
+            InventoryReference newRef = new InventoryReference
+            {
+                _section = section,
+                _id = pool[(int)(uSelection * pool.Count)]
+            };
+
+            pool.Remove(newRef._id);
+
+            if (section == InventorySection.Passive_Relic)
+            {
+                passiveIDs.Remove(newRef._id);
+            }
+
+            return newRef;
+        }
+    }
+
+    public InventoryReference GenerateActiveRelicReference(List<InventoryReference> relicsToIgnore)
+    {
+        List<int> targets = _activeRelics.Select(relic => relic.ID).Where(relicID => !_activeRelicInventory.Contains(relicID)).ToList();
+
+        foreach (InventoryReference ir in relicsToIgnore)
+        {
+            if (ir._section == InventorySection.Active_Relic)
+                targets.Remove(ir._id);
+        }
+
+        return new InventoryReference
+        {
+            _section = InventorySection.Active_Relic,
+            _id = (int)(Random.Range(0.0f, 1.0f) * targets.Count)
+        };
+    }
 }

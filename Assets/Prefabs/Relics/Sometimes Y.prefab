@@ -48,6 +48,7 @@ MonoBehaviour:
   _description: '[Placeholder]\nOccasionally increases the damage of words containing
     the letter Y.'
   _icon: {fileID: 975767265599224733, guid: 3fcd182d01454dea78b8246d9644010d, type: 3}
+  _passivePools: 1
   _effects:
   - _event: 0
     _condition: 2
