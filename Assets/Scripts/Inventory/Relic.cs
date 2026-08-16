@@ -24,6 +24,7 @@ public class Relic : MonoBehaviour
     [Flags]
     public enum FPASSIVEPOOL
     {
+        OTHER           = 0x0,
         LETTER          = 0x1,
         PART_OF_SPEECH  = 0x2
     }

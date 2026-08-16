@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -92,11 +93,6 @@ public class InventoryManager : MonoBehaviour
 		InitPassiveRelics();
 		InitActiveRelics();
 		InitConsumables();
-
-        //for (int i = 0; i < _startingRelics; i++)
-        //{
-        //	GrantRelic();
-        //}
 
         List<InventoryReference> relicRefs = GenerateItemReferences(_startingRelics);
         List<InventoryReference> test = GenerateItemReferences(_passiveRelics.Count(), new float[] { 100, 1 });
@@ -394,57 +390,6 @@ public class InventoryManager : MonoBehaviour
 		_itemInUse = null;
 	}
 
-	public void GrantRelic()
-	{
-		int totalRelics = _activeRelics.Count + _passiveRelics.Count;
-		bool granted = false;
-		
-		//if all relics owned
-		if (_activeRelicInventory.Count + _passiveRelicInventory.Count == totalRelics)
-		{
-			return;
-		}
-		
-		while (!granted)
-		{
-			//choose a random relic
-			int relicToGrant = (int)Mathf.Floor(Random.Range(0.0f, 1.0f) * totalRelics);
-			Debug.Log("Relic to Give:" + relicToGrant);
-			
-			//check to see if its within the passive list
-			if (relicToGrant < _passiveRelics.Count)
-			{
-				//check to avoid duplicates
-				if (_passiveRelicInventory.Contains(relicToGrant))
-				{
-					continue;
-				}
-				
-				//add relic
-				_passiveRelicInventory.Add(relicToGrant);
-				Debug.Log("Passive Added");
-				granted = true;
-			}
-			//otherwise it's in the active list
-			else
-			{
-				//offset the number by the passive relic list count
-				relicToGrant -= _passiveRelics.Count;
-				
-				//prevent duplicates
-				if (_activeRelicInventory.Contains(relicToGrant))
-				{
-					continue;
-				}
-				
-				//add relic
-				_activeRelicInventory.Add(relicToGrant);
-				granted = true;
-			}
-			
-		}
-	}
-
     public void GrantRelic(InventoryReference relicRef)
     {
         Debug.Assert(relicRef._section != InventorySection.Consumable_Item);
@@ -532,14 +477,42 @@ public class InventoryManager : MonoBehaviour
             return new List<InventoryReference>();
 
         Debug.Assert(sectionWeights.Length == 2 && (sectionWeights[0] > 0 || sectionWeights[1] > 0));
+        Relic.FPASSIVEPOOL[] pools = (Relic.FPASSIVEPOOL[])Enum.GetValues(typeof(Relic.FPASSIVEPOOL));
+        Debug.Log(passiveRelicWeights == null || passiveRelicWeights.Length == pools.Length);
 
         // set up relic candidates and selection weights
 
         List<int> activeIDs = _activeRelics.Select(relic => relic.ID).Where(id => !_activeRelicInventory.Contains(id)).ToList();
-        List<int> passiveIDs = _passiveRelics.Select(relic => relic.ID).Where(id => !_passiveRelicInventory.Contains(id)).ToList();
+        List<int> passiveIDs = new List<int>();
 
-        // Part of Speech, Letter, Other
-        List<int>[] sublists = { new List<int>(passiveIDs), new List<int>(passiveIDs), new List<int>(passiveIDs) };
+        Dictionary<Relic.FPASSIVEPOOL, List<int>> poolLists = new Dictionary<Relic.FPASSIVEPOOL, List<int>>
+        {
+            [Relic.FPASSIVEPOOL.OTHER] = new List<int>(),
+            [Relic.FPASSIVEPOOL.LETTER] = new List<int>(),
+            [Relic.FPASSIVEPOOL.PART_OF_SPEECH] = new List<int>()
+        };
+
+        foreach (Relic relic in _passiveRelics)
+        {
+            passiveIDs.Add(relic.ID);
+
+            if (relic.PassivePools == Relic.FPASSIVEPOOL.OTHER)
+            {
+                poolLists[Relic.FPASSIVEPOOL.OTHER].Add(relic.ID);
+                continue;
+            }
+            else
+            {
+                // start at 1 to skip the Relic.FPASSIVEPOOL.OTHER case
+                for (int i = 1; i < pools.Length; i++)
+                {
+                    if ((relic.PassivePools & pools[i]) != 0)
+                    {
+                        poolLists[pools[i]].Add(relic.ID);
+                    }
+                }
+            }
+        }
 
         if (relicsToIgnore != null)
         {
@@ -551,44 +524,29 @@ public class InventoryManager : MonoBehaviour
                 else if (ir._section == InventorySection.Passive_Relic)
                 {
                     passiveIDs.Remove(ir._id);
-                    sublists[0].Remove(ir._id);
-                    sublists[1].Remove(ir._id);
-                    sublists[2].Remove(ir._id);
+
+                    // O(n) if the relic isn't in the sublist, but might be faster than looking up the relic and checking its ID?
+                    poolLists[Relic.FPASSIVEPOOL.OTHER].Remove(ir._id);
+                    poolLists[Relic.FPASSIVEPOOL.LETTER].Remove(ir._id);
+                    poolLists[Relic.FPASSIVEPOOL.PART_OF_SPEECH].Remove(ir._id);
                 }
             }
         }
 
-        float activeWeight = sectionWeights[0];
-        float passiveWeight = sectionWeights[1];
+        float activeWeight, passiveWeight;
+        float[] poolWeights = new float[pools.Length];
 
-        float[] subWeights = { -1, -1, -1 };
+        UpdatePoolWeights();
 
-        if (passiveWeight >= 0 && passiveRelicWeights != null)
-        {
-            Debug.Assert(passiveRelicWeights.Length == 3);
-            float totalSubWeight = passiveRelicWeights[0] + passiveRelicWeights[1] + passiveRelicWeights[2];
-            float scaleFactor = passiveWeight / totalSubWeight;
-
-            for (int i = 0; i < 3; i++)
-            {
-                subWeights[i] = passiveRelicWeights[i] * scaleFactor;
-            }
-        }
-
-        // 
+        if (activeWeight + passiveWeight == 0)
+            return new List<InventoryReference>();
 
         List<InventoryReference> relicsSelected = new List<InventoryReference>();
-        bool canFindMoreRelics = true;
 
-        while (relicsSelected.Count < count && canFindMoreRelics)
+        while (relicsSelected.Count < count)
         {
-            CheckForEmptyRelicPools();
-
-            if (activeWeight + passiveWeight == 0)
-                canFindMoreRelics = false;
-
-            float category = Random.Range(0.0f, 1.0f) * (activeWeight + passiveWeight);
-            float selection = Random.Range(0.0f, 1.0f);
+            float category = UnityEngine.Random.Range(0.0f, 1.0f) * (activeWeight + passiveWeight);
+            float selection = UnityEngine.Random.Range(0.0f, 1.0f);
 
             if (category < activeWeight)
             {
@@ -600,16 +558,16 @@ public class InventoryManager : MonoBehaviour
                 {
                     category -= activeWeight;
 
-                    for (int i = 0; i < subWeights.Length; i++)
+                    for (int i = 0; i < pools.Length; i++)
                     {
-                        if (category < subWeights[i])
+                        if (category < poolWeights[i])
                         {
                             relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Passive_Relic, selection, i));
                             break;
                         }
                         else
                         {
-                            category -= subWeights[i];
+                            category -= poolWeights[i];
                         }
                     }
                 }
@@ -618,40 +576,44 @@ public class InventoryManager : MonoBehaviour
                     relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Passive_Relic, selection));
                 }
             }
+
+            UpdatePoolWeights();
+
+            if (activeWeight + passiveWeight == 0)
+                break;
         }
 
         return relicsSelected;
 
         // Local helper functions
 
-        void CheckForEmptyRelicPools()
+        void UpdatePoolWeights()
         {
-            if (activeIDs.Count == 0)
+            activeWeight = activeIDs.Count > 0 ? sectionWeights[0] : 0;
+            passiveWeight = passiveIDs.Count > 0 ? sectionWeights[1] : 0;
+
+            // no work left to do
+            if (activeWeight + passiveWeight == 0 || passiveRelicWeights == null)
+                return;
+
+            float totalSubWeight = 0;
+
+            for (int i = 0; i < pools.Length; i++)
             {
-                activeWeight = 0;
+                totalSubWeight += (poolLists[pools[i]].Count > 0 ? 1 : 0) * passiveRelicWeights[i];
             }
 
-            bool[] unclaimedPassives = sublists.Select(list => list.Count > 0).ToArray();
-
-            if (!unclaimedPassives[0] || !unclaimedPassives[1] || !unclaimedPassives[2])
+            if (totalSubWeight == 0)
             {
-                float totalSubWeight =
-                    (unclaimedPassives[0] ? 0 : 1) * passiveRelicWeights[0] +
-                    (unclaimedPassives[1] ? 0 : 1) * passiveRelicWeights[1] +
-                    (unclaimedPassives[2] ? 0 : 1) * passiveRelicWeights[2];
+                Debug.LogError("No relics in sub-pools, but there are still unclaimed passive relic IDs");
+                passiveWeight = 0;
+                return;
+            }
+            float scaleFactor = passiveWeight / totalSubWeight;
 
-                if (totalSubWeight == 0)
-                {
-                    passiveWeight = 0;
-                    subWeights = new float[] { 0, 0, 0 };
-                }
-                else
-                {
-                    float scaleFactor = passiveWeight / totalSubWeight;
-                    subWeights[0] = (unclaimedPassives[0] ? 0 : 1) * passiveRelicWeights[0] * scaleFactor;
-                    subWeights[1] = (unclaimedPassives[1] ? 0 : 1) * passiveRelicWeights[1] * scaleFactor;
-                    subWeights[2] = (unclaimedPassives[2] ? 0 : 1) * passiveRelicWeights[2] * scaleFactor;
-                }
+            for (int i = 0; i < pools.Length; i++)
+            {
+                poolWeights[0] = (poolLists[pools[i]].Count > 0 ? 1 : 0) * passiveRelicWeights[i] * scaleFactor;
             }
         }
 
@@ -669,7 +631,7 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
-                pool = sublists[subpoolIndex];
+                pool = poolLists[(Relic.FPASSIVEPOOL)subpoolIndex];
             }
 
             InventoryReference newRef = new InventoryReference
@@ -702,7 +664,7 @@ public class InventoryManager : MonoBehaviour
         return new InventoryReference
         {
             _section = InventorySection.Active_Relic,
-            _id = (int)(Random.Range(0.0f, 1.0f) * targets.Count)
+            _id = (int)(UnityEngine.Random.Range(0.0f, 1.0f) * targets.Count)
         };
     }
 }
