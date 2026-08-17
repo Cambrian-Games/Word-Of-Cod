@@ -470,8 +470,9 @@ public class InventoryManager : MonoBehaviour
             return new List<InventoryReference>();
 
         Debug.Assert(sectionWeights.Length == 2 && (sectionWeights[0] > 0 || sectionWeights[1] > 0));
+
         Relic.FPASSIVEPOOL[] poolEnums = (Relic.FPASSIVEPOOL[])Enum.GetValues(typeof(Relic.FPASSIVEPOOL));
-        Debug.Log(passiveRelicWeights == null || passiveRelicWeights.Length == poolEnums.Length);
+        Debug.Assert(passiveRelicWeights == null || passiveRelicWeights.Length == poolEnums.Length);
 
         // set up relic pools
 
@@ -511,6 +512,8 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
+        // clear out ignored relics
+
         if (relicsToIgnore != null)
         {
             foreach (InventoryReference relicRef in relicsToIgnore)
@@ -522,13 +525,15 @@ public class InventoryManager : MonoBehaviour
                 {
                     passiveRefs.Remove(relicRef);
 
-                    // O(n) if the relic isn't in the sublist, but might be faster than looking up the relic and checking its ID?
+                    // O(n) if the relic isn't in the pool, but might be faster than looking up the relic and checking its ID?
                     pools[Relic.FPASSIVEPOOL.OTHER].Remove(relicRef);
                     pools[Relic.FPASSIVEPOOL.LETTER].Remove(relicRef);
                     pools[Relic.FPASSIVEPOOL.PART_OF_SPEECH].Remove(relicRef);
                 }
             }
         }
+
+        // generate initial weights
 
         float activeWeight, passiveWeight;
         float[] poolWeights = new float[poolEnums.Length];
@@ -606,6 +611,7 @@ public class InventoryManager : MonoBehaviour
                 passiveWeight = 0;
                 return;
             }
+
             float scaleFactor = passiveWeight / totalSubWeight;
 
             for (int i = 0; i < poolEnums.Length; i++)
