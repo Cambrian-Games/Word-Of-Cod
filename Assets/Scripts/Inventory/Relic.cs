@@ -48,6 +48,11 @@ public class Relic : MonoBehaviour
         _id = i;
     }
 
+    public InventoryManager.InventoryReference AsInventoryReference()
+    {
+        return new InventoryManager.InventoryReference(InventoryManager.InventorySection.Passive_Relic, _id);
+    }
+
     internal RelicEffect.Result OnWordSubmit(Word word)
     {
         RelicEffect.Result res = new RelicEffect.Result();

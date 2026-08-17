@@ -60,6 +60,11 @@ public abstract class Item : MonoBehaviour
 		OnUseStateChanged(oldState, newState);
 	}
 
+    public virtual InventoryManager.InventoryReference AsInventoryReference()
+    {
+        return new InventoryManager.InventoryReference(InventoryManager.InventorySection.Consumable_Item, _id);
+    }
+
 	public virtual void OnSelect() { }
 	public virtual void OnBattleStateChanged(BattleManager.BattleState oldBattleState, BattleManager.BattleState newBattleState) { }
 
