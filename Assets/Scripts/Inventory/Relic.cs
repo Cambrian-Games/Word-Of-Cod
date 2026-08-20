@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Relic : MonoBehaviour
+public class Relic : MonoBehaviour, IDisplayInfo
 {
     private int _id = -1; // will be assigned by the inventory manager
 

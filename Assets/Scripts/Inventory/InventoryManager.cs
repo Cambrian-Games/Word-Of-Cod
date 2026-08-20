@@ -55,37 +55,17 @@ public class InventoryManager : MonoBehaviour
             return null;
         }
 
-        public readonly string Name()
+        public readonly IDisplayInfo DisplayInfo()
         {
-            return _section switch
+            IDisplayInfo displayInfo = _section switch
             {
-                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].DisplayName,
-                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].DisplayName,
-                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].DisplayName,
+                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id],
+                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id],
+                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id],
                 _ => throw new InvalidOperationException(),
             };
-        }
 
-        public readonly string Description()
-        {
-            return _section switch
-            {
-                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].Description,
-                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].Description,
-                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].Description,
-                _ => throw new InvalidOperationException(),
-            };
-        }
-
-        public readonly Sprite Sprite()
-        {
-            return _section switch
-            {
-                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].Icon,
-                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].Icon,
-                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].Icon,
-                _ => throw new InvalidOperationException(),
-            };
+            return displayInfo;
         }
 
         public override readonly string ToString()
@@ -98,6 +78,8 @@ public class InventoryManager : MonoBehaviour
                 _ => throw new InvalidOperationException(),
             };
         }
+
+
     }
 
 	public List<Relic> _passiveRelics;

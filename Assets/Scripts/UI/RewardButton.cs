@@ -39,7 +39,7 @@ public class RewardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         _state = RewardState.Reward_Enabled;
         _reward = reward;
         _button.interactable = true;
-        _rewardIcon.sprite = reward.Sprite();
+        _rewardIcon.sprite = reward.DisplayInfo().Icon;
 
         _consumableQuantity = quantity;
         _callback = callback;
@@ -115,7 +115,7 @@ public class RewardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (_state == RewardState.Reward_Enabled || _state == RewardState.Reward_Disabled)
         {
             Debug.Assert(_tooltip);
-            _tooltip.text = _reward.Description();
+            _tooltip.text = _reward.DisplayInfo().Description;
 
         }
     }
