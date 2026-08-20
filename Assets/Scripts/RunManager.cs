@@ -145,6 +145,13 @@ public class RunManager : MonoBehaviour
                     if (_bossRewardObject.activeSelf)
                         break;
 
+                    bool eventIsShop = CurrentEvent._isShop;
+
+                    if (!eventIsShop)
+                    {
+                        BattleManager.INSTANCE.Unload();
+                    }
+
                     // if this was the last event, win
                     if (_currentRun.Count == _format.Events.Count)
                     {
@@ -152,7 +159,7 @@ public class RunManager : MonoBehaviour
                         break;
                     }
 
-                    if (!CurrentEvent._isShop)
+                    if (!eventIsShop)
                     {
                         SetRunState(RunState.Traveling_To_Next_Event);
                         break;
@@ -242,10 +249,6 @@ public class RunManager : MonoBehaviour
                         enemyTypes.HasFlag(Enemy.FENEMYTYPE.BOSS))
                     {
                         _bossRewardObject.SetActive(true);
-                    }
-                    else
-                    {
-                        BattleManager.INSTANCE.Unload();
                     }
                 }
                 break;

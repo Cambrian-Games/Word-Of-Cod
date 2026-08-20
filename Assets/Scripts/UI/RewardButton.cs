@@ -72,8 +72,6 @@ public class RewardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         _state = RewardState.Reward_Granted;
         // reward != null
         _button.interactable = false;
-        // this prevents a weird flash of white
-        _rewardIcon.color = _button.colors.disabledColor;
         _rewardIcon.sprite = _defaultSprite;
 
         _tooltip.text = "";

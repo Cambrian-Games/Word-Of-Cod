@@ -20,7 +20,5 @@ public class BattleRewardManager : MonoBehaviour
     public void LeaveShop()
     {
         gameObject.SetActive(false);
-        //RunManager.INSTANCE.SetRunState(RunManager.RunState.Traveling_To_Next_Event);
-        BattleManager.INSTANCE.Unload();
     }
 }
