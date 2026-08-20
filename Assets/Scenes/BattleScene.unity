@@ -3256,8 +3256,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92aa57fa821ef1973953571c4b8e270d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverText
-  _text: {fileID: 1914770743}
-  _shopManager: {fileID: 1497376467}
 --- !u!114 &453585815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10928,8 +10926,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92aa57fa821ef1973953571c4b8e270d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverText
-  _text: {fileID: 1914770743}
-  _shopManager: {fileID: 1497376467}
 --- !u!114 &1854038853
 MonoBehaviour:
   m_ObjectHideFlags: 0

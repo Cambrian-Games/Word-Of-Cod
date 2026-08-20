@@ -47,6 +47,10 @@ public class ShopManager : MonoBehaviour
         }
 
         // TODO initialize items
+        for (int i = 0; i < _itemRewardButtons.Count; i++)
+        {
+            _itemRewardButtons[i].InitializeEmpty();
+        }
     }
 
     public void OnRelicPicked()

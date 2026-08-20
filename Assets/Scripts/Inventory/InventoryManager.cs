@@ -521,6 +521,9 @@ public class InventoryManager : MonoBehaviour
 
         foreach (Relic relic in _passiveRelics)
         {
+            if (_passiveRelicInventory.Contains(relic.ID))
+                continue;
+
             passiveRefs.Add(relic.AsInventoryReference());
 
             if (relic.PassivePools == Relic.FPASSIVEPOOL.OTHER)

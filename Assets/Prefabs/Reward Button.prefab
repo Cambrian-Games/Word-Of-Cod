@@ -116,7 +116,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 6807636340153993579}
   m_OnClick:
     m_PersistentCalls:
@@ -146,7 +146,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RewardButton
   _rewardIcon: {fileID: 6807636340153993579}
+  _button: {fileID: 5285204633520723437}
   _tooltip: {fileID: 0}
   _canGiveReward: 0
   _defaultSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _defaultColor: {r: 1, g: 1, b: 1, a: 1}
