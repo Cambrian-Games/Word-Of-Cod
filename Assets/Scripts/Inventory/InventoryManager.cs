@@ -55,6 +55,39 @@ public class InventoryManager : MonoBehaviour
             return null;
         }
 
+        public readonly string Name()
+        {
+            return _section switch
+            {
+                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].DisplayName,
+                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].DisplayName,
+                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].DisplayName,
+                _ => throw new InvalidOperationException(),
+            };
+        }
+
+        public readonly string Description()
+        {
+            return _section switch
+            {
+                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].Description,
+                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].Description,
+                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].Description,
+                _ => throw new InvalidOperationException(),
+            };
+        }
+
+        public readonly Sprite Sprite()
+        {
+            return _section switch
+            {
+                InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].Icon,
+                InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].Icon,
+                InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].Icon,
+                _ => throw new InvalidOperationException(),
+            };
+        }
+
         public override readonly string ToString()
         {
             return _section switch
@@ -62,7 +95,7 @@ public class InventoryManager : MonoBehaviour
                 InventorySection.Passive_Relic => Player.INSTANCE._inventory._passiveRelics[_id].DisplayName + " (Passive Relic)",
                 InventorySection.Active_Relic => Player.INSTANCE._inventory._activeRelics[_id].DisplayName + " (Active Relic)",
                 InventorySection.Consumable_Item => Player.INSTANCE._inventory._consumables[_id].DisplayName + " (Consumable Item)",
-                _ => "",
+                _ => throw new InvalidOperationException(),
             };
         }
     }
@@ -112,8 +145,6 @@ public class InventoryManager : MonoBehaviour
 
 	private void InitPassiveRelics()
 	{
-		Debug.Log(_passiveRelicInventory);
-
 		_sortedPassiveRelics?.Clear();
 
 		_sortedPassiveRelics = new Dictionary<RelicEffect.EventTiming, HashSet<Relic>>();
@@ -137,8 +168,6 @@ public class InventoryManager : MonoBehaviour
 	}
 	private void InitActiveRelics()
 	{
-		Debug.Log(_activeRelicInventory);
-
 		for (int i = 0; i < _activeRelics.Count; i++)
 		{
 			_activeRelics[i].ID = i;
@@ -648,22 +677,5 @@ public class InventoryManager : MonoBehaviour
 
             return newRef;
         }
-    }
-
-    public InventoryReference GenerateActiveRelicReference(List<InventoryReference> relicsToIgnore)
-    {
-        List<int> targets = _activeRelics.Select(relic => relic.ID).Where(relicID => !_activeRelicInventory.Contains(relicID)).ToList();
-
-        foreach (InventoryReference ir in relicsToIgnore)
-        {
-            if (ir._section == InventorySection.Active_Relic)
-                targets.Remove(ir._id);
-        }
-
-        return new InventoryReference
-        {
-            _section = InventorySection.Active_Relic,
-            _id = (int)(UnityEngine.Random.Range(0.0f, 1.0f) * targets.Count)
-        };
     }
 }

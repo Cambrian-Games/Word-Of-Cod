@@ -1,80 +1,60 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class ShopManager : MonoBehaviour
 {
-    public Button _relicChoiceButton;
-	
-    [HideInInspector]
-    public int _relicChoice = -1;
+    [SerializeField]
+    private List<RewardButton> _relicRewardButtons;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField, Min(0)]
+    private int _relicsToGrant;
 
-    // Update is called once per frame
-    void Update()
+    [SerializeField]
+    private List<RewardButton> _itemRewardButtons;
+
+    [SerializeField, Min(0)]
+    private int _itemsToGrant;
+    [SerializeField, Min(0)]
+    private int _quantityPerItem;
+
+    private void OnValidate()
     {
-        
+        _relicsToGrant = Mathf.Min(_relicRewardButtons.Count, _relicsToGrant);
+        _itemsToGrant = Mathf.Min(_itemRewardButtons.Count, _itemsToGrant);
     }
 
     private void OnEnable()
     {
-        _relicChoiceButton.gameObject.SetActive(true);
+        List<InventoryManager.InventoryReference> relics = Player.INSTANCE._inventory.GenerateRelicItemReferences(_relicsToGrant);
 
-        //choose new unowned relic and display
-        List<int> unownedRelics = new List<int>();
-
-        for (int i = 0; i < Player.INSTANCE._inventory._passiveRelics.Count; i++)
+        if (relics.Count < _relicsToGrant)
         {
-            if (!Player.INSTANCE._inventory._passiveRelicInventory.Contains(i))
-            {
-                unownedRelics.Add(i);
-            }
+            Debug.LogWarning("Couldn't generate enough relics!");
         }
 
-        for (int i = 0; i < Player.INSTANCE._inventory._activeRelics.Count; i++)
+        for (int i = 0; i < relics.Count; i++)
         {
-            if (!Player.INSTANCE._inventory._activeRelicInventory.Contains(i))
-            {
-                //offset active relics by passive count
-                unownedRelics.Add(i + Player.INSTANCE._inventory._passiveRelics.Count);
-            }
+            _relicRewardButtons[i].Initialize(relics[i], callback: OnRelicPicked);
         }
 
-        _relicChoice = unownedRelics[Random.Range(0, unownedRelics.Count)];
-        if (_relicChoice < Player.INSTANCE._inventory._passiveRelics.Count)
+        for (int i = relics.Count; i < _relicRewardButtons.Count; i++)
         {
-            _relicChoiceButton.GetComponent<Image>().sprite = Player.INSTANCE._inventory._passiveRelics[_relicChoice].Icon;
+            _relicRewardButtons[i].InitializeEmpty();
         }
-        else
-        {
-            _relicChoiceButton.GetComponent<Image>().sprite = Player.INSTANCE._inventory._activeRelics[_relicChoice - Player.INSTANCE._inventory._passiveRelics.Count].Icon;
-        }
-        
-        //throw new NotImplementedException();
+
+        // TODO initialize items
     }
 
-    public void AddRelic()
+    public void OnRelicPicked()
     {
-        if (_relicChoice != -1)
+        foreach (RewardButton button in _relicRewardButtons)
         {
-            if (_relicChoice < Player.INSTANCE._inventory._passiveRelics.Count)
-            {
-                Player.INSTANCE._inventory._passiveRelicInventory.Add(_relicChoice);
-            }
-            else
-            {
-                Player.INSTANCE._inventory._activeRelicInventory.Add(_relicChoice - Player.INSTANCE._inventory._passiveRelics.Count);
-            }
+            button.DisableReward();
         }
-        
-        _relicChoiceButton.gameObject.SetActive(false);
     }
 
     public void LeaveShop()
