@@ -16,9 +16,4 @@ public class PostBossShop : MonoBehaviour
 
         _rewardButton.Initialize(relics[0]);
     }
-
-    public void LeaveShop()
-    {
-        gameObject.SetActive(false);
-    }
 }

@@ -56,11 +56,4 @@ public class EventShop : MonoBehaviour
             button.DisableReward();
         }
     }
-
-    public void LeaveShop()
-    {
-		RunManager.INSTANCE.ShopCanvas.enabled = false;
-        gameObject.SetActive(false);
-        RunManager.INSTANCE.SetRunState(RunManager.RunState.Traveling_To_Next_Event);
-    }
 }

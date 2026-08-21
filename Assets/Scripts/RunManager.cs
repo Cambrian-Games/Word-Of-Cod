@@ -29,8 +29,6 @@ public class RunManager : MonoBehaviour
 	public string _loseScene;
 	public string _winScene;
 
-	public GameObject _storeObject;
-	public GameObject _bossRewardObject;
 	private Vector3 _destination;
 
 	public AnalyticsManager _analyticsManager;
@@ -38,10 +36,6 @@ public class RunManager : MonoBehaviour
 	[SerializeField]
 	private Canvas _mainCanvas;
 	public Canvas MainCanvas => _mainCanvas;
-
-	[SerializeField]
-	private Canvas _shopCanvas;
-	public Canvas ShopCanvas => _shopCanvas;
 
     [SerializeField]
     private StatsHolder _statsHolder;
@@ -137,18 +131,20 @@ public class RunManager : MonoBehaviour
                     break;
 
                 case RunState.In_Event:
-                    // Wait for the battle manager to kick us into Post_Event
-
+                    // If the current event isn't a shop, the battle manager kicks us into post event
+                    
+                    if (CurrentEvent._isShop && !ShopManager.INSTANCE.IsShopOpen())
+                    {
+                        SetRunState(RunState.Post_Event);
+                    }
                     break;
 
                 case RunState.Post_Event:
                     // if this was a boss fight, we wait for items/relics to be purchased
-                    if (_bossRewardObject.activeSelf)
+                    if (ShopManager.INSTANCE.IsShopOpen())
                         break;
 
-                    bool eventIsShop = CurrentEvent._isShop;
-
-                    if (!eventIsShop)
+                    if (!CurrentEvent._isShop)
                     {
                         BattleManager.INSTANCE.Unload();
                     }
@@ -159,15 +155,13 @@ public class RunManager : MonoBehaviour
                         SetRunState(RunState.Win);
                         break;
                     }
-
-                    if (!eventIsShop)
-                    {
-                        SetRunState(RunState.Traveling_To_Next_Event);
-                        break;
-                    }
+                    
+                    SetRunState(RunState.Traveling_To_Next_Event);
                     break;
+
                 case RunState.Win:
                     break;
+
                 case RunState.Lose:
                     break;
             }
@@ -220,9 +214,7 @@ public class RunManager : MonoBehaviour
                 // will modify this field if we ever have more than two event kinds
                 if (CurrentEvent._isShop)
                 {
-                    // Better to tell the shop manager to handle all of this
-                    _shopCanvas.enabled = true;
-                    _storeObject.SetActive(true);
+                    ShopManager.INSTANCE.OpenEventShop();
                 }
                 else
                 {
@@ -249,7 +241,7 @@ public class RunManager : MonoBehaviour
                     if (enemyTypes.HasFlag(Enemy.FENEMYTYPE.MINIBOSS) ||
                         enemyTypes.HasFlag(Enemy.FENEMYTYPE.BOSS))
                     {
-                        _bossRewardObject.SetActive(true);
+                        ShopManager.INSTANCE.OpenPostBossShop();
                     }
                 }
                 break;
