@@ -79,8 +79,6 @@ public class InventoryManager : MonoBehaviour
                 _ => throw new InvalidOperationException(),
             };
         }
-
-
     }
 
 	public List<Relic> _passiveRelics;
@@ -116,7 +114,7 @@ public class InventoryManager : MonoBehaviour
 		InitActiveRelics();
 		InitConsumables();
 
-        List<InventoryReference> relicRefs = GenerateRelicItemReferences(_startingRelics);
+        List<InventoryReference> relicRefs = GenerateRelicReferences(_startingRelics);
 
         foreach (InventoryReference relicRef in relicRefs)
         {
@@ -471,12 +469,12 @@ public class InventoryManager : MonoBehaviour
 		icon.sprite = newSprite;
 	}
 
-    public List<InventoryReference> GenerateRelicItemReferences(int count)
+    public List<InventoryReference> GenerateRelicReferences(int count)
     {
-        return GenerateRelicItemReferences(count, new float[] { 1, 1 });
+        return GenerateRelicReferences(count, new float[] { 1, 1 });
     }
 
-    public List<InventoryReference> GenerateRelicItemReferences(int count, float[] sectionWeights, float[] passiveRelicWeights = null, List<InventoryReference> relicsToIgnore = null)
+    public List<InventoryReference> GenerateRelicReferences(int count, float[] sectionWeights, float[] passiveRelicWeights = null, List<InventoryReference> relicsToIgnore = null)
     {
         if (count <= 0)
             return new List<InventoryReference>();
@@ -540,7 +538,6 @@ public class InventoryManager : MonoBehaviour
                 {
                     passiveRefs.Remove(relicRef);
 
-                    // O(n) if the relic isn't in the pool, but might be faster than looking up the relic and checking its ID?
                     pools[Relic.FPASSIVEPOOL.OTHER].Remove(relicRef);
                     pools[Relic.FPASSIVEPOOL.LETTER].Remove(relicRef);
                     pools[Relic.FPASSIVEPOOL.PART_OF_SPEECH].Remove(relicRef);
@@ -579,7 +576,7 @@ public class InventoryManager : MonoBehaviour
                     {
                         if (category < poolWeights[i])
                         {
-                            relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Passive_Relic, selection, i));
+                            relicsSelected.Add(InventoryReferenceFromUValue(InventorySection.Passive_Relic, selection, poolEnums[i]));
                             break;
                         }
                         else
@@ -635,7 +632,7 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        InventoryReference InventoryReferenceFromUValue(InventorySection section, float uSelection, int subpoolIndex = -1)
+        InventoryReference InventoryReferenceFromUValue(InventorySection section, float uSelection, Relic.FPASSIVEPOOL subpoolIndex = (Relic.FPASSIVEPOOL)(-1))
         {
             List<InventoryReference> pool;
 
@@ -643,13 +640,13 @@ public class InventoryManager : MonoBehaviour
             {
                 pool = activeRefs;
             }
-            else if (subpoolIndex == -1)
+            else if (subpoolIndex == (Relic.FPASSIVEPOOL)(-1))
             {
                 pool = passiveRefs;
             }
             else
             {
-                pool = pools[(Relic.FPASSIVEPOOL)subpoolIndex];
+                pool = pools[subpoolIndex];
             }
 
             InventoryReference newRef = pool[(int)uSelection * pool.Count];

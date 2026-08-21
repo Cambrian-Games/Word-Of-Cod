@@ -5,6 +5,7 @@ public abstract class Item : MonoBehaviour, IDisplayInfo
 {
 	[SerializeField]
 	protected int _maxCount;
+    public int MaxCount => _maxCount;
 	public int _currentCount;
 
 	[SerializeField]

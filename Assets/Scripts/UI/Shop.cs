@@ -25,7 +25,7 @@ public class Shop : MonoBehaviour
 
     private void OnEnable()
     {
-        List<InventoryManager.InventoryReference> relics = Player.INSTANCE._inventory.GenerateRelicItemReferences(_relicsToGrant);
+        List<InventoryManager.InventoryReference> relics = Player.INSTANCE._inventory.GenerateRelicReferences(_relicsToGrant);
 
         if (relics.Count < _relicsToGrant)
         {

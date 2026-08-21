@@ -63,7 +63,8 @@ public class RewardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
                 Player.INSTANCE._inventory.GrantRelic(_reward);
                 break;
             case InventoryManager.InventorySection.Consumable_Item:
-                _reward.ConsumableItem()._currentCount += _consumableQuantity;
+                Item consumable = _reward.ConsumableItem();
+                consumable._currentCount = Mathf.Min(consumable.MaxCount, consumable._currentCount + _consumableQuantity);
                 break;
             default:
                 throw new System.InvalidOperationException();
