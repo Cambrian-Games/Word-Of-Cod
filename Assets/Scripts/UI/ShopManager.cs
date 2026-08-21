@@ -5,9 +5,9 @@ public class ShopManager : MonoBehaviour
     public static ShopManager INSTANCE;
 
     [SerializeField]
-    private EventShop _eventShop;
+    private Shop _eventShop;
     [SerializeField]
-    private PostBossShop _postBossShop;
+    private Shop _postBossShop;
 
     private GameObject _activeShop;
 

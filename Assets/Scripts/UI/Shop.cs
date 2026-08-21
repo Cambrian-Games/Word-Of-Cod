@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EventShop : MonoBehaviour
+public class Shop : MonoBehaviour
 {
     [SerializeField]
     private List<RewardButton> _relicRewardButtons;

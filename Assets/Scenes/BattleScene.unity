@@ -5931,7 +5931,7 @@ GameObject:
   - component: {fileID: 893356440}
   - component: {fileID: 893356441}
   m_Layer: 5
-  m_Name: Post-Miniboss Shop
+  m_Name: Post-Boss Shop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5971,10 +5971,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 893356439}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c32c68be6c3d1b417a1e74bc694c90f7, type: 3}
+  m_Script: {fileID: 11500000, guid: bc5217e31a1b6d83cb72f837e55b6eee, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BattleRewardManager
-  _rewardButton: {fileID: 743981411}
+  m_EditorClassIdentifier: Assembly-CSharp::ShopManager
+  _relicRewardButtons:
+  - {fileID: 743981411}
+  _relicsToGrant: 1
+  _itemRewardButtons: []
+  _itemsToGrant: 0
+  _quantityPerItem: 0
 --- !u!1 &908427790
 GameObject:
   m_ObjectHideFlags: 0
@@ -8830,7 +8835,7 @@ GameObject:
   - component: {fileID: 1497376466}
   - component: {fileID: 1497376467}
   m_Layer: 5
-  m_Name: Event Shop
+  m_Name: Overworld Shop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10123,7 +10128,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
