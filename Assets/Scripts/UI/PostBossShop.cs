@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BattleRewardManager : MonoBehaviour
+public class PostBossShop : MonoBehaviour
 {
     public RewardButton _rewardButton;
     

@@ -138,6 +138,7 @@ public class RunManager : MonoBehaviour
 
                 case RunState.In_Event:
                     // Wait for the battle manager to kick us into Post_Event
+
                     break;
 
                 case RunState.Post_Event:
