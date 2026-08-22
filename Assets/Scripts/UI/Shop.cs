@@ -55,5 +55,7 @@ public class Shop : MonoBehaviour
         {
             button.DisableReward();
         }
+
+        ShopManager.INSTANCE.QueueFullLetterWeightMenu();
     }
 }
