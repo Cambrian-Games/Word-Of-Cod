@@ -8,6 +8,7 @@ public class LetterWeightMenu : MonoBehaviour
     [SerializeField]
     private GameObject _letterWeightParent;
 
+    [SerializeField]
     private List<LetterWeightRow> _letterWeightRows = new List<LetterWeightRow>();
 
     private void OnEnable()
@@ -19,6 +20,16 @@ public class LetterWeightMenu : MonoBehaviour
         while (_letterWeightRows.Count < 26)
         {
             _letterWeightRows.Add(Instantiate(_letterWeightRowPrefab, _letterWeightParent.transform));
+        }
+    }
+
+    [ContextMenu("Fix")]
+    public void FixNamesAndPositions()
+    {
+        for (int i = 0; i < _letterWeightRows.Count; i++)
+        {
+            _letterWeightRows[i].name = "Letter Weight (" + (char)('A' + i) + ")";
+            _letterWeightRows[i].transform.localPosition = new Vector3(_letterWeightRows[i].transform.localPosition.x, -10 - (20 * i), _letterWeightRows[i].transform.localPosition.z);
         }
     }
 }
