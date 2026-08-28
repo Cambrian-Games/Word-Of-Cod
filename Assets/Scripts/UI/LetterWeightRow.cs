@@ -27,10 +27,13 @@ public class LetterWeightRow : MonoBehaviour
     public TMP_Text FinalWeightText => _finalWeightText;
     #endregion
 
-#if UNITY_EDITOR
-    public char _letter;
-#else
     [SerializeField, HideInInspector]
     private char _letter;
+    public char Letter
+    {
+        get => _letter;
+#if UNITY_EDITOR
+        set => _letter = value;
 #endif
+    }
 }

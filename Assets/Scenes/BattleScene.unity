@@ -693,6 +693,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (E)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 1f2066d0852a18840ae1a03d034f49c1, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 69
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -943,6 +951,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (F)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 536e6beb28c39644884c9351afc5d123, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 70
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1188,6 +1204,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (P)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 57fe7e7951738d149957b683e9cfea6b, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 80
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1682,6 +1706,10 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (A)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 65
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2242,6 +2270,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (R)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8f2ea58b1d892354c87852fe25625b40, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 82
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3165,6 +3201,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (J)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 76ed7cb0eb49f974d8a6f91f855e0417, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 74
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4319,6 +4363,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (Q)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: f49ddd7bc4e6e0946807b23d03da3b82, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 81
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4932,6 +4984,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (Y)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 176df43c2528af247a20e5eda5605826, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 89
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5430,6 +5490,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (X)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: f2fea92b1fe47f74f9b0f5be7c7567e5, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 88
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5911,6 +5979,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (N)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 48be5cb49588dc64b9d14f70a3afca1a, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 78
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6203,6 +6279,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (W)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: a8a5799345ac840448fa7f576085f90d, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 87
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6999,6 +7083,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (D)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 36783720962447345a53ceb1b3240db4, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 68
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7292,6 +7384,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (Z)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 39caf4cb7b2079140aaf13dcf3d47a6d, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 90
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9837,6 +9937,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (O)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 7d92a1a358f80f44a8ab04e0ad9c3d80, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 79
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -10955,6 +11063,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (M)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 881d473d709d445408994b0611c5ae30, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 77
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11343,6 +11459,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (C)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 375039704ceda38438dbe421765e7ba3, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 67
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11455,6 +11579,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (S)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 6a0d677adcd6d8f45acffb2e188e2120, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 83
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -13196,6 +13328,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (G)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 1e643d47da69e6f458b6bbe1b1cec796, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 71
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13309,6 +13449,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (K)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c941a186ef0af74fa44316c7bea0f20, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 75
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13421,6 +13569,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (U)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 490e063442855594cbef17df53c28149, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 85
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -13758,6 +13914,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (H)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 1b1be53d27694de4b9d9c77c6a52df71, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 72
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15314,6 +15478,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (I)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b8af11312cf916a4e8d0d4a69ee50144, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 73
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -15426,6 +15598,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (T)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: bab7774f016855d498606aaa6b12bef5, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 84
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15641,6 +15821,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (B)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 971123bb23de0744497ffc0726b31f10, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 66
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15983,6 +16171,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Letter Weight (L)
       objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: e2ab9fa2c0bcca4428966bd4a1c035ba, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 76
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -16244,6 +16440,14 @@ PrefabInstance:
     - target: {fileID: 6775194119241059653, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
       propertyPath: m_Name
       value: Letter Weight (V)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7608817213702444035, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 247765ff7e96bf942bf8fad2aaa21d39, type: 3}
+    - target: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
+      propertyPath: _letter
+      value: 86
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
