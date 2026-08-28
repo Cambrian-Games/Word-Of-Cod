@@ -390,7 +390,7 @@ GameObject:
   - component: {fileID: 7061766006998665830}
   - component: {fileID: 92924293824745431}
   m_Layer: 5
-  m_Name: New Weight
+  m_Name: Final Weight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -554,7 +554,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0000019073, y: 114.83246}
+  m_AnchoredPosition: {x: 0, y: 115}
   m_SizeDelta: {x: 191.94, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8464548942160569438
@@ -569,6 +569,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f30477a1a0a773d44a9726ca6c1fb858, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LetterWeightRow
+  _letterIcon: {fileID: 7608817213702444035}
+  _baseWeightText: {fileID: 4216454592827843886}
+  _minusButton: {fileID: 453170593235313532}
+  _plusButton: {fileID: 6568496336024435617}
+  _playerTweakText: {fileID: 8100307981796309115}
+  _finalWeightText: {fileID: 92924293824745431}
 --- !u!1 &7152368058328390093
 GameObject:
   m_ObjectHideFlags: 0
