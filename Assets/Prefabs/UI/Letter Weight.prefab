@@ -120,7 +120,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1864003842881769775}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8464548942160569438}
+        m_TargetAssemblyTypeName: LetterWeightRow, Assembly-CSharp
+        m_MethodName: ClickPlus
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1300682833939960825
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,7 +253,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3474185052930034750}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8464548942160569438}
+        m_TargetAssemblyTypeName: LetterWeightRow, Assembly-CSharp
+        m_MethodName: ClickMinus
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3038140485949386735
 GameObject:
   m_ObjectHideFlags: 0
@@ -575,6 +599,8 @@ MonoBehaviour:
   _plusButton: {fileID: 6568496336024435617}
   _playerTweakText: {fileID: 8100307981796309115}
   _finalWeightText: {fileID: 92924293824745431}
+  _letter: 0
+  _parent: {fileID: 0}
 --- !u!1 &7152368058328390093
 GameObject:
   m_ObjectHideFlags: 0

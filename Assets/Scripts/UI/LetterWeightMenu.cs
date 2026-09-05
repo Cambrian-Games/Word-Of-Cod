@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -48,9 +49,20 @@ public class LetterWeightMenu : MonoBehaviour
             _letterWeightRows[i].transform.localPosition = new Vector3(_letterWeightRows[i].transform.localPosition.x, -10 - (20 * i), _letterWeightRows[i].transform.localPosition.z);
             _letterWeightRows[i].LetterIcon.sprite = _charset._letterSprites[i];
             _letterWeightRows[i].Letter = (char)('A' + i);
+            _letterWeightRows[i].Parent = this;
             UnityEditor.EditorUtility.SetDirty(_letterWeightRows[i].LetterIcon);
             UnityEditor.EditorUtility.SetDirty(_letterWeightRows[i]);
         }
     }
 #endif
+    public void OnClickPlus(LetterWeightRow row)
+    {
+        Debug.Log(row.Parent);
+        //throw new NotImplementedException();
+    }
+
+    public void OnClickMinus(LetterWeightRow row)
+    {
+        //throw new NotImplementedException();
+    }
 }

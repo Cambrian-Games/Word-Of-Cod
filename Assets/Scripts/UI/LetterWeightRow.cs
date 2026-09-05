@@ -36,4 +36,24 @@ public class LetterWeightRow : MonoBehaviour
         set => _letter = value;
 #endif
     }
+
+    [SerializeField, HideInInspector]
+    private LetterWeightMenu _parent;
+    public LetterWeightMenu Parent
+    {
+        get => _parent;
+#if UNITY_EDITOR
+        set => _parent = value;
+#endif
+    }
+
+    public void ClickPlus()
+    {
+        _parent.OnClickPlus(this);
+    }
+
+    public void ClickMinus()
+    {
+        _parent.OnClickMinus(this);
+    }
 }
