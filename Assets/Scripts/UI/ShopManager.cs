@@ -60,22 +60,23 @@ public class ShopManager : MonoBehaviour
 
     public bool IsShopOpen()
     {
-        return _activeShop;
+        return _activeShop || IsLetterWeightMenuOpen();
     }
 
     public void OpenFullLetterWeightMenu()
     {
-
+        _letterWeightMenu.gameObject.SetActive(true);
     }
 
     public void CloseLetterWeightMenu()
     {
+        _letterWeightMenu.gameObject.SetActive(false);
         _isLetterWeightMenuQueued = false;
     }
 
     public bool IsLetterWeightMenuOpen()
     {
-        return false;
+        return _letterWeightMenu.gameObject.activeSelf;
     }
 
     public void QueueFullLetterWeightMenu()

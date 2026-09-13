@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -139,6 +140,8 @@ public class CharacterWeights : ScriptableObject
 
 		int charIter = 0;
 
+        // TODO determine vowel rate by checking relative vowel weight
+
 		while (vowelRate < _minVowelRate && charIter < newChars.Length)
 		{
 			if (VOWELS.Contains(newChars[charIter]))
@@ -180,17 +183,28 @@ public class CharacterWeights : ScriptableObject
 		float[] newWeights = new float[_weights.Length];
 		Array.Copy(_weights, newWeights, _weights.Length);
 
+        ReadOnlyCollection<float> tweakedWeights = RunManager.INSTANCE._letterTweakset.WeightTweaks;
+
+        for (int i = 0; i < newWeights.Length; i++)
+        {
+            newWeights[i] += tweakedWeights[i];
+        }
+
 		foreach (char vowel in VOWELS)
 		{
 			byte charCount = charCounts[CharToIndex(vowel)];
 
-			if (charCount >= _defaultZeroThreshold)
+            float zeroThreadholdTweak = 0; // will be pulled from somewhere
+
+			if (charCount >= _defaultZeroThreshold + zeroThreadholdTweak)
 			{
 				newWeights[CharToIndex(vowel)] = 0;
 				continue;
 			}
 
-			if (charCount > _defaultDecayThreshold)
+            float decayThresholdTweak = 0; // will be pulled from somewhere, might be equal to zeroThresholdTweak?
+
+			if (charCount > _defaultDecayThreshold + decayThresholdTweak)
 			{
 				// a(1-u) + b(u) = x
 				// a = _defaultDecayThreshold
@@ -200,7 +214,7 @@ public class CharacterWeights : ScriptableObject
 				// u = (a-x) / (a-b)
 
 				//float u = (_defaultDecayThreshold - charCount) / (float)(_defaultDecayThreshold - (_defaultZeroThreshold - 1));
-				float u = Mathf.InverseLerp(_defaultDecayThreshold, _defaultZeroThreshold - 1, charCount);
+				float u = Mathf.InverseLerp(_defaultDecayThreshold + zeroThreadholdTweak, _defaultZeroThreshold - 1 + decayThresholdTweak, charCount);
 				newWeights[CharToIndex(vowel)] *= _vowelCurve.Evaluate(u);
 				continue;
 			}
