@@ -54,6 +54,7 @@ public class ShopManager : MonoBehaviour
 
         if (_isLetterWeightMenuQueued)
         {
+            _letterWeightMenu._maxPlayerTweaks += RunManager.INSTANCE.AdditionalTweaksPerRelic;
             OpenFullLetterWeightMenu();
         }
     }

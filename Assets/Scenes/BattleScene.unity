@@ -5955,6 +5955,7 @@ MonoBehaviour:
   _statsHolder: {fileID: 1714602142}
   _permaTweakStep: 2.5
   _playerTweakStep: 1.25
+  _additionalTweaksPerRelic: 5
 --- !u!4 &628337404
 Transform:
   m_ObjectHideFlags: 0
@@ -8985,7 +8986,7 @@ GameObject:
   - component: {fileID: 960604533}
   - component: {fileID: 960604532}
   m_Layer: 5
-  m_Name: Remaining Tweak Count
+  m_Name: Used Tweaks Count
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12529,7 +12530,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   _letterWeightRowPrefab: {fileID: 8464548942160569438, guid: 959b43982a0c8914db95185befb7dbde, type: 3}
   _letterWeightParent: {fileID: 1526828803}
-  _maxPlayerTweaks: 5
   _letterWeightRows:
   - {fileID: 214874449}
   - {fileID: 2011470266}
@@ -12557,7 +12557,7 @@ MonoBehaviour:
   - {fileID: 650577765}
   - {fileID: 555153756}
   - {fileID: 862658274}
-  _remainingTweakText: {fileID: 960604532}
+  _playerTweaksInUseText: {fileID: 960604532}
   _charset: {fileID: 11400000, guid: e2c5fe67f99581948a346f84aea30e4e, type: 2}
 --- !u!224 &1526828805
 RectTransform:

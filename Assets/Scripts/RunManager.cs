@@ -48,6 +48,11 @@ public class RunManager : MonoBehaviour
     private float _permaTweakStep;
     [SerializeField]
     private float _playerTweakStep;
+    //[SerializeField]
+    //private int _startingPlayerTweaks; //This is zero for now because we don't show letter tweaks at the start of a run. Will change with metaprogression
+    [SerializeField]
+    private int _additionalTweaksPerRelic;
+    public int AdditionalTweaksPerRelic => _additionalTweaksPerRelic;
 
     public enum RunState
 	{

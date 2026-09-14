@@ -14,8 +14,7 @@ public class LetterWeightMenu : MonoBehaviour
     private GameObject _letterWeightParent;
 #endif
 
-    [Header("Temporary")]
-    public int _maxPlayerTweaks;
+    internal int _maxPlayerTweaks;
     private bool _atMaxPlayerTweaks;
     private bool _atMaxPlayerTweaksPrev;
 
@@ -24,7 +23,7 @@ public class LetterWeightMenu : MonoBehaviour
     [SerializeField]
     private List<LetterWeightRow> _letterWeightRows = new List<LetterWeightRow>();
     [SerializeField]
-    private TMP_Text _remainingTweakText;
+    private TMP_Text _playerTweaksInUseText;
 
     public CharacterSet _charset;
 
@@ -95,7 +94,7 @@ public class LetterWeightMenu : MonoBehaviour
 
         bool updateButtonState = forceButtonStateUpdate || (_atMaxPlayerTweaksPrev != _atMaxPlayerTweaks);
 
-        _remainingTweakText.text = $"{_maxPlayerTweaks - _tweaks.TotalPlayerTweakCount}";
+        _playerTweaksInUseText.text = $"{_tweaks.TotalPlayerTweakCount}/{_maxPlayerTweaks}";
         if (!updateText && !updateButtonState)
             return;
 
