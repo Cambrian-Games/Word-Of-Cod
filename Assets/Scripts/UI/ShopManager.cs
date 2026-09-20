@@ -13,9 +13,9 @@ public class ShopManager : MonoBehaviour
     [SerializeField]
     private LetterWeightMenu _letterWeightMenu;
 
-
-
     private bool _isLetterWeightMenuQueued;
+
+
 
     void Awake()
     {

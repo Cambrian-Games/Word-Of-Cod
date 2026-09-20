@@ -14,7 +14,9 @@ public class LetterWeightMenu : MonoBehaviour
     private GameObject _letterWeightParent;
 #endif
 
+    // needs access elsewhere, should not be editor accessible, should not be serialized
     internal int _maxPlayerTweaks;
+
     private bool _atMaxPlayerTweaks;
     private bool _atMaxPlayerTweaksPrev;
 
@@ -25,7 +27,9 @@ public class LetterWeightMenu : MonoBehaviour
     [SerializeField]
     private TMP_Text _playerTweaksInUseText;
 
+#if UNITY_EDITOR
     public CharacterSet _charset;
+#endif
 
     private void OnEnable()
     {
@@ -95,6 +99,7 @@ public class LetterWeightMenu : MonoBehaviour
         bool updateButtonState = forceButtonStateUpdate || (_atMaxPlayerTweaksPrev != _atMaxPlayerTweaks);
 
         _playerTweaksInUseText.text = $"{_tweaks.TotalPlayerTweakCount}/{_maxPlayerTweaks}";
+
         if (!updateText && !updateButtonState)
             return;
 
