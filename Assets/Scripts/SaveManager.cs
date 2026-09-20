@@ -13,6 +13,10 @@ public class SaveData
     public (string, int) _bestWord;
     public int _runsWon;
     public int _totalRuns;
+    public int _metaHealthPoints;
+    public int _metaDamagePoints;
+    public int _metaResistPoints;
+    public int _metaLetterCurrencyPoints;
 }
 
 
