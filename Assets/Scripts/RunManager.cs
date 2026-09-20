@@ -42,7 +42,19 @@ public class RunManager : MonoBehaviour
     
 	private Enemy _overworldEnemy;
 
-	public enum RunState
+    // yes this is actually meant to be public, I want the LetterTweak Menus to be able to modify it
+    public LetterTweakSet _letterTweakset;
+    [SerializeField]
+    private float _permaTweakStep;
+    [SerializeField]
+    private float _playerTweakStep;
+    //[SerializeField]
+    //private int _startingPlayerTweaks; //This is zero for now because we don't show letter tweaks at the start of a run. Will change with metaprogression
+    [SerializeField]
+    private int _additionalTweaksPerRelic;
+    public int AdditionalTweaksPerRelic => _additionalTweaksPerRelic;
+
+    public enum RunState
 	{
 		Nil = -1,
 		Run_Start,
@@ -181,6 +193,7 @@ public class RunManager : MonoBehaviour
 		switch (_state)
 		{
 			case RunState.Run_Start:
+                _letterTweakset = new LetterTweakSet(_permaTweakStep, _playerTweakStep);
 				SetRunState(RunState.Traveling_To_Next_Event);
 				break;
 			case RunState.Traveling_To_Next_Event:

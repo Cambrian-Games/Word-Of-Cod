@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -180,17 +181,37 @@ public class CharacterWeights : ScriptableObject
 		float[] newWeights = new float[_weights.Length];
 		Array.Copy(_weights, newWeights, _weights.Length);
 
+        ReadOnlyCollection<float> tweakedWeights = RunManager.INSTANCE._letterTweakset.WeightTweaks;
+
+        float totalBaseWeight = newWeights.Sum();
+
+        for (int i = 0; i < newWeights.Length; i++)
+        {
+            newWeights[i] += tweakedWeights[i];
+        }
+
+        float totalTweakedWeight = newWeights.Sum();
+
 		foreach (char vowel in VOWELS)
 		{
 			byte charCount = charCounts[CharToIndex(vowel)];
 
-			if (charCount >= _defaultZeroThreshold)
+            float basePercent = _weights[vowel - 'A'] / totalBaseWeight;
+            float tweakedPercent = newWeights[vowel - 'A'] / totalTweakedWeight;
+
+            float thresholdTweak = tweakedPercent / basePercent;
+
+            float newZeroThreshold = _defaultZeroThreshold * thresholdTweak;
+
+			if (charCount >= Mathf.RoundToInt(newZeroThreshold))
 			{
 				newWeights[CharToIndex(vowel)] = 0;
 				continue;
 			}
 
-			if (charCount > _defaultDecayThreshold)
+            float newDecayThreshold = _defaultDecayThreshold * thresholdTweak;
+
+			if (charCount > Mathf.RoundToInt(newDecayThreshold))
 			{
 				// a(1-u) + b(u) = x
 				// a = _defaultDecayThreshold
@@ -200,7 +221,7 @@ public class CharacterWeights : ScriptableObject
 				// u = (a-x) / (a-b)
 
 				//float u = (_defaultDecayThreshold - charCount) / (float)(_defaultDecayThreshold - (_defaultZeroThreshold - 1));
-				float u = Mathf.InverseLerp(_defaultDecayThreshold, _defaultZeroThreshold - 1, charCount);
+				float u = Mathf.InverseLerp(Mathf.RoundToInt(newDecayThreshold), Mathf.RoundToInt(newZeroThreshold - 1), charCount);
 				newWeights[CharToIndex(vowel)] *= _vowelCurve.Evaluate(u);
 				continue;
 			}

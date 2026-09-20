@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class ShopManager : MonoBehaviour
@@ -9,8 +8,14 @@ public class ShopManager : MonoBehaviour
     private Shop _eventShop;
     [SerializeField]
     private Shop _postBossShop;
-
     private GameObject _activeShop;
+
+    [SerializeField]
+    private LetterWeightMenu _letterWeightMenu;
+
+    private bool _isLetterWeightMenuQueued;
+
+
 
     void Awake()
     {
@@ -46,10 +51,37 @@ public class ShopManager : MonoBehaviour
     {
         _activeShop.SetActive(false);
         _activeShop = null;
+
+        if (_isLetterWeightMenuQueued)
+        {
+            _letterWeightMenu._maxPlayerTweaks += RunManager.INSTANCE.AdditionalTweaksPerRelic;
+            OpenFullLetterWeightMenu();
+        }
     }
 
     public bool IsShopOpen()
     {
-        return _activeShop;
+        return _activeShop || IsLetterWeightMenuOpen();
+    }
+
+    public void OpenFullLetterWeightMenu()
+    {
+        _letterWeightMenu.gameObject.SetActive(true);
+    }
+
+    public void CloseLetterWeightMenu()
+    {
+        _letterWeightMenu.gameObject.SetActive(false);
+        _isLetterWeightMenuQueued = false;
+    }
+
+    public bool IsLetterWeightMenuOpen()
+    {
+        return _letterWeightMenu.gameObject.activeSelf;
+    }
+
+    public void QueueFullLetterWeightMenu()
+    {
+        _isLetterWeightMenuQueued = true;
     }
 }
