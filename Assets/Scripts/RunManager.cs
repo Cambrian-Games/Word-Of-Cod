@@ -253,14 +253,14 @@ public class RunManager : MonoBehaviour
 			case RunState.Win:
 				//TODO Add Analytics for End Game
 				SendWinEvent();
-				endGameSave(true);
+				EndGameSave(true);
 				SceneManager.LoadScene(_winScene);
 				break;
 			case RunState.Lose:
 				//TODO Add analytics for lost run
 				//    same as End Game, but with added "what you lost to" event
 				SendLoseEvent();
-				endGameSave(false);
+				EndGameSave(false);
 				SceneManager.LoadScene(_loseScene);
 				break;
 		}
@@ -466,7 +466,7 @@ public class RunManager : MonoBehaviour
 	}
 
 	
-	private void endGameSave(bool win)
+	private void EndGameSave(bool win)
 	{
 		if (win)
 		{

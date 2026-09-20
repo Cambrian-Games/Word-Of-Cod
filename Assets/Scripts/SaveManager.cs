@@ -21,7 +21,7 @@ public class SaveManager : MonoBehaviour
 {
     public static SaveManager INSTANCE;
     
-    [SerializeField]
+    //[SerializeField]
     public SaveData _saveData;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created

@@ -108,3 +108,4 @@ Utils/*/bin
 Utils/*/raw-wiktextract-data.jsonl
 *.editorconfig
 Utils/DictionaryParser/all_words.txt
+Assets/StreamingAssets/saveData
