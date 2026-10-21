@@ -118,24 +118,36 @@ public class Tile : MonoBehaviour
 
 	private void OnMouseEnter()
 	{
-		TileSelector.INSTANCE.MouseOverTile(this);
+        if (PauseManager.INSTANCE.PauseMode == PauseManager.PauseMenuMode.Playing)
+        {
+		    TileSelector.INSTANCE.MouseOverTile(this);
+        }
 	}
 
 	private void OnMouseExit()
 	{
-		TileSelector.INSTANCE.MouseLeaveTile(this);
+        if (PauseManager.INSTANCE.PauseMode == PauseManager.PauseMenuMode.Playing)
+        {
+            TileSelector.INSTANCE.MouseLeaveTile(this);
+        }
 	}
 
 	private void OnMouseDown()
 	{
-		TileSelector.INSTANCE.ClickTile(this);
+        if (PauseManager.INSTANCE.PauseMode == PauseManager.PauseMenuMode.Playing)
+        {
+            TileSelector.INSTANCE.ClickTile(this);
+        }
 	}
 
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (PauseManager.INSTANCE.PauseMode == PauseManager.PauseMenuMode.Playing)
         {
-            TileSelector.INSTANCE.RightClickTile(this);
+            if (Input.GetMouseButtonDown(1))
+            {
+                TileSelector.INSTANCE.RightClickTile(this);
+            }
         }
     }
 
