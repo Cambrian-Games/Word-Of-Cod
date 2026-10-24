@@ -247,6 +247,37 @@ public class TileSelector : MonoBehaviour
 		// how should we handle if you have only one selected tile, you're in click + move, and you move the mouse out of the play grid?
 	}
 
+    public void ForceUpdateHighlightedTile()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(ray.origin, ray.direction);
+
+        Tile foundTile = null;
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (foundTile = hit.collider.GetComponent<Tile>())
+                break;
+        }
+
+        if (foundTile)
+        {
+            if (foundTile != _currentHighlightedTile)
+            {
+                if (_currentHighlightedTile)
+                {
+                    MouseLeaveTile(_currentHighlightedTile);
+                }
+
+                MouseOverTile(foundTile);
+            }
+        }
+        else if (_currentHighlightedTile)
+        {
+            MouseLeaveTile(_currentHighlightedTile);
+        }
+    }
+
 	internal void ClickTile(Tile tile)
 	{
 		switch (_selectionMode)

@@ -61,7 +61,6 @@ public class PauseManager : MonoBehaviour
         if (_prevPauseMode != _pauseMode)
         {
             SetPauseState(_pauseMode, true);
-            _prevPauseMode = _pauseMode;
         }
 #endif
         bool receivedEscapeInput = Input.GetKeyDown(KeyCode.Escape);
@@ -88,6 +87,10 @@ public class PauseManager : MonoBehaviour
                 SetPauseState(PauseMenuMode.Paused);
                 break;
         }
+
+#if UNITY_EDITOR
+        _prevPauseMode = _pauseMode;
+#endif
     }
 
     public void SetPauseState(PauseMenuMode pauseMode, bool force = false)
@@ -100,7 +103,6 @@ public class PauseManager : MonoBehaviour
             case PauseMenuMode.Playing:
                 Time.timeScale = 0.0f;
                 _pauseCanvas.SetActive(true);
-                // open pause mode UI
                 break;
 
             case PauseMenuMode.Paused:
@@ -119,6 +121,7 @@ public class PauseManager : MonoBehaviour
             case PauseMenuMode.Playing:
                 Time.timeScale = 1.0f;
                 _pauseCanvas.SetActive(false);
+                TileSelector.INSTANCE.ForceUpdateHighlightedTile();
                 break;
 
             case PauseMenuMode.Paused:

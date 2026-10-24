@@ -3,13 +3,15 @@ using UnityEngine;
 
 public class MWSwitch : ActiveRelic
 {
+    private Item.UseState _nextState = UseState.Nil;
+
 	public override void OnBattleStateChanged(BattleManager.BattleState oldBattleState, BattleManager.BattleState newBattleState)
 	{
 		bool isPlayerTurn = (newBattleState == BattleManager.BattleState.Player_Turn);
 
 		if (isPlayerTurn)
 		{
-			// Do we want to grey it out if there are no Ms or Ws? It's functionally not usable if there are none.
+			// TODO check if new letter has been added by LetterTile mid-turn
 			bool hasValidTarget = GameBoard.INSTANCE.CountTiles('M') > 0 || GameBoard.INSTANCE.CountTiles('W') > 0;
 			State = (hasValidTarget) ? UseState.Can_Use : UseState.Unususable;
 		}
@@ -17,6 +19,8 @@ public class MWSwitch : ActiveRelic
 		{
 			State = UseState.Unususable;
 		}	
+       
+        _nextState = State;
 	}
 
 	public override void OnSelect()
@@ -24,6 +28,7 @@ public class MWSwitch : ActiveRelic
 		Debug.Assert(State == UseState.Can_Use);
 
 		State = UseState.In_Use;
+        _nextState = UseState.Can_Use;
 		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Item_Use;
 	}
 
@@ -46,12 +51,12 @@ public class MWSwitch : ActiveRelic
 		if (isM || isW)
 		{
 			GameBoard.INSTANCE.ChangeTileLetter(tile, isM ? 'W' : 'M');
-			State = UseState.Unususable;
+			_nextState = UseState.Unususable;
 			EndUse();
 		}
 		else
 		{
-			State = UseState.Can_Use;
+			_nextState = UseState.Can_Use;
 			EndUse();
 		}
 	}
@@ -59,6 +64,8 @@ public class MWSwitch : ActiveRelic
 	public override void EndUse()
 	{
 		TileSelector.INSTANCE.Mode = TileSelector.SelectionMode.Letter_Selection;
+
+        State = _nextState;
 		base.EndUse();
 	}
 }
