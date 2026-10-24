@@ -3113,7 +3113,7 @@ GameObject:
   - component: {fileID: 355158520}
   - component: {fileID: 355158519}
   m_Layer: 5
-  m_Name: Tooltip BG
+  m_Name: Tooltip Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3132,6 +3132,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2056634670}
+  - {fileID: 752068616}
   m_Father: {fileID: 683767549}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7176,7 +7177,6 @@ RectTransform:
   - {fileID: 449002162}
   - {fileID: 1600074230}
   - {fileID: 355158518}
-  - {fileID: 752068616}
   - {fileID: 531968407}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7642,11 +7642,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1639540490}
-  m_Father: {fileID: 683767549}
+  m_Father: {fileID: 355158518}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 148.42, y: -193.98}
+  m_AnchoredPosition: {x: 148.42, y: -43.98004}
   m_SizeDelta: {x: 43.1639, y: 61.8387}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &752068617
