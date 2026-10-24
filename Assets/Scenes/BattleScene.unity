@@ -4518,7 +4518,7 @@ GameObject:
   m_Component:
   - component: {fileID: 449002162}
   m_Layer: 5
-  m_Name: New Current Parent
+  m_Name: Compass Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6367,7 +6367,7 @@ GameObject:
   - component: {fileID: 657686898}
   - component: {fileID: 657686899}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Word Preview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13702,7 +13702,7 @@ GameObject:
   - component: {fileID: 1600074232}
   - component: {fileID: 1600074231}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Shuffle Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
