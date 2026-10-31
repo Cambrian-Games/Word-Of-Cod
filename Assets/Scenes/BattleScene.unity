@@ -2816,6 +2816,71 @@ MonoBehaviour:
   _section: 0
   _inventoryIndex: 8
   _tooltipText: {fileID: 2056634671}
+--- !u!1001 &257234130
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 848143829052163948, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_Name
+      value: Overworld Shopkeep
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalScale.x
+      value: -0.2829158
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.2766064
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 107.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6564249800412420026, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
 --- !u!1 &331093403
 GameObject:
   m_ObjectHideFlags: 0
@@ -3529,6 +3594,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f30477a1a0a773d44a9726ca6c1fb858, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LetterWeightRow
+--- !u!1 &404743633 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 848143829052163948, guid: 83f84c35a503c724f9655be7c6640302, type: 3}
+  m_PrefabInstance: {fileID: 257234130}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &412057963
 GameObject:
   m_ObjectHideFlags: 0
@@ -6076,6 +6146,8 @@ MonoBehaviour:
   _analyticsManager: {fileID: 0}
   _mainCanvas: {fileID: 683767548}
   _statsHolder: {fileID: 1714602142}
+  _signpostPrefab: {fileID: 8179625858894371233, guid: 80f268cfa03a54c45bb32253c1570609, type: 3}
+  _overworldShopKeep: {fileID: 404743633}
   _permaTweakStep: 2.5
   _playerTweakStep: 1.25
   _additionalTweaksPerRelic: 5
@@ -14462,7 +14534,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1693261687
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19119,3 +19191,4 @@ SceneRoots:
   - {fileID: 1474867105}
   - {fileID: 520233554}
   - {fileID: 439832512}
+  - {fileID: 257234130}

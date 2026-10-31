@@ -260,21 +260,17 @@ public class TileSelector : MonoBehaviour
                 break;
         }
 
+        if (_currentHighlightedTile)
+        {
+            if (_currentHighlightedTile == foundTile)
+                return;
+
+            MouseLeaveTile(_currentHighlightedTile);
+        }
+
         if (foundTile)
         {
-            if (foundTile != _currentHighlightedTile)
-            {
-                if (_currentHighlightedTile)
-                {
-                    MouseLeaveTile(_currentHighlightedTile);
-                }
-
-                MouseOverTile(foundTile);
-            }
-        }
-        else if (_currentHighlightedTile)
-        {
-            MouseLeaveTile(_currentHighlightedTile);
+            MouseOverTile(foundTile);
         }
     }
 

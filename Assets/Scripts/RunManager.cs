@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Services.Analytics;
@@ -41,6 +42,12 @@ public class RunManager : MonoBehaviour
     private StatsHolder _statsHolder;
     
 	private Enemy _overworldEnemy;
+
+    [SerializeField]
+    private GameObject _signpostPrefab;
+
+    [SerializeField]
+    private GameObject _overworldShopKeep;
 
     // yes this is actually meant to be public, I want the LetterTweak Menus to be able to modify it
     public LetterTweakSet _letterTweakset;
@@ -213,6 +220,7 @@ public class RunManager : MonoBehaviour
                 }
                 else
                 {
+                    SpawnOverworldSignpost();
                     // display crossroads here
                 }
                 break;
@@ -256,6 +264,10 @@ public class RunManager : MonoBehaviour
                     {
                         ShopManager.INSTANCE.OpenPostBossShop();
                     }
+                }
+                else // this is a shop
+                {
+                    _overworldShopKeep.SetActive(false);
                 }
                 break;
 
@@ -332,6 +344,15 @@ public class RunManager : MonoBehaviour
         Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
         Vector3 targetPos = _nextEventPos - new Vector3(2 * offset.x, 0, 0);
         _overworldEnemy.transform.position = targetPos;
+    }
+
+    private void SpawnOverworldSignpost()
+    {
+        GameObject overworldSignpost = Instantiate(_signpostPrefab);
+        Vector3 offset = FindAnyObjectByType<CameraTracker>()._targetOffset;
+        // subtract _distanceBetweenEvents because _nextEventPos is two units away if there's a signpost.
+        Vector3 targetPos = _nextEventPos - _distanceBetweenEvents * Vector3.right - new Vector3(2 * offset.x, 0, 0);
+        overworldSignpost.transform.position = targetPos;
     }
 
     public void AddWordToStats(Word word)
