@@ -72,6 +72,9 @@ public class BattleManager : MonoBehaviour
     private float _timeToDestination = 0.5f;
     private float _timeElapsed = 0;
 
+    [SerializeField, Range(0.0f, 1.0f)]
+    private float _postBattleHealPercent = 0.1f;
+
     private int _totalWords; // used for logging
 
     public static BattleManager INSTANCE;
@@ -292,7 +295,7 @@ public class BattleManager : MonoBehaviour
                 break;
 
             case BattleState.Win:
-				Player.INSTANCE.Heal(Mathf.RoundToInt(Player.INSTANCE.MaxHealth / 10.0f));
+				Player.INSTANCE.Heal(Mathf.RoundToInt(_postBattleHealPercent * Player.INSTANCE.MaxHealth));
                 RunManager.INSTANCE.SetRunState(RunManager.RunState.Post_Event);
                 break;
         }
