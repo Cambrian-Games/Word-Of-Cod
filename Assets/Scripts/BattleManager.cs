@@ -349,7 +349,7 @@ public class BattleManager : MonoBehaviour
                     {
                         Debug.Log($"{_enemy.CurrentHealth} - {_wordToSubmit.EffectiveDamage}");
 						_enemyDamagePopup.GetComponent<DamagePopupScript>().Popup(_wordToSubmit.EffectiveDamage);
-                        _enemy.Damage(_wordToSubmit.EffectiveDamage);
+                        _enemy.Damage(Mathf.RoundToInt(_wordToSubmit.EffectiveDamage * (1.0f + 0.03f * SaveManager.INSTANCE._saveData._metaDamagePoints)));
                         SetPostPlayerTurnState(PostPlayerTurnState.Cleanup);
                     }
                     break;

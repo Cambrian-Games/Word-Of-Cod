@@ -87,6 +87,7 @@ public class RunManager : MonoBehaviour
     {
 		SetRunState(RunState.Run_Start);
 		TryInitializeAnalytics();
+		_additionalTweaksPerRelic += SaveManager.INSTANCE._saveData._metaLetterCurrencyPoints;
     }
 
 	// Update is called once per frame

@@ -268,6 +268,7 @@ public class InventoryManager : MonoBehaviour
 	    if (result._values.Count == 0 && Player.INSTANCE._bubbleShield == 0 && !Player.INSTANCE._substitute)
 	    {
 		    modifiedDamage = baseDamage;
+		    modifiedDamage = modifiedDamage * (1.0f - (0.03f * SaveManager.INSTANCE._saveData._metaResistPoints));
 		    return;
 	    }
 	    
@@ -286,6 +287,7 @@ public class InventoryManager : MonoBehaviour
         else
         {
 	        modifiedDamage = (baseDamage * (1 - totalResistPercent) - totalResistBonus);
+	        modifiedDamage = modifiedDamage * (1.0f - (0.03f * SaveManager.INSTANCE._saveData._metaResistPoints));
         }
 
         foreach (var item in result._values)

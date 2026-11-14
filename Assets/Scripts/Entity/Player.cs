@@ -26,6 +26,12 @@ public class Player : Entity
 		INSTANCE = this;
 	}
 
+	void Start()
+	{
+		MaxHealth = MaxHealth + SaveManager.INSTANCE._saveData._metaHealthPoints * 20;
+		CurrentHealth = MaxHealth;
+	}
+
 	protected override void OnTakeDamage(int damageTaken)
 	{
 		_inventory.OnPlayerTakeDamage();

@@ -9,7 +9,11 @@ public class Entity : MonoBehaviour
 
 	[SerializeField]
 	private int _maxHealth;
-	public int MaxHealth => _maxHealth;
+	public int MaxHealth
+	{
+		get => _maxHealth;
+		set => _maxHealth = value;
+	}
 
 	// state
     private int _currentHealth;
@@ -17,6 +21,7 @@ public class Entity : MonoBehaviour
 	{
 		get => _currentHealth;
 		//set => _currentHealth = value;
+		set => _currentHealth = value;
 	}
 
 	protected int _lastDamageTaken = 0;
