@@ -54,6 +54,6 @@ MonoBehaviour:
     _filterString: Y
     _filterPOS: 0
     _numTimesToApply: 1
-    _chanceToTrigger: 0.16666667
+    _chanceToTrigger: 0.25
     _valueToModify: 0
     _value: 1

@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   _displayName: School of Fish
   _sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  _maxHealth: 300
+  _maxHealth: 250
   _enemyTypes: 260
   _schedulePolicy: 3
   _rules:
@@ -179,7 +179,7 @@ MonoBehaviour:
         _numTurns: 1
         _endsTurn: 0
         _isCritical: 0
-        _baseDamage: 10
+        _baseDamage: 15
     - rid: 7225786354854789312
       type: {class: TransformTiles, ns: , asm: Assembly-CSharp}
       data:
