@@ -502,12 +502,22 @@ public class RunManager : MonoBehaviour
 		{
 			SaveManager.INSTANCE._saveData._runsWon += 1;
 		}
+
 		SaveManager.INSTANCE._saveData._totalRuns += 1;
 		SaveManager.INSTANCE._saveData._longestWord = (StatsHolder.INSTANCE._longestWord,
 			StatsHolder.INSTANCE._longestWord.Length);
-		SaveManager.INSTANCE._saveData._bestWord = (StatsHolder.INSTANCE._mostDamagingWord,
-			StatsHolder.INSTANCE._sortedWordDamages[^1]);
-		SaveManager.INSTANCE.WriteSaveData();
+
+        if (StatsHolder.INSTANCE._sortedWordDamages.Count > 0)
+        {
+            SaveManager.INSTANCE._saveData._bestWord = (StatsHolder.INSTANCE._mostDamagingWord,
+                StatsHolder.INSTANCE._sortedWordDamages[^1]);
+        }
+        else
+        {
+            SaveManager.INSTANCE._saveData._bestWord = ("", 0);
+        }
+        
+        SaveManager.INSTANCE.WriteSaveData();
 	}
 
 	#endregion
