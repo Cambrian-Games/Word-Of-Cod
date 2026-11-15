@@ -3,7 +3,11 @@ using UnityEngine;
 
 public class YouSubstitution : ActiveRelic
 {
+    [SerializeField, Range(0.0f, 1.0f)]
+    public float _healthCostPercentage = 0.2f;
+
 	private bool _used;
+
 	public override void OnBattleStateChanged(BattleManager.BattleState oldBattleState, BattleManager.BattleState newBattleState)
 	{
 		if (newBattleState == BattleManager.BattleState.Load)
@@ -25,7 +29,7 @@ public class YouSubstitution : ActiveRelic
 		State = UseState.Unususable;
 		_used = true;
 		Player.INSTANCE._substitute = true;
-		int loss = Mathf.RoundToInt(Player.INSTANCE.MaxHealth * 0.2f);
+		int loss = Mathf.RoundToInt(Player.INSTANCE.MaxHealth * _healthCostPercentage);
 		Player.INSTANCE.SetHealth(Mathf.Max(Player.INSTANCE.CurrentHealth - loss, 1));
 
 		EndUse();
